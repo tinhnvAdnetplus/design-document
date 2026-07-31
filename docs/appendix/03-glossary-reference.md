@@ -10,6 +10,8 @@
 | Cache | Derived, disposable knowledge or prompt artifact. |
 | Cache Registry | Metadata/policy registry for all V2 cache layers. |
 | Cache Taxonomy | Prompt, Conversation, Resume, and Knowledge Cache layers. |
+| Capability Discovery | Adapter-owned production of a version-bound Capability Document through `capabilities()`. |
+| Capability Registry | Runtime-owned registry of current Adapter Capability Documents; never populated from CLI output, probing, or LLM reasoning. |
 | Conversation Cache | Restricted diagnostic-only layer, disabled by default. |
 | Causation ID | Identifier of the direct predecessor event. |
 | Correlation ID | Identifier shared by one logical workflow. |
@@ -31,6 +33,7 @@
 | Knowledge Cache | Per-root Git-derived project knowledge. |
 | Resume Cache | Opaque adapter recovery hint valid only in Resume Scope. |
 | Resume Scope | Role-specific exceptional-resume eligibility/lifetime. |
+| Silent completion failure | Task deadline passes without a terminal event or explicit deferral/block; Runtime reconciles instead of inferring success. |
 | Root session | Persistent agent session owning project-wide context. |
 | Runtime client | Small command invoked through terminal event notice. |
 | Session ID | Runtime-generated identity for one process instance. |
@@ -53,6 +56,7 @@
 | Knowledge Runtime | evolve provenance-linked snapshots from Git diff and governed evidence. |
 | Event Store | replay projections; never blindly replay external side effects. |
 | Scheduler | select eligible queued work; never become blocking RPC or worker pool. |
+| Capability Registry | require fresh Adapter declarations for startup, scheduling, fork, and resume; revalidate on upgrade/restart. |
 | Resume | exceptional recovery only; fresh path must work. |
 | Transport | tmux notices reference durable events. |
 | Security | capabilities, path validation, least privilege, audit. |

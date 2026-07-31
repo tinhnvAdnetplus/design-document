@@ -35,11 +35,17 @@ implicit allow because an event was well-formed.
 | approve_merge | exact reviewed candidate | Claude reviewer |
 | merge_integration | configured integration ref | merger |
 | sync_knowledge | own Knowledge Cache | corresponding root |
+| use_model_inference | configured adapter inference endpoint | adapter with explicit network permission |
 | alter_policy | configuration | administrator |
 | recover_quarantine | named artifact | restricted maintainer |
 
 A capability is narrower than a role. The implementation must check branch,
 worktree, feature state, token, and policy revision as context.
+
+`use_model_inference` is a network permission evaluated for the adapter, not a
+claim inferred from a model response or terminal text. It is independent of
+repository and merge permissions and is denied unless configuration explicitly
+allows it.
 
 ## Permission matrix
 

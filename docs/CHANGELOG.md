@@ -3,6 +3,27 @@
 All notable architecture-specification changes are recorded here. This document
 uses semantic intent rather than implementation-release dates.
 
+## Unreleased — Second Architecture Review Board Integration
+
+### Integrated clarifications
+
+- Added the Agent Compliance Contract: terminal-event obligation, observable
+  completion reconciliation, silent-completion recovery, and test coverage.
+- Promoted Capability Registry to a Runtime component populated only by
+  `Adapter.capabilities()`, with Scheduler/fork/resume dependency,
+  revalidation, and misreporting fail-closed behavior.
+- Added configured review/fix escalation, explicit model-inference network
+  permission, and Minimal versus Full V2 Conformance clarification.
+- Clarified that Root Update Commit is optional metadata-only checkpointing;
+  added only a roadmap entry for Tree Hash Carry Forward.
+
+### Explicit non-changes
+
+- No ADR, invariant, baseline workflow, Knowledge Runtime, Knowledge Evolution,
+  Session Lineage Graph, Event Store, Root Session, Control Loop, Eligibility
+  Scheduler, fork abstraction, Git-first, evidence-first, or Root Update Commit
+  architecture was changed.
+
 ## Version 2 — Runtime Evolution
 
 ### Added

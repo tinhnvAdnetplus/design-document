@@ -70,6 +70,16 @@ Git evidence.
 A feature fork captures a bounded contextual starting point from its parent
 root. It is not a copy of all conversation history and not a database backup.
 
+Before creating a child, the Runtime consults the Capability Registry populated
+by the parent Adapter's `capabilities()` document. A Registry declaration of
+native fork selects that adapter operation; a declaration of compatible
+synthetic fork selects a fresh bounded packet. The Runtime MUST NOT infer the
+choice from CLI output, runtime probing, model reasoning, or the adapter name.
+Both forms preserve the same role, packet, lineage, disposal, and evidence
+contract. Any performance benefit attributed to native fork is conditional on
+the current Capability Registry declaration and measured adapter behavior; it
+does not alter the fork abstraction or create an authority difference.
+
 A fork packet contains stable role instructions, feature request, approved plan
 when available, relevant root knowledge records, Git base, target paths, known
 constraints, event references, and explicit non-goals. It should contain

@@ -18,6 +18,8 @@ This chapter defines fault domains, recovery order, and data-integrity rules.
 | disk full | potentially state/cache | stop writes safely | likely |
 | policy config invalid | no | refuse start/reload | administrator |
 | resume ID lost | no | fresh reconstruction | no |
+| silent completion failure | no inferred completion | reconcile Git/events/lease/session, then recover | if evidence remains uncertain |
+| capability declaration mismatch | adapter path unavailable | fence, revalidate, reconstruct if needed | if affected work is blocked |
 
 ## Recovery order
 
@@ -28,11 +30,13 @@ This chapter defines fault domains, recovery order, and data-integrity rules.
 4. Inspect integration ref, Git merge state, registered worktrees, and dirty
    status.
 5. Reconcile active leases and fence unavailable holders.
-6. Reconcile terminal sessions through adapter observations.
-7. Determine resume or fresh reconstruction under session policy.
-8. Replay pending idempotent command intents only after confirmation query.
-9. Resume deliveries and root synchronization.
-10. Publish recovery report with unresolved items.
+6. Reconcile terminal sessions through adapter observations and required
+   terminal workflow events against Git, Event Store, artifacts, and leases.
+7. Revalidate Capability Registry entries before adapter-dependent recovery.
+8. Determine resume or fresh reconstruction under session policy.
+9. Replay pending idempotent command intents only after confirmation query.
+10. Resume deliveries and root synchronization.
+11. Publish recovery report with unresolved items.
 
 ## Data-integrity rules
 
@@ -74,3 +78,5 @@ projections; it must confirm every command intent before effect execution.
 Knowledge Runtime rebuilds a missing Knowledge Cache from Git diff and governed
 evidence. Resume Cache loss selects fresh reconstruction. Conversation Cache
 loss has no correctness impact and must not be treated as an audit loss.
+Capability Registry is rebuilt from fresh Adapter capability documents rather
+than Event Store history; a stale or contradicted entry is `ADAPTER_UNAVAILABLE`.

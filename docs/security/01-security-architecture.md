@@ -23,6 +23,7 @@ without retaining unrestricted prompts or terminal transcripts.
 | path traversal | event selects arbitrary worktree | generated paths and canonical validation |
 | secret exposure | token in prompt/log | redaction and restricted retention |
 | supply-chain change | altered CLI behavior | adapter version contract tests |
+| capability misreporting | declared adapter behavior differs from observation | mark `ADAPTER_UNAVAILABLE`, fence, and revalidate |
 | Git ref race | merge against changed base | lock and approval binding |
 | event tamper | edited local record | digest, access controls, optional signatures |
 | privilege escalation | agent changes policy | read-only configuration and separate admin role |
@@ -61,7 +62,7 @@ content.
 | terminal | fixed-form send-keys, no prompt text injection |
 | events | schema, digest, idempotency, append-only access |
 | secrets | references only, redaction, restricted diagnostics |
-| network | deny by default; adapter/MCP allow-list |
+| network | deny by default; adapter/MCP allow-list and explicit model-inference permission |
 | dependencies | pinned/validated adapter versions, contract tests |
 | audit | accepted/rejected actions and override records |
 
@@ -84,6 +85,8 @@ permissions, terminal command format, or merge action.
 ## Secure defaults
 
 Raw transcript retention is disabled. Network access is denied unless needed.
+Model inference traffic is denied unless the specific adapter has an explicit
+model-inference permission; adapter updates and MCP access do not imply it.
 Root sessions lack write leases. Feature sessions lack integration access.
 Unknown events and policy revisions are rejected. Dirty worktrees are preserved
 rather than automatically cleaned. These defaults favor containment over
@@ -113,3 +116,14 @@ cannot be promoted directly into Knowledge Cache. Cache Registry metadata and
 Session Lineage Graph are sensitive operational metadata; they require the same
 access control as event audit records. Scheduler and Dispatcher accept only
 validated event references and cannot interpret terminal text as a queue command.
+
+## Capability Registry trust boundary
+
+Capability Discovery is Adapter-owned. Capability Registry is Runtime-owned and
+contains only version-bound results returned by `Adapter.capabilities()`. The
+Runtime MUST NOT populate it from CLI output, runtime probing, or LLM reasoning.
+Declared capabilities are claims subject to observed behavior: if a fork,
+resume, notification, or lifecycle observation contradicts the current
+declaration, the Runtime treats the adapter as `ADAPTER_UNAVAILABLE`, fences
+dependent leases/intents, and requires revalidation. It never silently trusts a
+misreporting adapter or falls back to an undeclared behavior.

@@ -41,7 +41,8 @@ recovery attempt; they are not long-lived agent memory.
 
 The runtime deletes or makes unusable a Resume Cache entry at its terminal
 invalidation event under retention policy. A retained diagnostic reference does
-not re-enable resume.
+not re-enable resume. Resume metadata cannot substitute for a current Registry
+declaration; absent `resume=true`, recovery selects reconstruction.
 
 ## Why persistence matters
 
@@ -59,12 +60,13 @@ configuration revision checks, and explicit state transitions control that cost.
 The runtime MAY attempt resume only when all conditions are true:
 
 1. a prior session was marked unavailable due to abnormal loss;
-2. the adapter provides a stored opaque resume reference;
-3. resume is enabled by configuration;
-4. the session role is still valid under current policy;
-5. Git base and assigned worktree satisfy recovery checks;
-6. no newer runtime session holds the same exclusive resource;
-7. the adapter can produce readiness evidence after resume.
+2. the Capability Registry currently declares `resume=true` for the adapter;
+3. the adapter provides a stored opaque resume reference;
+4. resume is enabled by configuration;
+5. the session role is still valid under current policy;
+6. Git base and assigned worktree satisfy recovery checks;
+7. no newer runtime session holds the same exclusive resource;
+8. the adapter can produce readiness evidence after resume.
 
 Failure of any condition selects fresh-session reconstruction. Resume never
 runs during ordinary idle, task handoff, or root knowledge synchronization.
@@ -162,6 +164,18 @@ leases, and Git state. Both layers are required.
 | stale cache tolerance | 0 integrated commits | require sync before root planning |
 | dirty worktree action | quarantine | never discard by default |
 | reconstruction packet limit | 128 KiB | preserve prompt budget |
+
+## Capability revalidation
+
+Capability revalidation occurs at Runtime startup, Runtime restart, adapter
+upgrade, and a manual CLI upgrade declared by an operator. The Runtime obtains
+a new document only through the Adapter's `capabilities()` operation and
+compares its version and supported operations with the Capability Registry. It
+does not scrape CLI output or probe an interactive session to infer support.
+Until revalidation succeeds, affected sessions are unavailable and resume,
+fork, and delivery paths that depend on the adapter remain blocked. This
+prevents a retained Resume Cache from reviving a session against stale adapter
+metadata.
 
 ## Trade-offs
 

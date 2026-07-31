@@ -37,10 +37,10 @@ minor prefix without changing the chapter identifier cited by another document.
 ## Runtime
 
 - [05 — Runtime Overview and Requirements](runtime/01-runtime-overview.md)
-  - functional and non-functional requirements
+  - functional requirements, Capability Registry, and root-context replacement guidance
   - adapter boundaries and runtime interfaces
 - [06 — Claude and Codex Runtimes](runtime/02-claude-codex-runtimes.md)
-  - CLI adapter contracts and vendor-specific behavior
+  - CLI adapter and agent-compliance contracts, capability discovery, and vendor-specific behavior
   - terminal control, readiness, and output boundaries
 - [07 — Persistent Sessions and Resume](runtime/03-persistent-sessions-resume.md)
   - normal persistence and exceptional resume strategy
@@ -135,12 +135,12 @@ section says otherwise.
 | Area | Primary chapters | Evidence |
 | --- | --- | --- |
 | Persistent agents | 05–10 | lifecycle tests and tmux inspection |
-| Resume and recovery | 07, 23 | reboot / lost-ID scenario |
+| Resume and recovery | 07, 23 | reboot / lost-ID and Registry-gated resume scenario |
 | Feature isolation | 08, 14–15, 18 | worktree ownership test |
 | Event protocol | 11–13 | schema and delivery tests |
 | Approval authority | 02, 14–15, 26 | authorization test |
 | Knowledge Runtime/cache | 05, 09, 16, 21 | rebuild, provenance, and migration test |
-| Event Store and scheduler | 01, 10–13, 21–24 | replay, queue fairness, and recovery test |
+| Event Store, scheduler, and capabilities | 01, 05–13, 21–24 | replay, Registry revalidation, queue fairness, and recovery test |
 | Operations | 21–24 | dashboard, alert, and chaos evidence |
 | Security | 25–26 | capability and secret-handling tests |
 

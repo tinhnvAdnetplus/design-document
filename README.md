@@ -49,6 +49,8 @@ The initial release specifies a local, single-host runtime. It supports:
 - append-only JSON events and agent acknowledgements;
 - Event Store replay, scheduler/dispatcher queues, and a derived session
   lineage graph;
+- Runtime-owned Capability Registry populated only by Adapter capability
+  declarations, with revalidation on startup and upgrades;
 - Knowledge Runtime snapshots, cache layers, and evidence-based evolution;
 - restart recovery and best-effort CLI resume after a host or process failure;
 - logging, metrics, token accounting, and least-privilege execution.

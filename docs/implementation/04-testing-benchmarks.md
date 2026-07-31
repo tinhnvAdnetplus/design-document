@@ -46,6 +46,13 @@ versions.
 | T-18 | Session Lineage Graph | fork/reconstruction DAG has no authority edge |
 | T-19 | Scheduler fairness | priority and retry preserve bounded eligible delivery |
 | T-20 | Event Store replay | projections rebuild; no blind side effect replay |
+| T-21 | terminal-event obligation | missing terminal event never advances workflow; observable reconciliation runs |
+| T-22 | Capability Registry startup | every enabled adapter supplies a current Capability Document |
+| T-23 | capability revalidation | startup/restart, adapter upgrade, and manual CLI upgrade refresh Registry |
+| T-24 | capability misreporting | declaration/observation mismatch becomes `ADAPTER_UNAVAILABLE` |
+| T-25 | resume declaration | resume is attempted only when Registry says `resume=true` |
+| T-26 | review/fix escalation | configured cycle limit blocks automatic dispatch and surfaces maintainer action |
+| T-27 | model inference permission | adapter inference is denied without explicit configured permission |
 
 ## Property tests
 
@@ -72,6 +79,8 @@ Each adapter must pass a common fixture set:
 - acknowledge without treating terminal text as authority;
 - detect absent terminal;
 - attempt exceptional resume once;
+- declare `resume=true` before any resume attempt;
+- provide a version-bound Capability Document and revalidate it on required triggers;
 - start fresh reconstruction when resume fails;
 - gracefully stop and report terminal absence;
 - redact diagnostics according to policy.
@@ -98,6 +107,8 @@ Fault injection should occur before and after each durable boundary:
 | Event Store replay after intent | confirmation query prevents duplicate effect |
 | corrupt cache artifact | Registry quarantines and rebuilds |
 | lineage parent missing | reconstruction marked root-cause, not fork |
+| terminal task deadline with no event | no inferred completion; reconcile then recover/block |
+| adapter behavior contradicts Capability Registry | `ADAPTER_UNAVAILABLE`; no undeclared fallback |
 
 Chaos runs must use disposable repositories and never point at production
 remotes.

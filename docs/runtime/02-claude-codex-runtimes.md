@@ -11,7 +11,9 @@ invocation details that can change with vendor releases.
 Each adapter MUST declare capabilities, launch a named terminal session, emit
 structured observations, support a fork operation, and support exceptional
 recovery. It MUST isolate vendor syntax inside the adapter and must not expose
-vendor-specific commands as runtime event types.
+vendor-specific commands as runtime event types. The Runtime accepts a
+capability only from this `capabilities()` declaration through its Capability
+Registry; terminal text, CLI probing, and model claims are not discovery input.
 
 | Capability | Claude adapter | Codex adapter | Runtime use |
 | --- | --- | --- | --- |
@@ -25,6 +27,38 @@ vendor-specific commands as runtime event types.
 | session metadata | required | required | reconciliation |
 | lineage metadata | required | required | fork/reconstruction provenance |
 | resume scope | required | required | exceptional recovery lifetime |
+
+The Capability Document is version-bound and includes `resume: true|false`,
+native or synthetic fork support, notification support, and the observations
+needed for readiness and reconciliation. An adapter discovers these properties
+using its owned, tested integration. On Runtime startup/restart, adapter
+upgrade, and an operator-declared manual CLI upgrade, the Runtime requires a
+fresh document before it starts, reattaches, resumes, forks, or dispatches to
+that adapter. A changed, missing, or invalid document makes the adapter
+unavailable until revalidation completes.
+
+## Agent Compliance Contract
+
+For each assigned role task, the adapter MUST make the agent's terminal-event
+obligation explicit: it emits one structured terminal workflow event, or an
+explicit deferral/block under policy, before the task deadline. Terminal prose,
+a quiet prompt, a pane that says “done,” or a delivery acknowledgement is not a
+completion event. Intermediate progress does not discharge the obligation.
+
+The Runtime determines completion by reconciling the claimed event with
+observable state: Event Store acceptance and correlation, required Git head and
+worktree state, required artifact/check references, lease state, and adapter
+session observation. It MUST reject or hold a claim whose observable
+postconditions do not match. This applies equally to plan, implementation,
+review, merge-adjacent, and root synchronization work.
+
+A **silent completion failure** occurs when the deadline passes without a
+terminal event or explicit deferral/block. The Runtime MUST not infer success.
+It records the unavailable/uncertain observation, stops automatic follow-on
+work, reconciles observable state, and applies the existing recovery decision:
+verified exceptional resume only when eligible, otherwise fresh reconstruction.
+If the work cannot be established from evidence, the feature remains blocked
+for recovery or human operation.
 
 ## Claude runtime profile
 
@@ -147,15 +181,17 @@ convenience, not the source of the event.
 ~~~text
 function fork_feature(adapter, root, feature, role, packet):
   assert root is Ready and packet Git base is reachable
+  assert CapabilityRegistry.require(adapter, "fork", current version)
   create terminal name from adapter, feature, role, attempt
-  ask adapter to create native or compatible fork
+  select native or synthetic fork from Capability Registry
+  ask adapter to create the selected compatible fork
   persist vendor metadata and parent/snapshot lineage as opaque/provenance data
   validate child readiness
   create child session record
   emit session.ready and feature role assignment
 ~~~
 
-If a native fork is unavailable, the adapter may start a new session with a
+If the Registry declares native fork unavailable, the adapter may start a new session with a
 compact root snapshot. It MUST label this synthetic, record the cache revision,
 and preserve the same feature disposal behavior. It MUST NOT imply that the
 new session has an exact vendor conversational parent.
@@ -164,9 +200,10 @@ new session has an exact vendor conversational parent.
 
 Resume exists only for a terminal loss, host reboot, or adapter crash. An
 adapter first proves that its prior process cannot be used. It then attempts a
-vendor resume only if a stored opaque ID is present, policy allows it, and the
-resume can be verified against expected repository state. Otherwise it starts
-a fresh root or feature session from a reconstruction packet.
+vendor resume only if the Capability Registry declares `resume=true`, a stored
+opaque ID is present, policy allows it, and the resume can be verified against
+expected repository state. Otherwise it starts a fresh root or feature session
+from a reconstruction packet.
 
 A successful vendor resume does not bypass state validation. The runtime checks
 role, lease, feature state, Git base, and policy revision before marking it
@@ -189,10 +226,13 @@ not exist in V2 because persistent CLI sessions are not a worker pool.
 
 ## CLI upgrade safety
 
-Adapter versions and detected CLI versions are recorded in session metadata.
-A runtime upgrade MUST perform a compatibility check before reattaching roots.
-Unknown command syntax, changed fork behavior, or ambiguous readiness results
-in unavailable state, not blind command execution.
+Adapter versions and their adapter-discovered CLI versions are recorded in
+session metadata and the Capability Registry. A Runtime restart, adapter
+upgrade, or manual CLI upgrade MUST re-run `capabilities()` before reattaching
+roots. Operators declare a manual CLI upgrade and run revalidation rather than
+having the Runtime probe CLI output. Unknown command syntax, changed fork
+behavior, a stale declaration, or ambiguous readiness results in
+`ADAPTER_UNAVAILABLE`, not blind command execution.
 
 ## Limitations
 

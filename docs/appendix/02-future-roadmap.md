@@ -10,8 +10,9 @@ coordination, and reconstructible context.
 
 Deliver stable Claude and Codex adapters, deterministic Event Store/projection,
 worktree leases, structured review approval, Knowledge Runtime, Cache Taxonomy,
-Session Lineage Graph, scheduler decomposition, observability, and chaos
-recovery. Exit criteria are adapter contract tests, lost-resume recovery,
+Session Lineage Graph, Capability Registry, scheduler decomposition,
+observability, and chaos recovery. Exit criteria are adapter contract tests,
+lost-resume recovery,
 knowledge-evolution provenance, and secure default logging.
 
 ## Stage 2 — Adapter expansion
@@ -21,7 +22,7 @@ servers, and custom AI workers. An adapter is admitted only when it provides:
 
 | Requirement | Reason |
 | --- | --- |
-| declared capabilities | deterministic policy |
+| current Capability Document from `capabilities()` | Runtime Registry and deterministic adapter selection |
 | bounded packet interface | token and privacy control |
 | start/fork or compatible child semantics | feature isolation |
 | readiness and stop observation | lifecycle supervision |
@@ -64,6 +65,9 @@ changes requires an ADR and explicit migration plan.
 ## Research topics
 
 - Provenance-aware semantic cache selection.
+- Tree Hash Carry Forward for a future, evidence-preserving optimization of
+  unchanged repository-tree identification. It is not part of the V2 baseline
+  workflow, fork semantics, Knowledge Evolution, or Root Update Commit.
 - Formal verification of workflow state machines.
 - Differential review using multiple independent agents.
 - Token-aware scheduler fairness.

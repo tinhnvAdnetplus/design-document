@@ -47,19 +47,22 @@ agents:
       role: claude_root
       tmux_session: claude-root
       worktree: /srv/ai-runtime/integration-readonly
-    capabilities: [plan, review, approve_merge, synchronize_knowledge]
+    allowed_actions: [plan, review, approve_merge, synchronize_knowledge]
   codex:
     enabled: true
     root:
       role: codex_root
       tmux_session: codex-root
       worktree: /srv/ai-runtime/integration-readonly
-    capabilities: [implement, synchronize_knowledge]
+    allowed_actions: [implement, synchronize_knowledge]
 
 policy:
   approval:
     merge_role: claude_reviewer
     expiration_minutes: 60
+  review:
+    max_fix_cycles: 3
+    escalation: require_human
   protected_paths:
     - migrations/**
     - infra/**
@@ -84,6 +87,9 @@ security:
   network:
     default: deny
     allow_for: [adapter_update, configured_mcp]
+    model_inference:
+      claude: allow
+      codex: allow
   secrets:
     provider: environment_reference
 ~~~
@@ -96,18 +102,22 @@ provider names are deployment-specific. Secrets are referenced, never included.
 | Section | Required fields | Validation |
 | --- | --- | --- |
 | runtime | repository, integration ref, state/worktree dirs | paths exist or safely creatable |
-| agents | adapter ID, root role, enabled flag | unique roots and supported capabilities |
-| policy | merge role, protected paths, checks | role resolves; patterns valid |
+| agents | adapter ID, root role, enabled flag | unique roots and policy-authorized actions |
+| policy | merge role, protected paths, checks, review escalation | role resolves; patterns and bounded fix cycles valid |
 | limits | bounded sizes and counts | positive, safe maximums |
-| security | path roots, egress, secret references | no broad unsafe allowance |
+| security | path roots, egress, model-inference permission, secret references | no broad unsafe allowance |
 | retention | event/cache/transcript rules | privacy and storage constraints |
 | observability | log level, metrics endpoint | secret redaction enabled |
 | scheduler | priority/retry/fairness limits | bounded classes and attempts |
 | knowledge runtime | snapshot/cache/retention policy | Conversation Cache disabled by default |
 
-The loader must reject unknown critical fields in strict mode and reject a
-configuration that grants a role inconsistent capabilities such as root code
-write or implementer merge approval.
+`allowed_actions` is policy authorization, not Capability Discovery. The
+Runtime obtains adapter capabilities only from `Adapter.capabilities()` and
+builds Capability Registry metadata from that result. The loader must reject
+unknown critical fields in strict mode and reject a configuration that grants a
+role inconsistent actions such as root code write or implementer merge approval.
+It must also reject an enabled adapter that cannot provide a current Capability
+Document at startup.
 
 ## Directory structure
 
@@ -157,6 +167,7 @@ worktrees do not contain caches, event files, or vendor resume IDs.
 | Knowledge Cache | named root | root lifecycle | provenance-linked and rebuildable |
 | Conversation Cache | restricted diagnostics | short policy lifetime | disabled by default |
 | Resume Cache | adapter | Resume Scope | opaque and exceptional only |
+| Capability Registry | Runtime | adapter/runtime lifecycle | version-bound Adapter capability documents only |
 | Lineage projection | Session Registry | event retention | no authority/transport semantics |
 
 ## File permissions
@@ -206,6 +217,19 @@ A configuration change is a reviewed Git change or equivalent immutable
 configuration revision. The orchestrator logs its digest and uses it for event
 authorization. Revoking a capability applies immediately to new side effects;
 existing sessions become unable to renew denied leases.
+
+The review escalation policy bounds review/fix cycles per feature. When the
+configured maximum is reached, the Runtime applies the configured
+`require_human` action: it blocks automatic further implementation/review
+dispatch and records the cycle count and evidence. A maintainer may abandon,
+replan, or issue an auditable policy override; the setting never turns a review
+finding into approval.
+
+Model inference egress is separate from adapter-update and MCP egress. Each
+enabled networked model adapter requires an explicit `model_inference` allow
+entry; absence means deny. This permission only permits the configured adapter
+to contact its configured inference endpoint and grants no repository, shell,
+policy, or merge authority.
 
 V2 configuration MUST reject a Conversation Cache enabled without explicit
 retention/access policy, a scheduler class that bypasses authorization, or a

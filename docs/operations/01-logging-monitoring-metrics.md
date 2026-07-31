@@ -47,6 +47,7 @@ runtime/session/feature correlation where applicable, and policy revision.
 | runtime_sessions | gauge | adapter, role, lifecycle | availability |
 | runtime_leases | gauge | resource type, state | concurrency |
 | runtime_feature_state | gauge | state | workflow flow |
+| runtime_review_fix_cycles | gauge | state | escalation proximity |
 | runtime_recovery_total | counter | kind, outcome | resilience |
 | runtime_merge_total | counter | outcome, strategy | integration health |
 | runtime_root_cache_age_seconds | gauge | root | sync freshness |
@@ -70,11 +71,13 @@ trend. It should link to safe aggregate status rather than terminal transcripts.
 | event store unavailable | critical | stop state changes |
 | integration lock stuck | high | reconcile Git and lock owner |
 | root unavailable past SLO | high | recovery procedure |
+| review/fix cycle limit reached | high | maintainer escalation procedure |
 | expired writer lease with live process | high | revoke/fence |
 | repeated authorization denial | security | suspend and investigate |
 | dirty worktree quarantine | high | maintainer review |
 | Knowledge Cache stale | warning | synchronize/rebuild |
 | packet budget breach | warning | inspect selection policy |
+| capability declaration/observation mismatch | high | mark adapter unavailable and revalidate |
 
 ## Tracing
 
@@ -105,6 +108,7 @@ response without making routine telemetry an uncontrolled prompt archive.
 | Knowledge Runtime | evolution stage, snapshot age, candidate rejection | no snapshot content in metrics |
 | Cache Registry | artifact count, invalidation, eviction, layer bytes | Conversation Cache access is restricted |
 | Session Lineage Graph | node/edge count, orphan/reconstruction count | no authority inference from graph |
+| Capability Registry | document age, revalidation result, declaration/observation mismatch | never expose capability payloads as terminal evidence |
 
 Alerting on Knowledge Evolution must distinguish an unavailable cache from a
 failed merge. The former degrades context quality but cannot invalidate a

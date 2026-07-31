@@ -105,7 +105,8 @@ extra authority.
 | --- | --- | --- |
 | Orchestrator | event routing, leases, state transitions, adapter calls, cleanup scheduling | judging code quality or inventing approval |
 | Policy engine | capability evaluation, role mapping, protected-path rules | parsing untrusted terminal text as a decision |
-| Adapter | start/fork/resume/stop a CLI, inject an event notice, collect bounded evidence | persisting global workflow state |
+| Adapter | discover and declare its capabilities; start/fork/resume/stop a CLI, inject an event notice, collect bounded evidence | persisting global workflow state |
+| Capability Registry | retain current version-bound Adapter capability declarations for Runtime decisions | CLI probing, model reasoning, or capability authorization |
 | Event Store | append accepted events, delivery records, command intents, and replay evidence | mutable current state queries or application-code truth |
 | State store | materialized aggregate state and indexes | independent business truth |
 | Worktree manager | create, lease, inspect, remove feature worktrees | merging arbitrary branches |
@@ -132,9 +133,9 @@ form sentence means approval.
 
 An adapter normalizes a CLI's commands and observable terminal behavior to the
 runtime contract. The Claude and Codex adapters differ in launch commands,
-fork syntax, resume identifiers, prompt injection details, and completion
-signals. They MUST expose a common capability model rather than make the event
-protocol vendor-specific.
+fork syntax, resume identifiers, prompt injection details, and readiness or
+reconciliation observations. They MUST expose a common capability model rather
+than make the event protocol vendor-specific.
 
 Adapters are responsible for a narrow terminal boundary:
 

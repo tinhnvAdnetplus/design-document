@@ -14,6 +14,7 @@ src/
   config/               schema, loading, revisioning
   domain/               events, aggregates, state transitions
   policy/               capabilities, protected paths, authorization
+  capabilities/         Runtime Capability Registry and revalidation
   store/                Event Store, projection, attachments
   knowledge/            snapshots, Cache Registry, compression, evolution
   lineage/              session-lineage projection
@@ -70,6 +71,11 @@ KnowledgeSnapshot {
   rootId, version, domains, integrationHead,
   facts, provenance, digest, validationState
 }
+
+CapabilityDocument {
+  adapterId, adapterVersion, cliVersion, fork, resume,
+  notify, readinessObservation, reconciliationObservation, digest
+}
 ~~~
 
 Types are immutable after append. The projection builds current mutable views
@@ -92,6 +98,13 @@ interface AgentAdapter {
 An observation contains status, timestamp, controlled diagnostic reference,
 terminal identity, adapter/CLI version, and retryability. It never returns raw
 prompt content as a required field.
+
+Capability Registry is initialized only from `AgentAdapter.capabilities()`.
+Capability Discovery remains inside the adapter implementation; the Runtime
+does not derive entries from CLI output, probing, or model reasoning. Startup,
+Runtime restart, adapter upgrade, and an operator-declared manual CLI upgrade
+all obtain and validate a fresh Capability Document before adapter-dependent
+work proceeds.
 
 ## Event acceptance pseudocode
 
@@ -120,11 +133,20 @@ suitable when a single orchestrator owns writes.
 
 ~~~text
 function reconcile():
+  for adapter in enabledAdapters():
+    registry.revalidate(adapter.capabilities())
+    if document missing, stale, or contradicted by observation:
+      mark adapter ADAPTER_UNAVAILABLE and fence dependent intents
+
   for session in projection.nonTerminalSessions():
     observed = adapter(session.agentId).inspect(session)
     compare observation with session and terminal registry
     if unavailable:
       append session.unavailable if not already recorded
+
+    if task deadline elapsed without terminal event or explicit deferral:
+      reconcile Git, Event Store, artifacts, and lease state
+      append session.unavailable; block follow-on work if completion is uncertain
 
   for lease in projection.activeLeases():
     if expired or owner unavailable:
@@ -148,8 +170,8 @@ projection and lineage/cache views; it does not replay an unconfirmed effect.
 function control_loop():
   receive event submission, scheduled eligibility, or runtime observation
   validate and persist Event Store evidence
-  project feature/session/lineage/cache state
-  scheduler.select_eligible()
+  project feature/session/lineage/cache/capability state
+  scheduler.select_eligible(CapabilityRegistry)
   dispatcher.route_notice() or gateway.execute_confirmed_intent()
   collect observation; emit and project outcome
   return idle without waiting for agent completion
@@ -210,10 +232,10 @@ handling.
 | Phase | Deliverable | Exit criterion |
 | --- | --- | --- |
 | 1 | event schema, store, projection | replay deterministic |
-| 2 | configuration and policy | invalid authority rejected |
+| 2 | configuration, policy, and Capability Registry | invalid authority/capability rejected |
 | 3 | Git worktree/lease gateway | concurrent writer test passes |
 | 4 | tmux wrapper and mock adapter | lifecycle test passes |
-| 5 | Claude/Codex adapters | contract fixtures pass |
+| 5 | Claude/Codex adapters | contract fixtures and revalidation pass |
 | 6 | feature/review/merge intents | end-to-end happy path |
 | 7 | cache synchronization | rebuild test passes |
 | 8 | observability and recovery | chaos suite passes |

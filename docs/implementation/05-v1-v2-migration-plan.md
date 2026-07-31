@@ -17,7 +17,7 @@ source of truth or grants new session authority.
 | Phase | Change | Compatibility gate | Rollback |
 | --- | --- | --- | --- |
 | 0 | inventory V1 state/configuration | clean Git and state backup | none needed |
-| 1 | introduce V2 vocabulary/projections | Event Store reads V1 log | disable V2 projections |
+| 1 | introduce V2 vocabulary/projections and Capability Registry | fresh Adapter documents validate | disable V2 projections/Registry dispatch |
 | 2 | register existing cache artifacts | cache digest/provenance check | retain V1 cache mode |
 | 3 | enable session lineage projection | all active sessions resolve | rebuild projection |
 | 4 | enable scheduler metrics/queues | no pending delivery loss | retain legacy scheduler path |
@@ -27,9 +27,10 @@ source of truth or grants new session authority.
 
 ## Phase 0 — Inventory and backup
 
-Record runtime configuration digest, adapter versions, policy revision, active
-features, worktree manifests, leases, Event Store location, root cache versions,
-and terminal observations. Back up Git, configuration, Event Store, and
+Record runtime configuration digest, adapter versions, fresh Adapter Capability
+Documents, policy revision, active features, worktree manifests, leases, Event
+Store location, root cache versions, and terminal observations. Back up Git,
+configuration, Event Store, and
 sanitized cache artifacts. Do not back up or migrate raw conversation content
 unless existing retention policy expressly permits it.
 
@@ -38,7 +39,9 @@ unless existing retention policy expressly permits it.
 Rename interfaces and dashboards from event log/state store to Event Store and
 projections without changing persistent record format. Add a schema version and
 replay test that rebuilds V2 projections from a V1 event stream. Do not execute
-command intents during migration replay.
+command intents during migration replay. Build the Runtime Capability Registry
+only from current `Adapter.capabilities()` documents; V1 CLI output, terminal
+state, and model statements cannot seed it.
 
 ## Phase 2 — Cache registry
 
@@ -80,9 +83,10 @@ optional and independently reversible by returning to event-only checkpoints.
 ## Phase 7 — Enforcement and deprecation
 
 After migration tests pass, require cache layer metadata on new artifacts,
-explicit resume scopes, lineage edges for forks, and scheduler metrics. Retain
-V1 readers for configured deprecation period. Remove legacy terminology only
-after all active features and adapters report V2 capability.
+explicit resume scopes, lineage edges for forks, Registry-gated scheduler and
+fork decisions, and scheduler metrics. Retain V1 readers for configured
+deprecation period. Remove legacy terminology only after all active features
+and adapters report V2 capability through current Capability Documents.
 
 ## Active-feature handling
 
@@ -100,6 +104,7 @@ preserves the event contract.
 | cache registry safe | unknown/transcript artifacts quarantined |
 | lineage correct | fork fixture and known V1 sessions |
 | scheduler lossless | pending deliveries retain IDs/order class |
+| capability registry current | every enabled adapter returns a current Capability Document |
 | evolution safe | every published fact has provenance |
 | resume safe | all resume IDs removed still recovers |
 | metadata commit safe | no application path changes |
@@ -114,7 +119,8 @@ rollback shortcut. Git remains independently recoverable at every phase.
 
 ## Migration completion
 
-Migration is complete when every enabled adapter declares V2 compatibility,
-existing artifacts are registered or quarantined, V2 replay/chaos tests pass,
-the terminology is reflected in operating procedures, and maintainers approve
-the selected metadata checkpoint mode.
+Migration is complete when every enabled adapter declares V2 compatibility
+through the Runtime Capability Registry, existing artifacts are registered or
+quarantined, V2 replay/chaos tests pass, the terminology is reflected in
+operating procedures, and maintainers approve the selected metadata checkpoint
+mode.

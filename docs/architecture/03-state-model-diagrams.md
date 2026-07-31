@@ -72,12 +72,13 @@ stateDiagram-v2
     Starting --> Ready: adapter health evidence
     Starting --> Failed: launch failure
     Ready --> Busy: delivery acknowledged
-    Busy --> Ready: terminal or event completion
+    Busy --> Ready: reconciled terminal event or explicit deferral
     Ready --> Draining: terminal cleanup requested
     Busy --> Draining: terminal cleanup requested
     Draining --> Terminated: tmux destroyed and leases released
     Ready --> Unavailable: heartbeat/reconcile failure
     Busy --> Unavailable: process failure
+    Busy --> Unavailable: task deadline without terminal event
     Unavailable --> Resuming: exceptional resume allowed
     Resuming --> Ready: resume verified
     Resuming --> Reconstructing: resume absent or invalid

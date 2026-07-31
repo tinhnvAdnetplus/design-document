@@ -12,7 +12,7 @@ The runtime has four planes.
 
 | Plane | Purpose | Main artifacts |
 | --- | --- | --- |
-| Control plane | accept events and coordinate deterministic actions | policy, Event Store projection, leases |
+| Control plane | accept events and coordinate deterministic actions | policy, Event Store projection, leases, Capability Registry |
 | Execution plane | host interactive CLI processes | tmux sessions, adapters, worktrees |
 | Evidence plane | preserve workflow facts | Event Store, Git commits, check reports |
 | Knowledge plane | provide bounded derived understanding | Knowledge Runtime, snapshots, Cache Registry |
@@ -40,6 +40,7 @@ cache can be discarded without invalidating a Git commit.
 | RT-13 | Maintain V2 Cache Taxonomy with layer-specific retention. | cache safety | Cache Registry test. |
 | RT-14 | Rebuild Session Lineage Graph from lifecycle evidence. | provenance | fork/reconstruction projection test. |
 | RT-15 | Schedule eligible deliveries and intents through explicit queues. | reliable async flow | priority/retry test. |
+| RT-16 | Build and require a current Capability Registry from every enabled adapter before adapter-dependent work. | safe adapter selection | startup/revalidation contract test. |
 
 ## Non-functional requirements
 
@@ -76,6 +77,11 @@ Adapter
   resume(recovery spec) -> observation
   stop(session spec) -> observation
 
+Capability Registry
+  register(adapter capability document)
+  require(adapter, capability, current version)
+  invalidate(adapter, reason)
+
 Git gateway
   create_worktree(feature)
   inspect(worktree or commit)
@@ -95,29 +101,49 @@ Knowledge Runtime
 
 Eligibility Scheduler
   enqueue(delivery or intent)
-  select_eligible()
+  select_eligible(Capability Registry)
   dispatch(target session)
 ~~~
 
 An interface returns structured observations and error codes. It MUST NOT require
 callers to parse a natural-language terminal pane as a protocol response.
 
+## Capability Registry
+
+Capability Registry is a first-class Runtime component. It stores the current,
+version-bound Capability Document returned by each enabled adapter's
+`capabilities()` operation, including whether `fork`, `resume`, notification,
+and required lifecycle observations are supported. Capability Discovery belongs
+to the Adapter; the Runtime records and consumes its result. The Registry is
+never populated from CLI output, Runtime probing, or LLM reasoning.
+
+The Eligibility Scheduler MUST require Registry eligibility before it selects a
+delivery or deterministic intent for an adapter-dependent action. Fork strategy
+MUST likewise select native or synthetic behavior from the Registry, not from a
+vendor name or a best-effort command attempt. Policy determines whether an
+already-declared capability is authorized; it does not discover a capability.
+
 ## Startup sequence
 
 1. Load immutable configuration and verify file permissions.
-2. Open or rebuild state projection from the Event Store.
-3. Inspect configured Git repository, integration ref, and registered worktrees.
-4. Reconcile active leases, Cache Registry artifacts, and Session Lineage Graph
+2. Obtain a fresh Capability Document from `capabilities()` for every enabled
+   adapter and build the Capability Registry. Fail closed for an adapter whose
+   document is absent, invalid, or incompatible.
+3. Open or rebuild state projection from the Event Store.
+4. Inspect configured Git repository, integration ref, and registered worktrees.
+5. Reconcile active leases, Cache Registry artifacts, and Session Lineage Graph
    against live processes and Git state.
-5. Start or attach root sessions in deterministic adapter order.
-6. Verify root readiness with adapter-specific evidence.
-7. Mark ready roots available for fork requests and root-sync events.
-8. Publish runtime health only after policy, Event Store, Git gateway, Knowledge
+6. Start or attach root sessions in deterministic adapter order.
+7. Verify root readiness with adapter-specific evidence.
+8. Mark ready roots available for Registry-permitted fork requests and root-sync events.
+9. Publish runtime health only after policy, Event Store, Git gateway, Knowledge
    Runtime, and required roots meet configured readiness criteria.
 
 Startup may be partially available. A configured Codex root can be unavailable
 while Claude planning remains observable, but the orchestrator MUST refuse paths
-that require the missing role rather than silently remapping authority.
+that require the missing role rather than silently remapping authority. A
+Runtime restart repeats capability registration; it must not reuse stale
+capability metadata from a prior process.
 
 ## Normal event processing
 
@@ -187,6 +213,17 @@ Suggested default controls:
 | capture pane diagnostic | 8 KiB | reduce sensitive retention |
 | delivery attempts | 5 | expose a persistent fault quickly |
 
+## Root context replacement recommendation
+
+A root's in-process context budget is distinct from the Knowledge Cache byte
+budget. If Runtime observation shows that a root has reached its configured
+advisory context threshold, it SHOULD recommend a controlled root replacement
+to the operator. The recommendation neither restarts the root automatically
+nor changes normal feature workflow: a replacement, if approved, follows the
+existing drain, reconstruction, and lineage rules. The current Knowledge Cache
+and Git-derived reconstruction packet preserve correctness; the purpose is
+bounded orientation cost, not recovery from an inferred failure.
+
 ## Lifecycle boundaries
 
 A root session is provisioned at runtime startup, remains available across
@@ -211,6 +248,8 @@ root process remains alive; a snapshot version changes, not session identity.
 | policy change denies action | refuse action and record reason |
 | delivery timeout | retry within policy then escalate |
 | Knowledge Runtime/cache failure | keep Git workflow valid; mark evolution pending |
+| missing terminal event by task deadline | reconcile Git, Event Store, lease, and adapter observations; never infer completion |
+| capability document missing, stale, or contradicted | mark adapter unavailable; block its dependent paths and recover/revalidate |
 
 ## Trade-offs
 

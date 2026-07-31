@@ -85,8 +85,18 @@ verified Git observations rather than terminal conversation summaries.
 | repeated protocol rejection | suspend session | security reviewer |
 | integration conflict | return to implementation | maintainer if repeated |
 | dirty recovery | quarantine | maintainer |
+| review/fix cycle limit reached | block automatic dispatch; present cycle evidence | maintainer |
 | policy override request | hold action | authorized administrator |
 | suspected secret leak | redact/revoke | security incident process |
+
+### Review/fix escalation procedure
+
+When the configured review/fix limit is reached, the maintainer inspects the
+approved plan, consecutive findings, current head/base, tests, and any scope
+change. The maintainer then records one of: abandon, replan, or an authorized
+policy override that permits another bounded cycle. The runtime does not clear
+the block because a terminal appears idle, and no override can reuse a stale
+approval.
 
 ### Knowledge Evolution exception
 

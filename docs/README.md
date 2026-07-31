@@ -67,8 +67,8 @@ flowchart LR
     CReview -->|merge.approved| Merge[Merge Authority]
     Merge -->|merge.completed| CRoot
     Merge -->|merge.completed| XRoot[Codex Root]
-    CRoot -->|knowledge.synchronized| Commit[Root Update Commit]
-    XRoot -->|knowledge.synchronized| Commit
+    CRoot -. optional metadata checkpoint .-> Commit[Root Update Commit]
+    XRoot -. optional metadata checkpoint .-> Commit
 ```
 
 The diagram shows logical actors. A deployment MAY co-locate Claude planning
@@ -176,11 +176,14 @@ flowchart TB
 ```
 
 The orchestrator is a coordinator, not an intelligent authority. In V2 it
-contains explicit Dispatcher, Eligibility Scheduler, and Session Registry
-modules; the Knowledge Runtime is its separate logical knowledge boundary. It
-validates configuration, assigns leases, persists Event Store evidence, invokes
-adapters, and applies deterministic policy. It does not reinterpret a review as
-approval or merge a branch without a valid authorization event.
+contains explicit Dispatcher, Eligibility Scheduler, Session Registry, and
+Capability Registry modules; the Knowledge Runtime is its separate logical
+knowledge boundary. Capability Discovery stays in the Adapter, while the
+Runtime-owned Registry supplies version-bound declarations to startup,
+scheduling, fork, and resume decisions. The orchestrator validates
+configuration, assigns leases, persists Event Store evidence, invokes adapters,
+and applies deterministic policy. It does not reinterpret a review as approval
+or merge a branch without a valid authorization event.
 
 ## 8. Document map
 
@@ -200,10 +203,30 @@ the following order for an implementation:
 
 ## 9. Conformance
 
-An implementation conforms to this specification when it implements all MUST
-requirements of the relevant V2 chapters, rejects unauthorized merge and
+V2 has one architecture and one normative vocabulary. **Minimal Conformance**
+is a deployment designation for the portable safety floor: it implements every
+applicable MUST for its enabled adapters and baseline flow, including Git-first
+evidence, Event Store, Capability Registry, role/lease boundaries, structured
+review, recovery reconstruction, and the required audit records. It may leave
+V2 optional facilities disabled, such as vendor resume, native fork, Conversation
+Cache, and the metadata-only Root Update Commit.
+
+**Full V2 Conformance** means Minimal Conformance plus every applicable V2
+runtime component and requirement for the declared deployment and enabled
+adapters, with the complete test evidence in
+[Testing and Benchmarks](implementation/04-testing-benchmarks.md). Minimal
+Conformance is not an alternate V2 architecture and must not be represented as
+Full V2 when a required enabled-adapter contract is absent.
+
+In either designation, an implementation rejects unauthorized merge and
 knowledge-evolution events, maintains required audit records, and passes the
-recovery scenario in [Testing and Benchmarks](implementation/04-testing-benchmarks.md).
+applicable recovery scenarios. Optional means disabled or explicitly selected;
+it never waives an applicable MUST.
+
+The Root Update Commit shown in the system diagram is not the result of every
+root synchronization. It is the optional, metadata-only checkpoint described
+in [Knowledge Synchronization](workflow/03-knowledge-synchronization.md), on a
+dedicated branch and separate from application integration history.
 
 An implementation MAY add agents, transports, or human checkpoints only when
 those additions do not alter Git-first durability, root ownership, feature

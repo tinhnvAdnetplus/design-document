@@ -95,6 +95,17 @@ The runtime may allow a policy-defined minor documentation correction to use
 targeted re-review, but it may not retain a merge approval across a changed
 head.
 
+### Review/fix escalation
+
+The Runtime counts completed `changes.requested` to implementation cycles for
+the feature. Before the configured maximum, the normal fix cycle remains
+unchanged. At the configured limit, it applies the configured escalation policy:
+the feature receives a blocked overlay, automatic review/fix dispatch stops,
+and a maintainer receives the findings, heads, plan, and cycle evidence. The
+maintainer may abandon the feature, request a replan, or make an auditable
+policy override. Escalation never converts repeated findings into approval or
+permits the reviewer to edit source.
+
 ## Approval
 
 Approval is an explicit structured event from Claude Reviewer and binds all
@@ -133,6 +144,15 @@ Review should check correctness, policy compliance, tests, compatibility,
 migration safety, generated source consistency, public API behavior, and
 unintended changes. It should not expand into unrelated refactoring unless a
 finding demonstrates a direct risk.
+
+## Planner/reviewer correlation trade-off
+
+Planner and reviewer events intentionally share the feature correlation ID and
+may originate from forks of the same Claude root. This makes the plan, reviewed
+head, and follow-up findings traceable, but it does not prove independent model
+reasoning. The accepted trade-off is explicit traceability over a claim of
+independence. Role separation, immutable review evidence, and approval binding
+remain the baseline controls; no new reviewer topology or authority is implied.
 
 ## Exceptional paths
 

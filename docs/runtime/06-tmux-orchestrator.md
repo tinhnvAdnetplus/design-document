@@ -59,7 +59,7 @@ authorization.
 while runtime is running:
   receive Event Store submission or runtime observation
   validate and persist before deriving projections/intents
-  project aggregate, lineage, cache, and delivery state
+  project aggregate, lineage, cache, capability, and delivery state
   select eligible queued delivery/intent by priority and policy
   dispatch notification or execute deterministic side effect
   collect controlled observation and emit/project outcome
@@ -81,6 +81,7 @@ schedule because it observes process liveness, not agent conversation.
 | Priority Policy | classify critical/high/normal/low work | config revision | Scheduler | cannot bypass authorization |
 | Retry Schedule | bounded delayed retry | delivery/intent lifetime | Scheduler and error handling | no retry of ambiguity |
 | Session Registry | report identity, lifecycle, capacity | session lifetime | Dispatcher and recovery | no authority grant |
+| Capability Registry | retain current adapter capability documents | runtime lifetime | Scheduler, fork, resume, startup | never discovers from CLI or model output |
 
 The modules may share one process and database in V2. They are separate
 responsibilities, not microservices. Persistent Claude/Codex sessions are
@@ -117,6 +118,7 @@ use current policy and Session Registry eligibility.
 | tmux session present, no readiness | starting/busy/ambiguous | wait or deadline |
 | tmux session absent | unavailable | reconcile and recover |
 | working directory mismatch | potential compromise | revoke lease and block |
+| declared capability differs from observed adapter behavior | adapter unavailable | fence dependent work and revalidate |
 | runtime client ack missing | delivery retry | backoff then escalate |
 | pane capture has secret marker | diagnostic risk | redact and restrict access |
 
