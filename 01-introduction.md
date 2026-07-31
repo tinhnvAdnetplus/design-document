@@ -1,24 +1,31 @@
 # Chapter 01 - Introduction
 
-## 1. Purpose
+## Purpose
 
-This document serves as the primary Software Design Document (SDD) for the project.
+This Software Design Document (SDD) defines the overall architecture, engineering principles, design decisions, and implementation guidance for the AI-assisted software development platform. It serves as the single source of truth for architects, developers, QA engineers, and DevOps engineers.
 
-## 2. Objectives
+## Goals
 
-- Establish a single source of truth.
-- Describe system architecture.
-- Define engineering principles.
-- Support AI-assisted software development.
+- Establish a unified technical vision.
+- Document functional and non-functional requirements.
+- Describe architecture, domain model, APIs, data, and deployment.
+- Standardize engineering practices.
+- Support future migration from Modular Monolith to Microservices.
 
-## 3. Audience
+## Audience
 
 - Solution Architects
 - Technical Leads
-- Developers
+- Backend Developers
+- Frontend Developers
 - QA Engineers
 - DevOps Engineers
+- Product Owners
 
-## 4. Scope
+## Scope
 
-This document covers requirements, architecture, APIs, database design, AI agents, deployment, security, testing, and operations.
+This document covers business requirements, system architecture, domain design, database design, API conventions, AI agent workflow, deployment strategy, observability, testing, security, and operational considerations.
+
+## Document Organization
+
+Subsequent chapters progressively refine the system from business requirements through implementation and operations.
