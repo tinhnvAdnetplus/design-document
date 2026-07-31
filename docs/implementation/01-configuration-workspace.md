@@ -30,6 +30,15 @@ runtime:
     feature_packet_bytes: 131072
     root_cache_bytes: 262144
     pending_deliveries_per_session: 32
+  scheduler:
+    priority_classes: [critical, high, normal, low]
+    max_delivery_attempts: 5
+    fairness: per_feature_fifo
+  knowledge_runtime:
+    snapshot_domains: [project, architecture, business, workspace, dependency, convention]
+    conversation_cache: disabled
+    knowledge_cache_retention_days: 30
+    resume_cache_retention_hours: 24
 
 agents:
   claude:
@@ -93,6 +102,8 @@ provider names are deployment-specific. Secrets are referenced, never included.
 | security | path roots, egress, secret references | no broad unsafe allowance |
 | retention | event/cache/transcript rules | privacy and storage constraints |
 | observability | log level, metrics endpoint | secret redaction enabled |
+| scheduler | priority/retry/fairness limits | bounded classes and attempts |
+| knowledge runtime | snapshot/cache/retention policy | Conversation Cache disabled by default |
 
 The loader must reject unknown critical fields in strict mode and reject a
 configuration that grants a role inconsistent capabilities such as root code
@@ -109,7 +120,7 @@ write or implementer merge approval.
     feat-0042/
     review-feat-0042-1/
   state/
-    runtime.db                      event log and projection
+    runtime.db                      Event Store and projection
     events/                         optional NDJSON export
     sessions/
       ses_claude_root.json
@@ -118,6 +129,8 @@ write or implementer merge approval.
     caches/
       claude-root.yaml
       codex-root.yaml
+    cache-registry/
+    lineage/
     packets/
       feat-0042/
     artifacts/
@@ -135,13 +148,24 @@ Runtime state is not committed to the application repository unless a separate
 repository policy explicitly tracks sanitized design metadata. Application code
 worktrees do not contain caches, event files, or vendor resume IDs.
 
+## V2 runtime state ownership
+
+| State | Owner | Lifecycle | Restriction |
+| --- | --- | --- | --- |
+| Event Store | control plane | retention policy | runtime evidence, not code truth |
+| Cache Registry | Knowledge Runtime | cache artifact lifetime | metadata, not unrestricted contents |
+| Knowledge Cache | named root | root lifecycle | provenance-linked and rebuildable |
+| Conversation Cache | restricted diagnostics | short policy lifetime | disabled by default |
+| Resume Cache | adapter | Resume Scope | opaque and exceptional only |
+| Lineage projection | Session Registry | event retention | no authority/transport semantics |
+
 ## File permissions
 
 | Path | Owner | Mode guidance | Reason |
 | --- | --- | --- | --- |
 | config policy | runtime administrator | read-only to agents | prevent policy self-modification |
 | state database | runtime account | owner read/write | event integrity |
-| root cache | corresponding root/runtime | owner read/write | derived context confidentiality |
+| Knowledge Cache | corresponding root/runtime | owner read/write | derived context confidentiality |
 | packets | feature role/runtime | restrictive temporary | task content |
 | worktrees | assigned writer | controlled write | isolation |
 | logs | observability/runtime | restrictive read | may contain paths/summaries |
@@ -182,6 +206,10 @@ A configuration change is a reviewed Git change or equivalent immutable
 configuration revision. The orchestrator logs its digest and uses it for event
 authorization. Revoking a capability applies immediately to new side effects;
 existing sessions become unable to renew denied leases.
+
+V2 configuration MUST reject a Conversation Cache enabled without explicit
+retention/access policy, a scheduler class that bypasses authorization, or a
+Root Update Commit branch that permits application paths.
 
 ## Trade-offs
 

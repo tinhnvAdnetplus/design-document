@@ -13,7 +13,7 @@ Root sessions are independent read-mostly actors; each owns only its own cache.
 
 | Resource | Concurrency | Guard |
 | --- | ---: | --- |
-| root cache | one writer per root | root identity |
+| Knowledge Cache | one writer per root | root identity |
 | feature worktree | one writer | lease plus fencing |
 | feature review | one active approval attempt | aggregate sequence |
 | integration worktree | one merger | integration lock |
@@ -68,5 +68,13 @@ implicit changes from a prior merge entering an approved candidate.
 
 Serial integration limits merge throughput but makes Git state and approval
 binding deterministic. Fine-grained parallel merges introduce conflict and
-review invalidation complexity that is not justified for v1.
+review invalidation complexity that is not justified for the single-host profile.
 
+## V2 scheduler and knowledge rules
+
+Eligibility Scheduler may prioritize revocation, recovery, merge validation,
+and knowledge-evolution notices, but Priority Policy cannot bypass a lease,
+approval, or root ownership check. Knowledge Evolution is read-only until a
+named root atomically publishes its own cache; it does not hold an integration
+lock or feature writer lease. Session Lineage Graph projection is lock-free
+derived state and must not participate in lock ordering.

@@ -12,10 +12,10 @@ The runtime has four planes.
 
 | Plane | Purpose | Main artifacts |
 | --- | --- | --- |
-| Control plane | accept events and coordinate deterministic actions | policy, state projection, leases |
+| Control plane | accept events and coordinate deterministic actions | policy, Event Store projection, leases |
 | Execution plane | host interactive CLI processes | tmux sessions, adapters, worktrees |
-| Evidence plane | preserve workflow facts | event log, Git commits, check reports |
-| Context plane | provide bounded derived understanding | root caches, plan and review packets |
+| Evidence plane | preserve workflow facts | Event Store, Git commits, check reports |
+| Knowledge plane | provide bounded derived understanding | Knowledge Runtime, snapshots, Cache Registry |
 
 The planes are intentionally separate. A CLI process can be unavailable while
 the control and evidence planes continue recording or reconciling facts. A
@@ -33,10 +33,13 @@ cache can be discarded without invalidating a Git commit.
 | RT-06 | Persist accepted events before side effects. | recovery and audit | crash injection test |
 | RT-07 | Require structured approval for integration. | prevent ambiguous merge | authorization test |
 | RT-08 | Destroy terminal feature sessions. | prevent context inflation | cleanup event and absent terminal |
-| RT-09 | Update root cache only from post-merge evidence. | cache correctness | provenance test |
+| RT-09 | Update Knowledge Cache only from post-merge evidence. | cache correctness | provenance test |
 | RT-10 | Reconstruct with no CLI resume IDs. | vendor-independent recovery | lost-ID scenario |
 | RT-11 | Expose health, delivery, lease, and token metrics. | operability | metrics contract test |
 | RT-12 | Reject unsupported or unauthorized events. | protocol safety | negative schema suite |
+| RT-13 | Maintain V2 Cache Taxonomy with layer-specific retention. | cache safety | Cache Registry test. |
+| RT-14 | Rebuild Session Lineage Graph from lifecycle evidence. | provenance | fork/reconstruction projection test. |
+| RT-15 | Schedule eligible deliveries and intents through explicit queues. | reliable async flow | priority/retry test. |
 
 ## Non-functional requirements
 
@@ -83,6 +86,17 @@ Policy engine
   authorize(subject, action, resource, context)
   validate_transition(state, event)
   validate_merge(binding)
+
+Knowledge Runtime
+  select_snapshot(packet scope)
+  evolve(merge evidence, root)
+  validate(candidate snapshot)
+  publish(Knowledge Cache)
+
+Eligibility Scheduler
+  enqueue(delivery or intent)
+  select_eligible()
+  dispatch(target session)
 ~~~
 
 An interface returns structured observations and error codes. It MUST NOT require
@@ -91,14 +105,15 @@ callers to parse a natural-language terminal pane as a protocol response.
 ## Startup sequence
 
 1. Load immutable configuration and verify file permissions.
-2. Open or rebuild state projection from the event log.
+2. Open or rebuild state projection from the Event Store.
 3. Inspect configured Git repository, integration ref, and registered worktrees.
-4. Reconcile any active leases against live processes and Git state.
+4. Reconcile active leases, Cache Registry artifacts, and Session Lineage Graph
+   against live processes and Git state.
 5. Start or attach root sessions in deterministic adapter order.
 6. Verify root readiness with adapter-specific evidence.
 7. Mark ready roots available for fork requests and root-sync events.
-8. Publish runtime health only after policy, event store, Git gateway, and
-   required roots meet configured readiness criteria.
+8. Publish runtime health only after policy, Event Store, Git gateway, Knowledge
+   Runtime, and required roots meet configured readiness criteria.
 
 Startup may be partially available. A configured Codex root can be unavailable
 while Claude planning remains observable, but the orchestrator MUST refuse paths
@@ -122,6 +137,25 @@ function accept(event):
 The command intent is persisted before terminal or Git execution. Reconciliation
 can therefore determine whether a side effect was pending, attempted, confirmed,
 or uncertain after a crash.
+
+## Runtime Lifecycle
+
+V2 defines two non-blocking loops. The Control Loop owns durable coordination;
+the Agent Loop owns role-specific reasoning. Review is a feature-workflow
+transition, not a universal control-loop phase.
+
+~~~text
+Control Loop:
+Receive -> Validate and Persist -> Project -> Schedule/Dispatch
+-> Execute or Observe -> Emit/Project outcome -> Idle
+
+Agent Loop:
+Receive notice -> Read immutable packet -> Process assigned role
+-> Emit structured event or deferral -> Idle
+~~~
+
+The Scheduler can execute deterministic intents and route notifications, but it
+MUST NOT wait for a model response or treat roots/forks as a worker pool.
 
 ## Idle semantics
 
@@ -148,7 +182,7 @@ Suggested default controls:
 | pending notices per session | 32 | avoid unbounded prompt injection |
 | inline event payload | 16 KiB | preserve terminal reliability |
 | event attachment size | 1 MiB | force Git/file references for large data |
-| root cache size | 256 KiB | prevent context inflation |
+| root knowledge snapshot size | 256 KiB | prevent context inflation |
 | feature context packet | 128 KiB | bound fork startup |
 | capture pane diagnostic | 8 KiB | reduce sensitive retention |
 | delivery attempts | 5 | expose a persistent fault quickly |
@@ -161,35 +195,39 @@ provisioned for one feature role, handles bounded work, and is terminated after
 a terminal workflow event. A merge is not complete until required root-sync
 events either complete or are visibly pending under policy.
 
+Knowledge Runtime evolves a new snapshot after eligible merge evidence. The
+root process remains alive; a snapshot version changes, not session identity.
+
 ## Failure behavior
 
 | Condition | Required behavior |
 | --- | --- |
 | adapter command unavailable | mark session unavailable; do not restart-loop |
 | terminal absent | reconcile process state and begin recovery |
-| event store unavailable | stop accepting state-changing events |
+| Event Store unavailable | stop accepting state-changing events |
 | Git inspection failure | block merge and cache sync |
 | feature worktree dirty after crash | preserve, quarantine, require resolution |
 | approval stale | invalidate and request fresh review |
 | policy change denies action | refuse action and record reason |
 | delivery timeout | retry within policy then escalate |
-| root cache failure | keep Git workflow valid; mark sync pending |
+| Knowledge Runtime/cache failure | keep Git workflow valid; mark evolution pending |
 
 ## Trade-offs
 
 Persistent interactive processes reduce token and setup cost, but make runtime
-health less trivial than one-shot jobs. The event log permits independent
+health less trivial than one-shot jobs. The Event Store permits independent
 progress, but users must understand eventual delivery and inspect status rather
 than waiting on an RPC response. The runtime chooses those costs because coding
 agents are naturally long-lived, asynchronous actors.
 
 ## Implementation guidance
 
-A v1 implementation SHOULD begin with one orchestrator process, a SQLite or
-append-only local store, an explicit file lock, a Git gateway that invokes
+A V2 implementation SHOULD begin with one orchestrator process, a SQLite or
+append-only Event Store, an explicit file lock, a Git gateway that invokes
 non-interactive Git, and small adapter processes. It SHOULD avoid shared-memory
 state and automatic shell retries that can duplicate edits or commits.
 
-See [Claude and Codex Runtimes](02-claude-codex-runtimes.md) and
+See [Claude and Codex Runtimes](02-claude-codex-runtimes.md),
+[Knowledge Runtime, Fork, and Cache Strategy](05-fork-knowledge-prompt-cache.md),
+[tmux Runtime and Orchestrator](06-tmux-orchestrator.md), and
 [Communication Protocol](../protocol/01-communication-protocol.md).
-

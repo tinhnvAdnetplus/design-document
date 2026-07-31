@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This chapter defines asynchronous event communication between agents, the
-orchestrator, and deterministic runtime actors. It replaces synchronous
-agent-to-agent calls with durable event handoff.
+This chapter defines asynchronous event communication between agents, the V2
+Event Store, Dispatcher, Eligibility Scheduler, and deterministic runtime
+actors. It replaces synchronous agent-to-agent calls with durable event handoff.
 
 ## Core rule
 
@@ -18,17 +18,19 @@ and policy permit, then emits a successor event or explicit deferral.
 ~~~mermaid
 flowchart LR
     P[Producer] --> V[Validate]
-    V -->|valid| L[Append event log]
+    V -->|valid| L[Append Event Store]
     V -->|invalid| R[event.rejected]
     L --> S[Project aggregate]
-    S --> Q[Queue target delivery]
-    Q --> A[Adapter notify]
+    S --> Q[Durable Delivery Queue]
+    Q --> E[Eligibility Scheduler]
+    E --> D[Dispatcher]
+    D --> A[Adapter notify]
     A --> K[Consumer acknowledgement]
     K --> C[Consumer process]
     C --> N[Successor event or idle]
 ~~~
 
-The append and projection order is deliberately before notification. A terminal
+The Event Store append and projection order is deliberately before notification. A terminal
 notice can be lost; the event record remains available to retry or reconcile.
 
 ## Delivery semantics
@@ -63,6 +65,8 @@ parallel if their leases and merge constraints do not conflict.
 | root | cache synchronization sequence | sync requested/completed |
 | runtime | global operational record | config loaded, recovery started |
 | policy | revision history | policy changed, capability revoked |
+| lineage | derived session-parent projection | fork/reconstruction evidence |
+| knowledge | snapshot publication lifecycle | candidate/validated/published |
 
 ## Acknowledgement model
 
@@ -118,10 +122,12 @@ renewal events under configured policy.
 
 ## Message routing
 
-The orchestrator routes by explicit target role or session. It MUST resolve a
-role to a current eligible session at delivery time. A sender cannot select an
-arbitrary terminal by string. If two reviewer sessions exist for separate
-attempts, the feature aggregate identifies the valid target.
+The Dispatcher routes by explicit target role or session. Eligibility Scheduler
+selects delivery only after policy, priority, retry deadline, session capacity,
+and lease state permit it. It MUST resolve a role to a current eligible session
+at delivery time. A sender cannot select an arbitrary terminal by string. If two
+reviewer sessions exist for separate attempts, the feature aggregate identifies
+the valid target.
 
 ## Protocol invariants
 
@@ -133,6 +139,9 @@ attempts, the feature aggregate identifies the valid target.
 6. A consumer cannot grant itself a new capability by emitting an event.
 7. A valid event remains inspectable after its target session is destroyed.
 8. Transport substitution must preserve these semantics.
+9. Event Store replay rebuilds projections and reconciles effects; it never
+   replays terminal input or Git mutation blindly.
+10. Session Lineage Graph is not a delivery route or authorization input.
 
 ## Trade-offs
 
@@ -144,4 +153,3 @@ over conversational immediacy.
 See [Message Format and JSON Events](02-message-json-event-protocol.md) for the
 envelope and [Protocol Error Handling](03-protocol-error-handling.md) for
 rejection and retry behavior.
-

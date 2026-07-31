@@ -22,7 +22,7 @@ context cost; it cannot guarantee model reasoning or external CI duration.
 
 ## Token optimization rules
 
-1. Keep stable project context in a bounded root cache.
+1. Keep stable project context in a bounded Knowledge Cache.
 2. Fork feature contexts rather than append every feature to root history.
 3. Send event references, not full transcripts or diffs.
 4. Prefer Git commit/path references over repeated source inclusion.
@@ -79,3 +79,11 @@ Adaptive packet selection may use dependency graphs and learned relevance
 scores, provided results remain explainable, provenance-linked, bounded, and
 subject to the same privacy policy.
 
+## V2 cache and scheduler capacity
+
+Prompt, Conversation, Resume, and Knowledge Cache layers have independent
+budgets and retention. Conversation Cache bytes are normally zero because the
+layer is disabled. Scheduler capacity is measured by eligible delivery age and
+queue depth, not by treating stateful sessions as pooled workers. Knowledge
+Compression must reduce packet cost while retaining provenance for every
+published fact.

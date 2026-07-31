@@ -14,14 +14,16 @@ src/
   config/               schema, loading, revisioning
   domain/               events, aggregates, state transitions
   policy/               capabilities, protected paths, authorization
-  store/                event log, projection, attachments
+  store/                Event Store, projection, attachments
+  knowledge/            snapshots, Cache Registry, compression, evolution
+  lineage/              session-lineage projection
   adapters/
     base/               common adapter contract
     claude/
     codex/
   tmux/                 terminal command wrapper and observation
   git/                  worktree, commit, merge gateway
-  scheduler/            deliveries, deadlines, reconciliation
+  scheduler/            dispatcher, eligibility, queues, deadlines, reconciliation
   cache/                root packet and knowledge-cache support
   observability/        logs, metrics, tracing
   cli/                  operator and in-terminal runtime client
@@ -45,7 +47,8 @@ Feature {
 
 Session {
   id, agentId, role, lifecycle, tmuxName,
-  adapterVersion, rootId, featureId, resumeMetadata
+  adapterVersion, rootId, featureId, resumeMetadata,
+  parentSessionId, knowledgeSnapshotVersion, lineageEdgeType
 }
 
 Lease {
@@ -61,6 +64,11 @@ Event {
 CommandIntent {
   id, sourceEventId, kind, status,
   idempotencyKey, preconditions, resultReference
+}
+
+KnowledgeSnapshot {
+  rootId, version, domains, integrationHead,
+  facts, provenance, digest, validationState
 }
 ~~~
 
@@ -106,7 +114,7 @@ function submit(event):
 
 The transaction boundary includes append, idempotency, and projection version
 check. Effect execution occurs afterward. SQLite transaction semantics are
-suitable for v1 when a single orchestrator owns writes.
+suitable when a single orchestrator owns writes.
 
 ## Reconciler pseudocode
 
@@ -131,7 +139,24 @@ function reconcile():
 ~~~
 
 Reconciliation is not conversational polling. It observes runtime resources and
-deterministic Git state on a controlled schedule.
+deterministic Git state on a controlled schedule. Event Store replay rebuilds
+projection and lineage/cache views; it does not replay an unconfirmed effect.
+
+## V2 control loop
+
+~~~text
+function control_loop():
+  receive event submission, scheduled eligibility, or runtime observation
+  validate and persist Event Store evidence
+  project feature/session/lineage/cache state
+  scheduler.select_eligible()
+  dispatcher.route_notice() or gateway.execute_confirmed_intent()
+  collect observation; emit and project outcome
+  return idle without waiting for agent completion
+~~~
+
+Persistent agents use the separate Agent Loop defined in Runtime Overview.
+They are Session Registry entries, not worker-pool members.
 
 ## Git gateway
 
@@ -160,6 +185,11 @@ When enabled by policy, the service asks the owning root to write a
 metadata-only cache manifest commit to the dedicated runtime knowledge branch.
 That operation is separate from integration merge and is guarded to prevent
 application-path changes.
+
+V2 implements this service as Knowledge Runtime: detect affected domains,
+collect Git diff/Event Store evidence, compress candidates, validate provenance
+and budgets, then publish the named root's snapshot atomically. Conversation
+Cache is never an implicit input.
 
 ## In-terminal client
 

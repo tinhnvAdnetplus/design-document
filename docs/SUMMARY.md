@@ -10,6 +10,9 @@ minor prefix without changing the chapter identifier cited by another document.
 - [Architecture Overview](architecture/01-architecture-overview.md)
 - [Agent Model and Decision Records](architecture/02-agent-model-decisions.md)
 - [Runtime Overview](runtime/01-runtime-overview.md)
+- [V2 Architecture Review](architecture/05-v2-architecture-review.md)
+- [ADR-011 — Version 2 Runtime Evolution](architecture/06-v2-design-decisions.md)
+- [V1 → V2 Migration Guide](implementation/05-v1-v2-migration-plan.md)
 
 ## Architecture
 
@@ -25,6 +28,11 @@ minor prefix without changing the chapter identifier cited by another document.
   - component, deployment, and class diagrams
 - [04 — Architectural Decisions](architecture/04-decision-records.md)
   - decisions, alternatives, consequences, and revision policy
+- [05 — V2 Architecture Review](architecture/05-v2-architecture-review.md)
+  - assessment of every independent-review proposal
+  - accepted, refined, and rejected V2 concepts
+- [ADR-011 — Version 2 Runtime Evolution](architecture/06-v2-design-decisions.md)
+  - binding V2 vocabulary, decisions, and rejected interpretations
 
 ## Runtime
 
@@ -39,8 +47,8 @@ minor prefix without changing the chapter identifier cited by another document.
   - reboot, crash, and fresh-session reconstruction
 - [08 — Session and Feature Lifecycle](runtime/04-session-lifecycle.md)
   - lifecycle states, leases, cleanup, and abandonment
-- [09 — Fork, Knowledge, and Prompt Cache](runtime/05-fork-knowledge-prompt-cache.md)
-  - fork discipline, cache schemas, and token optimization
+- [09 — Knowledge Runtime, Fork, and Cache Strategy](runtime/05-fork-knowledge-prompt-cache.md)
+  - snapshots, cache registry, compression, fork discipline, and token optimization
 - [10 — tmux Runtime and Orchestrator](runtime/06-tmux-orchestrator.md)
   - session layout, `send-keys`, event delivery, and supervision
 
@@ -72,11 +80,13 @@ minor prefix without changing the chapter identifier cited by another document.
   - modules, pseudocode, shell examples, and integration order
 - [20 — Testing and Benchmark Strategy](implementation/04-testing-benchmarks.md)
   - test pyramid, fixtures, chaos scenarios, and measurements
+- [V1 → V2 Migration Guide](implementation/05-v1-v2-migration-plan.md)
+  - compatible rollout, validation gates, and rollback
 
 ## Operations
 
 - [21 — Logging, Monitoring, and Metrics](operations/01-logging-monitoring-metrics.md)
-  - event logs, dashboards, alerts, and privacy controls
+  - Event Store logs, dashboards, alerts, and privacy controls
 - [22 — Performance, Tokens, and Capacity](operations/02-performance-token-capacity.md)
   - prompt budgets, latency, throughput, and benchmarking
 - [23 — Recovery and Fault Tolerance](operations/03-recovery-fault-tolerance.md)
@@ -99,6 +109,8 @@ minor prefix without changing the chapter identifier cited by another document.
   - staged roadmap and adapter expansion criteria
 - [29 — Glossary and Reference](appendix/03-glossary-reference.md)
   - defined terms, status codes, and reference checklists
+- [V2 Changelog](CHANGELOG.md)
+  - version history and compatibility notes
 
 ## Cross-reference rules
 
@@ -113,10 +125,10 @@ section says otherwise.
 | Reader | Recommended sequence | Outcome |
 | --- | --- | --- |
 | Runtime implementer | 01, 05–13, 18–24 | A conforming local runtime. |
-| Agent adapter author | 02, 05–07, 11–13, 25–26 | A compatible adapter with safe recovery. |
-| Repository maintainer | 01–04, 14–17, 25–26 | Policy, review, and merge governance. |
+| Agent adapter author | 02, 05–10, 11–13, 25–26 | A compatible adapter with safe recovery. |
+| Repository maintainer | 01–06, 14–17, 25–26 | Policy, review, merge, and V2 rationale. |
 | SRE or platform engineer | 03, 06, 10–13, 21–24 | Operable deployment and incident procedures. |
-| Security reviewer | 02, 11–13, 17, 25–26 | Trust boundaries and authorization evidence. |
+| Security reviewer | 02, 05–06, 11–13, 17, 25–26 | Trust boundaries and authorization evidence. |
 
 ## Requirement traceability
 
@@ -127,7 +139,8 @@ section says otherwise.
 | Feature isolation | 08, 14–15, 18 | worktree ownership test |
 | Event protocol | 11–13 | schema and delivery tests |
 | Approval authority | 02, 14–15, 26 | authorization test |
-| Knowledge cache | 09, 16 | rebuild and provenance test |
+| Knowledge Runtime/cache | 05, 09, 16, 21 | rebuild, provenance, and migration test |
+| Event Store and scheduler | 01, 10–13, 21–24 | replay, queue fairness, and recovery test |
 | Operations | 21–24 | dashboard, alert, and chaos evidence |
 | Security | 25–26 | capability and secret-handling tests |
 

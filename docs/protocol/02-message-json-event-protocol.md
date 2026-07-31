@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This chapter defines the v1 JSON event envelope, event catalog, payload rules,
+This chapter defines the V2 JSON event envelope, event catalog, payload rules,
 and examples. The envelope is the authoritative communication artifact; a
 terminal notice carries only a reference to it.
 
@@ -19,6 +19,11 @@ terminal notice carries only a reference to it.
     "role": "codex_implementer",
     "adapter": "codex",
     "adapter_version": "1.4.0"
+  },
+  "lineage": {
+    "parent_session_id": "ses_codex_root",
+    "knowledge_snapshot_version": 42,
+    "edge_type": "fork"
   },
   "aggregate": {
     "feature_id": "feat-0042",
@@ -38,7 +43,7 @@ terminal notice carries only a reference to it.
 }
 ~~~
 
-All fields except causation ID, attachments, and signature reference are
+All fields except causation ID, lineage, attachments, and signature reference are
 required. Timestamps use UTC RFC 3339. IDs use configured opaque stable
 formats. The event hash is calculated over a canonical representation excluding
 the hash field itself.
@@ -75,6 +80,10 @@ as attachments with content digest and access-controlled URI.
 | merge.completed | merger | result, integration commit, checks | merging to merged/failed |
 | knowledge.sync.requested | orchestrator | merge range, root ID | notify root |
 | knowledge.synchronized | root | cache digest, provenance | sync progress |
+| knowledge.evolution.started | Knowledge Runtime | root, merge range, candidate domains | evolution started |
+| knowledge.snapshot.published | root | snapshot/cache digest, domains, provenance | snapshot current |
+| cache.invalidated | Knowledge Runtime | layer, scope, trigger | cache unavailable |
+| session.lineage.recorded | adapter/orchestrator | parent, child, edge type | lineage projection |
 | session.unavailable | adapter/orchestrator | observation and reason | session overlay |
 | lease.granted | orchestrator | resource, token, expiry | writer enabled |
 | lease.revoked | orchestrator | reason, token | writer disabled |
@@ -126,7 +135,7 @@ evidence, not a substitute for Git verification.
 }
 ~~~
 
-Only the configured Claude reviewer identity can emit this type in v1. The
+Only the configured Claude reviewer identity can emit this type in the baseline role profile. The
 merger must reject it if any binding fact differs at merge time.
 
 ## Validation
@@ -150,10 +159,17 @@ validate event:
 
 ## Versioning
 
-The protocol version has major compatibility semantics. A v1 consumer rejects
-an incompatible v2 event rather than interpreting it best-effort. Additive
+The protocol version has major compatibility semantics. A consumer of protocol
+major version 1 rejects an incompatible major version 2 event rather than interpreting it best-effort. Additive
 fields use the extensions namespace and must not change existing meaning.
 Breaking changes require a parallel event type or major version migration.
+
+## Event Store replay rule
+
+Event Store replay reconstructs aggregate, delivery, cache, and lineage
+projections from accepted events. A replayed command intent MUST first use its
+confirmation query; it MUST NOT replay terminal keys, merges, commits, or
+cleanup merely because a historical event appears in the stream.
 
 ## Attachments
 
@@ -174,4 +190,3 @@ a restricted artifact URI while public event metadata remains inspectable.
 A strict envelope adds structure compared with free-text messages, but it makes
 recovery, authorization, and metrics possible. It also lets future adapters
 participate without teaching every agent vendor-specific conversation syntax.
-

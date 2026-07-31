@@ -6,7 +6,7 @@ This chapter specifies why roots remain alive, when resume is permitted, and
 how the runtime recovers when it cannot resume. It establishes the rule that
 resume is an optimization, never a correctness dependency.
 
-## Persistent-session policy
+## Persistent-session policy and Resume Lifecycle
 
 Normal development follows this policy:
 
@@ -26,15 +26,32 @@ discarding the process. Restarting a feature session to avoid a difficult task
 is also prohibited; a new fork requires an explicit recovery or abandonment
 transition.
 
+## Resume lifetime by scope
+
+Resume Cache entries are opaque adapter metadata with a policy-bounded
+lifetime. They are valid only while the runtime Session Lifecycle permits a
+recovery attempt; they are not long-lived agent memory.
+
+| Scope | Cache owner | Eligible interval | Terminal invalidation | Fresh path |
+| --- | --- | --- | --- | --- |
+| Root | root adapter | unavailable to root replacement | root drain/disable/replacement | root reconstruction packet |
+| Planner | feature adapter | unavailable to plan outcome | plan accepted/rejected/cancelled | plan packet |
+| Implementer | feature adapter | unavailable while feature can continue | review/cancel/cleanup | worktree/Git packet |
+| Reviewer | feature adapter | unavailable while decision is pending | approval/rejection/expiry/cancellation | immutable review packet |
+
+The runtime deletes or makes unusable a Resume Cache entry at its terminal
+invalidation event under retention policy. A retained diagnostic reference does
+not re-enable resume.
+
 ## Why persistence matters
 
 A persistent root avoids repeating stable project instructions, repository
 orientation, conventions, and recent integrated changes. It also keeps CLI tool
 state available. The runtime does not equate this convenience with durability:
-the root cache is written independently and can be reconstructed.
+the Knowledge Cache is written independently and can be reconstructed.
 
 Persistence has a cost. A long-lived CLI can leak memory, hold stale terminal
-state, or continue after a policy change. Health checks, bounded root caches,
+state, or continue after a policy change. Health checks, bounded Knowledge Caches,
 configuration revision checks, and explicit state transitions control that cost.
 
 ## Exceptional-resume preconditions
@@ -78,7 +95,7 @@ prompt.
 ## Reconstruction packet
 
 A fresh root packet contains stable role instructions, configuration revision,
-repository identity, integration head, root cache if valid, recent integrated
+repository identity, integration head, Knowledge Cache if valid, recent integrated
 ranges, known project constraints, and links to event evidence. A fresh feature
 packet additionally contains feature ID, plan, worktree status, writer lease
 status, review cycle, and target Git base.
@@ -88,7 +105,7 @@ status, review cycle, and target Git base.
 | runtime and policy revision | required | required |
 | role contract | required | required |
 | repository and integration HEAD | required | required |
-| root cache provenance | required | selected |
+| Knowledge Cache provenance | required | selected |
 | feature plan | no | required |
 | worktree path and branch | no | required |
 | active lease and fencing token | no | if still valid |
@@ -98,7 +115,8 @@ status, review cycle, and target Git base.
 
 The packet must state that it is a reconstruction, identify unknowns, and tell
 the agent to verify Git before acting. It must not claim continuity that cannot
-be proven.
+be proven. It identifies the Knowledge Snapshot version and Session Lineage
+Graph parentage so recovery remains auditable without a transcript.
 
 ## Root recovery
 
@@ -157,10 +175,16 @@ explicitly drain and replace a root during a maintenance window, but this is a
 controlled recovery event with a reconstruction packet, not ordinary workflow
 behavior.
 
+## Cache and lineage restrictions
+
+Resume Cache is one layer in the V2 Cache Taxonomy. It cannot promote terminal
+text or conversational material into Knowledge Cache. If a recovered session
+has no valid lineage parent, its reconstruction is marked root-cause recovery,
+not a synthetic fork. Both cases remain compatible with Git-first recovery.
+
 ## Future improvements
 
 Future adapters may cryptographically attest a resumed session, checkpoint a
 sanitized local context, or support transactional session snapshots. These
 features can reduce reconstruction cost but cannot alter the Git-first recovery
 requirement.
-

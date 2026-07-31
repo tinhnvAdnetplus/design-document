@@ -78,7 +78,7 @@ observable.
 
 ## 4. Non-goals
 
-The following are explicitly outside the v1 scope:
+The following are explicitly outside the current scope:
 
 - replacing Git, GitHub/GitLab, CI, or branch protection;
 - sharing model transcripts as a canonical knowledge base;
@@ -133,8 +133,8 @@ implementation action.
 | FR-02 | Create feature sessions through the adapter's fork mechanism. | MUST | Adapter contract test. |
 | FR-03 | Destroy feature sessions after merge or terminal abandonment. | MUST | Cleanup integration test. |
 | FR-04 | Route structured events asynchronously. | MUST | Protocol and latency test. |
-| FR-05 | Allow only Claude to emit `merge.approved` in v1. | MUST | Authorization test. |
-| FR-06 | Synchronize root knowledge after integration commits. | MUST | Rebuild and provenance test. |
+| FR-05 | Allow only Claude to emit `merge.approved` in the baseline role profile. | MUST | Authorization test. |
+| FR-06 | Evolve and publish root knowledge snapshots after integration commits. | MUST | Rebuild and provenance test. |
 | FR-07 | Recover without any saved CLI resume ID. | MUST | Chaos recovery test. |
 | FR-08 | Isolate write access to a feature worktree. | MUST | Permission test. |
 | FR-09 | Record operational telemetry without raw prompt defaults. | MUST | Security test. |
@@ -152,7 +152,9 @@ flowchart TB
     Human[Developer or Maintainer]
     Git[(Git Repository)]
     Orch[Runtime Orchestrator]
-    Store[(Event Log and State Store)]
+    Store[(Event Store and Projections)]
+    Knowledge[Knowledge Runtime]
+    Scheduler[Dispatcher and Eligibility Scheduler]
     Tmux[tmux Server]
     Claude[Claude CLI Adapter]
     Codex[Codex CLI Adapter]
@@ -160,6 +162,9 @@ flowchart TB
 
     Human -->|start, inspect, approve policy| Orch
     Orch <--> Store
+    Orch <--> Knowledge
+    Orch --> Scheduler
+    Scheduler --> Tmux
     Orch -->|send-keys / capture-pane| Tmux
     Tmux --> Claude
     Tmux --> Codex
@@ -170,10 +175,12 @@ flowchart TB
     CI -->|check status event| Orch
 ```
 
-The orchestrator is a coordinator, not an intelligent authority. It validates
-configuration, assigns leases, persists event metadata, invokes adapters, and
-applies deterministic policy. It does not reinterpret a review as approval or
-merge a branch without a valid authorization event.
+The orchestrator is a coordinator, not an intelligent authority. In V2 it
+contains explicit Dispatcher, Eligibility Scheduler, and Session Registry
+modules; the Knowledge Runtime is its separate logical knowledge boundary. It
+validates configuration, assigns leases, persists Event Store evidence, invokes
+adapters, and applies deterministic policy. It does not reinterpret a review as
+approval or merge a branch without a valid authorization event.
 
 ## 8. Document map
 
@@ -188,12 +195,14 @@ the following order for an implementation:
 6. [Feature and Review Lifecycle](workflow/01-feature-review-lifecycle.md)
 7. [Reference Implementation](implementation/03-reference-implementation.md)
 8. [Recovery](operations/03-recovery-fault-tolerance.md)
+9. [V2 Architecture Review](architecture/05-v2-architecture-review.md)
+10. [V1 → V2 Migration Guide](implementation/05-v1-v2-migration-plan.md)
 
 ## 9. Conformance
 
 An implementation conforms to this specification when it implements all MUST
-requirements of the relevant v1 chapters, rejects unauthorized merge and
-knowledge-sync events, maintains required audit records, and passes the
+requirements of the relevant V2 chapters, rejects unauthorized merge and
+knowledge-evolution events, maintains required audit records, and passes the
 recovery scenario in [Testing and Benchmarks](implementation/04-testing-benchmarks.md).
 
 An implementation MAY add agents, transports, or human checkpoints only when
@@ -223,4 +232,6 @@ The extension model anticipates Gemini CLI, OpenAI Responses API, local models,
 MCP servers, and custom workers. New adapters conform to the same capability,
 event, permission, and recovery contracts. Distributed scheduling, interactive
 human review UIs, and cryptographic event signatures are planned only after the
-single-host contract has stable tests and benchmarks.
+single-host contract has stable tests and benchmarks. Stateless workers are a
+separate future capability; persistent Claude and Codex sessions are not a
+worker pool.

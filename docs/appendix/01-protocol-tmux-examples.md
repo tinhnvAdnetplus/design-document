@@ -95,7 +95,7 @@ structured state transition from review back to implementation.
 }
 ~~~
 
-## Example root cache fact
+## Example Knowledge Cache fact
 
 ~~~yaml
 kind: concurrency
@@ -125,6 +125,15 @@ It does not restart the implementer or reconstruct full conversations.
 - Reject raw prose as workflow authority.
 - Fence stale writers.
 - Preserve dirty worktrees on recovery.
-- Update root cache only after integration commit.
+- Update Knowledge Cache only after integration commit.
 - Keep raw prompts out of default logs.
 
+## V2 Knowledge Evolution example
+
+After merge completion, Knowledge Runtime records an evolution-started event
+for each root, detects affected snapshot domains from the Git diff, and builds
+a bounded evidence packet. The named root publishes a validated Knowledge Cache
+version and emits synchronization completion. If metadata checkpoints are
+enabled, the Git gateway writes only the snapshot manifest to the protected
+runtime knowledge branch. The implementer/reviewer feature terminals are then
+destroyed and both roots return to idle.

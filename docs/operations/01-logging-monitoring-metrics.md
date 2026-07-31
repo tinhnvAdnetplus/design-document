@@ -73,7 +73,7 @@ trend. It should link to safe aggregate status rather than terminal transcripts.
 | expired writer lease with live process | high | revoke/fence |
 | repeated authorization denial | security | suspend and investigate |
 | dirty worktree quarantine | high | maintainer review |
-| root cache stale | warning | synchronize/rebuild |
+| Knowledge Cache stale | warning | synchronize/rebuild |
 | packet budget breach | warning | inspect selection policy |
 
 ## Tracing
@@ -95,3 +95,17 @@ Detailed observability can become a sensitive transcript system. This design
 prioritizes structured evidence and aggregate metrics, enabling incident
 response without making routine telemetry an uncontrolled prompt archive.
 
+## V2 component telemetry
+
+| Component | Required telemetry | Limitation |
+| --- | --- | --- |
+| Event Store | append latency, replay outcome, projection lag | never emit raw event payload by default |
+| Eligibility Scheduler | queue depth, eligible age, priority, retry count | no feature text labels |
+| Dispatcher | notice latency, target availability, acknowledgement | delivery is not task completion |
+| Knowledge Runtime | evolution stage, snapshot age, candidate rejection | no snapshot content in metrics |
+| Cache Registry | artifact count, invalidation, eviction, layer bytes | Conversation Cache access is restricted |
+| Session Lineage Graph | node/edge count, orphan/reconstruction count | no authority inference from graph |
+
+Alerting on Knowledge Evolution must distinguish an unavailable cache from a
+failed merge. The former degrades context quality but cannot invalidate a
+verified Git integration commit.

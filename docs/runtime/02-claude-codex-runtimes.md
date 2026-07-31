@@ -23,6 +23,8 @@ vendor-specific commands as runtime event types.
 | bounded diagnostic capture | required | required | incident support |
 | graceful stop | required | required | feature cleanup |
 | session metadata | required | required | reconciliation |
+| lineage metadata | required | required | fork/reconstruction provenance |
+| resume scope | required | required | exceptional recovery lifetime |
 
 ## Claude runtime profile
 
@@ -38,7 +40,7 @@ The adapter SHOULD use the CLI’s native fork command where offered. It records
 | --- | --- |
 | parent runtime session | root session that supplied context |
 | vendor fork reference | opaque vendor value, if present |
-| root cache version | derived cache used for the fork |
+| Knowledge Cache version | derived cache used for the fork |
 | feature ID and role | planner or reviewer responsibility |
 | Git base | immutable starting commit |
 | terminal session | assigned terminal identity |
@@ -100,7 +102,7 @@ The adapter assembles a prompt from bounded sources:
 | --- | ---: | ---: | ---: |
 | stable role contract | yes | yes | yes |
 | runtime event handling convention | yes | yes | yes |
-| current root cache | yes | selected | selected |
+| current Knowledge Cache | yes | selected | selected |
 | full prior transcript | no | no | no |
 | plan artifact | no | yes | yes |
 | current Git diff | no | implementation only | yes |
@@ -147,7 +149,7 @@ function fork_feature(adapter, root, feature, role, packet):
   assert root is Ready and packet Git base is reachable
   create terminal name from adapter, feature, role, attempt
   ask adapter to create native or compatible fork
-  persist vendor metadata as opaque data
+  persist vendor metadata and parent/snapshot lineage as opaque/provenance data
   validate child readiness
   create child session record
   emit session.ready and feature role assignment
@@ -170,6 +172,21 @@ A successful vendor resume does not bypass state validation. The runtime checks
 role, lease, feature state, Git base, and policy revision before marking it
 ready.
 
+## Resume scopes
+
+The adapter MUST report the Resume Scope and deadline assigned by runtime
+policy. Root scope ends when the configured root is replaced; Planner,
+Implementer, and Reviewer scopes end with their feature-role terminal state.
+“Feature Resume” groups these three feature roles. A generic Worker Resume does
+not exist in V2 because persistent CLI sessions are not a worker pool.
+
+| Scope | Allowed only after | Required recovery evidence | Expiry |
+| --- | --- | --- | --- |
+| Root | abnormal root loss | repository identity and snapshot validity | root replacement/disable |
+| Planner | abnormal feature loss | feature request and current plan state | plan terminal state |
+| Implementer | abnormal feature loss | clean/handled worktree and current lease | review/cancel/cleanup |
+| Reviewer | abnormal feature loss | current immutable review packet | decision/cancel/expiry |
+
 ## CLI upgrade safety
 
 Adapter versions and detected CLI versions are recorded in session metadata.
@@ -187,4 +204,3 @@ modify the protocol when a vendor renames a local flag.
 See [Persistent Sessions and Resume](03-persistent-sessions-resume.md) for
 recovery and [tmux Runtime and Orchestrator](06-tmux-orchestrator.md) for
 terminal supervision.
-

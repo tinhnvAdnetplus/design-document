@@ -24,7 +24,7 @@ implicit allow because an event was well-formed.
 
 ## Capability catalog
 
-| Capability | Resource scope | Holder in v1 |
+| Capability | Resource scope | Holder in baseline role profile |
 | --- | --- | --- |
 | read_repository | configured repo | all defined roles |
 | fork_session | own adapter/root | root adapters |
@@ -34,7 +34,7 @@ implicit allow because an event was well-formed.
 | review_feature | immutable review snapshot | Claude reviewer |
 | approve_merge | exact reviewed candidate | Claude reviewer |
 | merge_integration | configured integration ref | merger |
-| sync_knowledge | own root cache | corresponding root |
+| sync_knowledge | own Knowledge Cache | corresponding root |
 | alter_policy | configuration | administrator |
 | recover_quarantine | named artifact | restricted maintainer |
 
@@ -50,7 +50,7 @@ worktree, feature state, token, and policy revision as context.
 | create commit | no | no | assigned | no | no | policy |
 | approve | no | no | no | yes | no | override |
 | merge main | no | no | no | no | yes | emergency |
-| update root cache | own only | no | no | no | no | no |
+| update Knowledge Cache | own only | no | no | no | no | no |
 | change policy | no | no | no | no | no | yes |
 | delete quarantine | no | no | no | no | no | restricted |
 
@@ -95,3 +95,11 @@ Contextual permission checks are more work than one broad token per agent, but
 they confine compromised or mistaken sessions. Short leases add renewals yet
 make recovery and stale-process fencing reliable.
 
+## V2 non-authority metadata
+
+Knowledge Snapshot version, cache layer, lineage parent, queue priority, and
+retry attempt are operational metadata. None grants a capability. Permission
+evaluation MUST continue to rely on authenticated session, role, resource,
+current policy, feature state, and required lease/approval. A Session Lineage
+Graph edge or Knowledge Cache citation cannot authorize dispatch, write, review,
+or merge.

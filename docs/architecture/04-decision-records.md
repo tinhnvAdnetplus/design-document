@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This chapter records architectural decisions that constrain v1. A decision
+This chapter records architectural decisions that constrain Version 1. A decision
 record states context, decision, alternatives, consequences, and reversal
 conditions. It is not a transcript of discussion and does not replace normative
 requirements in owner chapters.
@@ -18,6 +18,14 @@ requirements in owner chapters.
 
 A new ADR is required when a change alters durable truth, permission authority,
 transport semantics, recovery guarantees, or an externally consumed protocol.
+
+## Version 2 decision authority
+
+[ADR-011 — Version 2 Runtime Evolution](06-v2-design-decisions.md) is the
+single source of truth for Version 2 implementation. It retains ADR-001 through
+ADR-010 unless it explicitly constrains their terminology or lifecycle. This
+chapter must not be used to reinterpret V2's frozen accepted, refined, or
+rejected decisions.
 
 ## ADR-001 — Git is the source of truth
 
@@ -224,4 +232,3 @@ Expected future ADR topics include remote workers, durable queues, signed
 events, multi-reviewer quorum, sandboxed agent execution, cache provenance
 attestations, and adapter capability negotiation. None should be implemented as
 an undocumented option because each touches a core invariant.
-

@@ -27,7 +27,7 @@ without retaining unrestricted prompts or terminal transcripts.
 | event tamper | edited local record | digest, access controls, optional signatures |
 | privilege escalation | agent changes policy | read-only configuration and separate admin role |
 
-The v1 threat model assumes the host runtime account and local kernel are
+The local threat model assumes the host runtime account and local kernel are
 trusted enough to run agents. A compromised host can defeat local file controls;
 hardened deployments should use OS accounts, containers, and remote audit sinks.
 
@@ -69,7 +69,7 @@ content.
 
 Secrets are supplied by a configured provider reference, scoped to the minimum
 agent/session that needs them, and never inserted into an event envelope or
-root cache. The runtime masks known secret values from logs where feasible and
+Knowledge Cache. The runtime masks known secret values from logs where feasible and
 treats a suspected exposure as a security incident: stop sharing artifact,
 revoke credential, redact retained copies where policy permits, and record
 response.
@@ -105,3 +105,11 @@ Future hardening may add per-agent containers, seccomp, filesystem namespaces,
 network proxies, signed events, hardware-backed credentials, and remote
 append-only audit storage.
 
+## V2 knowledge and scheduler controls
+
+Knowledge Runtime accepts only Git/configuration/governed Event Store evidence.
+Conversation Cache is disabled by default, access-logged when enabled, and
+cannot be promoted directly into Knowledge Cache. Cache Registry metadata and
+Session Lineage Graph are sensitive operational metadata; they require the same
+access control as event audit records. Scheduler and Dispatcher accept only
+validated event references and cannot interpret terminal text as a queue command.

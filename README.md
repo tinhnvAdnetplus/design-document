@@ -5,8 +5,9 @@ Runtime**, a persistent collaboration runtime for Claude CLI and Codex CLI.
 
 The runtime keeps each CLI agent alive in its own `tmux` session, creates an
 isolated forked session for feature work, and uses Git as the sole durable
-source of truth. A session transcript, resume identifier, and prompt cache are
-explicitly disposable implementation details.
+source of truth. The V2 Knowledge Runtime manages bounded, provenance-linked
+snapshots and cache layers; a session transcript, resume identifier, and prompt
+cache remain explicitly disposable implementation details.
 
 ## Reading the specification
 
@@ -31,7 +32,12 @@ normative terms:
 5. Agent-to-agent interaction is asynchronous event delivery, never a blocking
    request/reply dependency.
 6. Normal development neither restarts nor resumes a running agent process.
-7. Only a root session synchronizes long-lived knowledge after a merge.
+7. Only a root session publishes its own evolved long-lived knowledge snapshot
+   after a merge.
+8. The Event Store records runtime evidence; it never replaces Git code truth
+   or blindly replays external side effects.
+9. Session lineage is a derived fork/reconstruction graph, never a direct
+   agent-to-agent transport or authority graph.
 
 ## Scope
 
@@ -41,6 +47,9 @@ The initial release specifies a local, single-host runtime. It supports:
 - `tmux` transport and process supervision boundaries;
 - Git worktrees for feature isolation;
 - append-only JSON events and agent acknowledgements;
+- Event Store replay, scheduler/dispatcher queues, and a derived session
+  lineage graph;
+- Knowledge Runtime snapshots, cache layers, and evidence-based evolution;
 - restart recovery and best-effort CLI resume after a host or process failure;
 - logging, metrics, token accounting, and least-privilege execution.
 
@@ -64,6 +73,9 @@ docs/
 
 ## Status
 
-This is a design specification. Interfaces marked `v1` are intended to remain
-compatible within the first production release. Experimental fields and future
-agent adapters are identified in their owning chapters.
+This is the Version 2 design specification. Event protocol version `v1`
+remains compatible; V2 adds explicit runtime components and vocabulary without
+changing the Git-first source-of-truth boundary. See the
+[V2 Architecture Review](docs/architecture/05-v2-architecture-review.md),
+[V2 Design Decisions](docs/architecture/06-v2-design-decisions.md), and
+[V1 → V2 Migration Guide](docs/implementation/05-v1-v2-migration-plan.md).

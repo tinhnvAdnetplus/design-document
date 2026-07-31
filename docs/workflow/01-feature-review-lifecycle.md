@@ -39,7 +39,7 @@ The Claude planner receives a feature request and produces a plan with:
 - acceptance criteria and test strategy;
 - rollout, compatibility, and security concerns;
 - requested permissions or external operations;
-- Git base and root cache evidence.
+- Git base and Knowledge Cache evidence.
 
 The plan is an artifact with a digest. If implementation materially changes
 scope, affected protected paths, migration strategy, or compatibility behavior,
@@ -115,10 +115,16 @@ still applies.
 ## Merge and terminal flow
 
 After the merger emits success, the integration commit becomes the reference
-for root synchronization. Feature sessions are destroyed after merge outcome is
-stable. Roots update their own caches and emit synchronization evidence. The
-feature reaches completed when configured root-sync obligations complete, or
-when policy records a deferred synchronization with visible degradation.
+for Knowledge Synchronization and Knowledge Evolution. Feature sessions are
+destroyed after merge outcome is stable. Knowledge Runtime collects the Git diff
+and governed Event Store evidence; each root publishes only its own validated
+snapshot and emits synchronization evidence. The feature reaches completed when
+configured root-sync obligations complete, or when policy records a deferred
+evolution with visible degradation.
+
+The complete V2 sequence in [State Model and Diagrams](../architecture/03-state-model-diagrams.md)
+is normative for the relationship between review retry, merge, evolution,
+optional metadata-only Root Update Commit, feature destruction, and root idle.
 
 ## Review quality constraints
 
@@ -146,4 +152,3 @@ The flow adds explicit handoffs and may cost more wall time than a single agent
 commit. It separates the person or process that writes code from the one that
 authorizes integration, making defects and deviations easier to review.
 Persistent roots and concise packets reduce the token cost of those handoffs.
-

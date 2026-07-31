@@ -19,6 +19,8 @@ handling, and compatibility failure behavior.
 | Git integrity | referenced commit absent | no | block workflow |
 | policy mismatch | approval revision stale | no | invalidate and re-review |
 | resource exhaustion | queue/cache size exceeded | conditional | backpressure event |
+| cache provenance | candidate knowledge fact lacks eligible evidence | no | reject candidate and keep prior snapshot |
+| lineage invalid | fork/reconstruction parent inconsistent | no | quarantine lineage record |
 | security | path escape or signature failure | no | revoke/block and alert |
 
 Every error response includes a machine code, stable event reference, category,
@@ -49,7 +51,7 @@ can trigger session suspension under policy.
 ## Idempotency
 
 A producer creates a stable idempotency key for an intended logical action.
-The event log stores the first accepted event digest for that key within the
+The Event Store stores the first accepted event digest for that key within the
 aggregate. A duplicate with the same digest returns the existing result. A
 duplicate key with different content is rejected as an idempotency conflict.
 
@@ -83,6 +85,10 @@ Quarantine is an operational state, not deletion. A maintainer may correct
 configuration, migrate an event, or abandon the feature through an auditable
 override.
 
+An Event Store replay failure is poison projection evidence, not permission to
+re-run a side effect. The runtime retains the event and blocks only the action
+whose deterministic confirmation cannot establish a safe outcome.
+
 ## Causal gaps
 
 An event that names an unknown causation ID or arrives before its predecessor
@@ -110,6 +116,10 @@ and whether manual action is necessary. The runtime exposes aggregate status,
 last accepted event, pending delivery count, active lease, terminal observation,
 and safe error code. Detailed restricted diagnostics remain access-controlled.
 
+Scheduler errors additionally expose queue class, attempt, next eligibility,
+and Session Registry reason. Knowledge errors expose snapshot domain, cache
+layer, provenance status, and whether the prior snapshot remains usable.
+
 ## Compatibility failures
 
 Unsupported protocol major versions, unknown critical event types, invalid
@@ -124,4 +134,3 @@ retries against an ambiguous terminal can duplicate a command, so adapter
 ambiguity is intentionally treated as unavailable rather than transient. This
 is a safety-first choice that favors a fresh reconstruction over uncertain
 interactive state.
-

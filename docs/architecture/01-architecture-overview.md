@@ -4,7 +4,7 @@
 
 This chapter defines the system boundary, principal components, durable state,
 and architectural invariants of AI Multi-Agent Runtime. It is normative for the
-local single-host v1 implementation.
+local single-host deployment profile.
 
 The runtime coordinates agents; it does not become a source-control system,
 code review system, or replacement for the agents it hosts. It provides an
@@ -34,10 +34,14 @@ flowchart TB
     subgraph Host[Controlled host]
         subgraph Runtime[AI Multi-Agent Runtime]
             O[Orchestrator]
-            E[(Append-only Event Log)]
+            E[(Event Store)]
             S[(Derived State Store)]
             P[Policy Engine]
             A[Agent Adapter Registry]
+            K[Knowledge Runtime]
+            D[Dispatcher]
+            Q[Eligibility Scheduler]
+            L[Session Lineage Graph]
             T[tmux Server]
         end
         subgraph AgentSessions[Independent CLI sessions]
@@ -55,6 +59,11 @@ flowchart TB
     H --> O
     O <--> E
     O <--> S
+    O --> K
+    O --> D
+    D --> Q
+    Q --> A
+    O --> L
     O --> P
     O --> A
     A --> T
@@ -77,7 +86,7 @@ but MUST NOT assert ownership of their internal state.
 | INV-01 | Git is the durable source of truth. | recovery and sync logic | reconstruct cache from Git. |
 | INV-02 | Root sessions never write feature code. | capability policy | reject write lease. |
 | INV-03 | A worktree has at most one writer. | worktree lease manager | deny conflicting lease. |
-| INV-04 | Only Claude reviewer authority approves a merge in v1. | event authorization | reject event. |
+| INV-04 | Only Claude reviewer authority approves a merge in the baseline role profile. | event authorization | reject event. |
 | INV-05 | Knowledge synchronization occurs only after an integrated Git change. | sync precondition | defer or reject. |
 | INV-06 | Normal execution does not use resume. | adapter state machine | report policy violation. |
 | INV-07 | Event producers do not block on consumers. | orchestrator API | persist/route then return. |
@@ -97,11 +106,13 @@ extra authority.
 | Orchestrator | event routing, leases, state transitions, adapter calls, cleanup scheduling | judging code quality or inventing approval |
 | Policy engine | capability evaluation, role mapping, protected-path rules | parsing untrusted terminal text as a decision |
 | Adapter | start/fork/resume/stop a CLI, inject an event notice, collect bounded evidence | persisting global workflow state |
-| Event log | immutable ordered records, delivery attempts, acknowledgements | mutable current state queries |
+| Event Store | append accepted events, delivery records, command intents, and replay evidence | mutable current state queries or application-code truth |
 | State store | materialized aggregate state and indexes | independent business truth |
 | Worktree manager | create, lease, inspect, remove feature worktrees | merging arbitrary branches |
 | Git gateway | deterministic Git commands, commit and merge validation | long-lived session memory |
-| Knowledge cache | compact derived project facts and pointers to commits | transcript archive or source of truth |
+| Knowledge Runtime | snapshots, cache registry, compression, evolution, provenance validation | source truth or a new AI process |
+| Dispatcher and Eligibility Scheduler | route events and select eligible deliveries/intents | blocking agent RPC or persistent worker pool |
+| Session Lineage Graph | derived fork/reconstruction provenance projection | transport, authority, or dependency graph |
 | Observability service | logs, metrics, traces, alerts | prompt or secret retention |
 
 ### Orchestrator
@@ -134,27 +145,69 @@ Adapters are responsible for a narrow terminal boundary:
 5. report bounded structured observations to the orchestrator;
 6. never decide workflow progression from unvalidated prose alone.
 
-### State and event stores
+### Event Store and projections
 
-The event log is append-only and is the runtime's audit evidence. The state
+The Event Store is append-only and is the runtime's audit evidence. The state
 store is a replaceable projection that makes current state cheap to inspect.
 If the projection is deleted, the orchestrator MUST be able to rebuild it by
 replaying validated events. If the log is deleted, Git and configuration can
 still reconstruct repository truth but cannot reconstruct all workflow history;
 that loss MUST be reported as an audit gap.
 
-For v1, newline-delimited JSON files with atomic rename and a local lock are
+For a single-host deployment, newline-delimited JSON files with atomic rename and a local lock are
 acceptable. SQLite is recommended when multiple runtime processes inspect state
-or when query and transactional requirements exceed simple files.
+or when query and transactional requirements exceed simple files. The Event
+Store supports projection replay, audit, and reconciliation. It MUST NOT replay
+an external effect simply because an intent exists; the gateway confirms its
+postcondition first.
+
+### Knowledge Runtime
+
+Knowledge Runtime is a logical control-plane component. It operates on bounded,
+versioned snapshots rather than conversation history. It owns selection,
+compression, validation, invalidation, and publication mechanics; each root
+still owns its cache artifact and is the only agent that can publish it.
+
+| Snapshot | Contents | Evidence boundary |
+| --- | --- | --- |
+| Project | repository identity, integration baseline, active constraints | Git/configuration |
+| Architecture | component and interface facts, ADR links | Git and governed artifacts |
+| Business | domain rules/terms represented by the repository | versioned product evidence |
+| Workspace | worktree, branch, lease observations | Git/worktree manager |
+| Dependency | manifests, locks, generator relationships | Git |
+| Convention | build, style, test, repository rules | Git/configuration |
+
+It MUST label inferences and open questions and MUST reject a candidate fact
+without eligible evidence. Knowledge Runtime is not a separate model process,
+not a central transcript store, and not a source of merge authority.
+
+### Scheduler and dispatcher
+
+The orchestrator contains four execution-control modules: Dispatcher,
+Eligibility Scheduler, Durable Delivery Queue, and Session Registry. The
+Dispatcher selects a target from registered eligible sessions. The Scheduler
+selects event deliveries and deterministic command intents by policy, priority,
+deadline, and resource availability. The Session Registry reports lifecycle
+and capacity. None waits for a model response or treats roots/forks as an
+interchangeable worker pool.
+
+### Session Lineage Graph
+
+The Session Lineage Graph is a derived directed acyclic forest. A fork or fresh
+reconstruction creates a parent-to-child lineage edge with feature, role, cache
+version, and terminal disposition metadata. It supports cache provenance,
+cleanup, and diagnostics. Event causation remains a separate graph; no lineage
+edge authorizes a write, approval, or direct message.
 
 ## Data ownership
 
 ```mermaid
 flowchart LR
     Git[Git objects and refs] -->|canonical code/history| GitConsumers[Agents, CI, maintainer]
-    Events[Event log] -->|workflow evidence| Projection[Derived runtime state]
+    Events[Event Store] -->|workflow evidence| Projection[Derived runtime state]
     Git -->|commit/diff facts| Cache[Root knowledge cache]
     Events -->|correlation and decisions| Cache
+    Knowledge[Knowledge Runtime] -->|validated snapshot| Cache
     Config[Versioned runtime config] -->|policy| Orchestrator
     Cache -->|derived context only| RootAgent[Root session]
 ```
@@ -163,12 +216,28 @@ flowchart LR
 | --- | --- | --- | --- |
 | application code, migration, generated source | Git | canonical | Git remote / object database |
 | branch and integration ref | Git | canonical | Git remote / local refs |
-| event envelope and acknowledgement | event log | operational audit | log backup; partial inference from Git |
+| event envelope and acknowledgement | Event Store | operational audit | log backup; partial inference from Git |
 | active lease | state store | ephemeral but durable while active | expire and reconcile |
 | CLI resume ID | adapter state | best effort | optional; never required |
 | root knowledge cache | root actor | derived | Git diff plus selected events |
 | raw terminal transcript | local diagnostic store | optional/retained by policy | not required |
 | metrics and logs | observability backend | operational | not required for correctness |
+
+## Knowledge evolution
+
+Knowledge synchronization is the workflow trigger. Knowledge Evolution is the
+pipeline it invokes after an integration change:
+
+~~~text
+merge evidence -> domain detection -> evidence collection -> compression
+-> candidate snapshot -> provenance/budget validation -> atomic publication
+-> root notification
+~~~
+
+The pipeline makes snapshot update testable without treating a root as a new
+process after each merge. The root remains persistent and receives a new
+snapshot version. Conversation material may be available only through the
+restricted cache policy; it is never a default pipeline input.
 
 ## Trust and execution zones
 
@@ -219,11 +288,11 @@ flowchart TB
     Remote <--> Forge
 ```
 
-The host is a single failure domain in v1. A host reboot ends `tmux` processes,
+The host is a single failure domain in V2. A host reboot ends `tmux` processes,
 but not Git history or state files stored on durable volume. Recovery therefore
-reconciles the filesystem, Git, event log, and configuration before attempting
+reconciles the filesystem, Git, Event Store, and configuration before attempting
 any optional CLI resume. Multi-host scheduling is a future extension because it
-requires distributed leases, secure transport, and a durable shared event log.
+requires distributed leases, secure transport, and a durable shared Event Store.
 
 ## Key execution path
 
@@ -239,19 +308,20 @@ requires distributed leases, secure transport, and a durable shared event log.
    `changes.requested` or `merge.approved`.
 6. The merger validates approval, ancestry, checks, and protected-path policy,
    then performs the integration merge.
-7. Root sessions receive `merge.completed`. Each root reads Git evidence and
-   updates only its own derived knowledge cache.
+7. Root sessions receive `merge.completed`. Knowledge Runtime evolves each
+   root's derived snapshot from Git evidence; each root publishes only its own
+   cache artifact and optional metadata-only root update commit.
 
 No step requires the prior sender to stay active after emission. An agent that
 dies after emitting a valid event does not invalidate work already recorded in
-Git and the event log.
+Git and the Event Store.
 
 ## Alternatives considered
 
 ### Central conversation broker
 
 A central LLM conversation service could consolidate messages and summaries.
-It was rejected for v1 because it encourages transcript-first recovery,
+It was rejected because it encourages transcript-first recovery,
 increases vendor coupling, complicates secret retention, and treats dialogue as
 durable truth. The cache model preserves useful summaries without creating that
 dependency.
@@ -260,7 +330,7 @@ dependency.
 
 Synchronous RPC appears simpler for request/response planning and review. It
 was rejected because terminal agents may be busy, crashed, rate-limited, or
-awaiting human input. An event log tolerates those cases and supports explicit
+awaiting human input. An Event Store tolerates those cases and supports explicit
 timeouts, retry, and investigation.
 
 ### One shared worktree
@@ -278,7 +348,7 @@ roots plus disposable forks align with the intended long-running workflow.
 ## Limitations and future improvements
 
 `tmux send-keys` is a terminal-control primitive, not an authenticated message
-bus. The v1 protocol uses it only as the notification channel; authoritative
+bus. The runtime protocol uses it only as the notification channel; authoritative
 events remain in the local store. Pane parsing can be adapter-specific and
 fragile, so adapters SHOULD favor explicit sentinel output or files rather than
 natural-language screen scraping.
@@ -286,9 +356,9 @@ natural-language screen scraping.
 The baseline's two-agent role model is intentionally narrow. Future models may
 add specialist agents, MCP workers, or separate human reviewers. Extensions
 MUST still name one owner for each write lease, one approver for each merge,
-and one root synchronizer per root cache.
+and one root synchronizer per Knowledge Cache. Stateless worker pools are a future
+adapter capability; they are not a replacement for persistent CLI sessions.
 
 See [Architectural Decisions](04-decision-records.md) for decision records and
 [State Model and Diagrams](03-state-model-diagrams.md) for formal state
 transitions.
-

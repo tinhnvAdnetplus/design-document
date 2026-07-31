@@ -44,6 +44,20 @@ revision, repository identity, and cache status. It is not required to have an
 empty inbox or an up-to-date cache if it has been marked unavailable for
 planning until synchronization completes.
 
+## Session Lineage Lifecycle
+
+Each fork or fresh reconstruction appends a lineage event. The runtime projects
+these immutable relationships as a Session Lineage Graph. The graph starts with
+one root node per enabled agent and may contain multiple feature-role children.
+It ends a node when the corresponding session is terminated, failed, or
+superseded; it does not delete historical lineage evidence during cleanup.
+
+| Edge type | Created by | Required metadata | Limitation |
+| --- | --- | --- | --- |
+| fork | adapter fork success | parent, child, role, feature, snapshot version | no transcript authority |
+| reconstruction | fresh recovery success | predecessor/parent if known, recovery reason | no restored lease |
+| root replacement | controlled maintenance | prior root, replacement root, reason | no implicit cache trust |
+
 ## Feature lifecycle
 
 A feature begins when a request receives a stable ID. It ends only when the
@@ -114,7 +128,7 @@ is active.
 | writer lease | implementer session | review, expiry, or cleanup |
 | review snapshot | reviewer session | review terminal state |
 | integration worktree | merger | merge command completes |
-| root cache directory | named root | root shutdown or cache rebuild |
+| Knowledge Cache directory | named root | root shutdown or cache rebuild |
 
 ## Abandonment
 
@@ -138,6 +152,14 @@ alter the feature head or approval state.
 Recommended policy uses short leases with explicit renewal rather than a single
 very long lease. This detects lost sessions earlier and makes a forced recovery
 safer, at the cost of periodic control traffic.
+
+## Resume lifecycle binding
+
+Session Lifecycle controls Resume Scope. A resume attempt is permitted only in
+Unavailable state and only before the scope's terminal invalidation event. A
+session can be reconstructed as a new lineage node when resume is absent or
+invalid. It never resumes solely because a root has newer knowledge; Knowledge
+Evolution updates a snapshot while a healthy root stays alive.
 
 ## Terminal conditions
 
@@ -168,4 +190,3 @@ Per-feature terminals are simple and observable but consume resources. Future
 pooling can reuse a process only if it provides hard context reset, independent
 runtime identity, and the same disposal guarantees. Until then, terminal reuse
 between features is prohibited.
-

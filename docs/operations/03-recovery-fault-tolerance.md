@@ -11,8 +11,8 @@ This chapter defines fault domains, recovery order, and data-integrity rules.
 | agent CLI exits | no | mark unavailable, recover | if dirty worktree |
 | tmux server exits | no Git loss | reconcile all sessions | no, unless ambiguity |
 | orchestrator exits | no if append transactional | restart and rebuild projection | no |
-| event projection corrupt | event log retained | rebuild projection | if log integrity fails |
-| event log corrupt | Git retained | stop mutation, restore/audit | yes |
+| event projection corrupt | Event Store retained | rebuild projection | if log integrity fails |
+| Event Store corrupt | Git retained | stop mutation, restore/audit | yes |
 | Git remote unavailable | local Git retained | block remote-dependent merge | policy |
 | integration merge crash | inspect Git | reconcile outcome | if unclean |
 | disk full | potentially state/cache | stop writes safely | likely |
@@ -24,7 +24,7 @@ This chapter defines fault domains, recovery order, and data-integrity rules.
 1. Stop automatic side effects if event store, policy, or Git identity is
    uncertain.
 2. Validate configuration digest and repository identity.
-3. Rebuild derived projection from verified event log.
+3. Rebuild derived projection from verified Event Store.
 4. Inspect integration ref, Git merge state, registered worktrees, and dirty
    status.
 5. Reconcile active leases and fence unavailable holders.
@@ -43,7 +43,7 @@ progress.
 
 ## Graceful degradation
 
-Loss of root cache affects token efficiency, not Git correctness. Loss of one
+Loss of Knowledge Cache affects token efficiency, not Git correctness. Loss of one
 adapter blocks only features requiring its role. Loss of observability should
 not stop a safe local workflow but must be visible. Loss of event durability,
 policy validation, or Git identity stops state-changing actions.
@@ -67,3 +67,10 @@ Fail-closed recovery can pause work that a human could possibly infer. This
 protects code and approvals from uncertain external side effects. The explicit
 human exception workflow supplies a documented path when speed is necessary.
 
+## V2 recovery extensions
+
+Event Store replay rebuilds aggregate, Cache Registry, and Session Lineage
+projections; it must confirm every command intent before effect execution.
+Knowledge Runtime rebuilds a missing Knowledge Cache from Git diff and governed
+evidence. Resume Cache loss selects fresh reconstruction. Conversation Cache
+loss has no correctness impact and must not be treated as an audit loss.

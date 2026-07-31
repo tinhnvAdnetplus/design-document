@@ -70,7 +70,7 @@ A maintainer needs concise answers:
 - which session holds each lease;
 - whether Git has uncommitted or divergent work;
 - which event/approval is pending or stale;
-- whether a root cache is current;
+- whether a Knowledge Cache is current;
 - what recovery step is safe next.
 
 The runtime status command must derive these answers from projections and
@@ -88,9 +88,16 @@ verified Git observations rather than terminal conversation summaries.
 | policy override request | hold action | authorized administrator |
 | suspected secret leak | redact/revoke | security incident process |
 
+### Knowledge Evolution exception
+
+If provenance validation rejects a candidate snapshot, a maintainer may inspect
+the Git diff and governed evidence, correct configuration or source metadata,
+and request a new evolution attempt. A maintainer MUST NOT paste a conversation
+summary into Knowledge Cache, override provenance failure with free text, or
+use an optional Root Update Commit to alter application code.
+
 ## Trade-offs
 
 Human exceptions reduce full autonomy but avoid unsafe guesses. The runtime
 makes the exceptional path auditable and narrow so that emergency flexibility
 does not become a hidden alternate workflow.
-

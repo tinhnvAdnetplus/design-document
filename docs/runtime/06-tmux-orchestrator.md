@@ -2,8 +2,8 @@
 
 ## Purpose
 
-This chapter defines the local terminal runtime, tmux naming, orchestration
-loop, and constraints on terminal transport.
+This chapter defines the local terminal runtime, tmux naming, V2 orchestrator
+decomposition, control loop, and constraints on terminal transport.
 
 ## Why tmux
 
@@ -57,19 +57,34 @@ authorization.
 
 ~~~text
 while runtime is running:
-  reconcile terminal and lease observations on schedule
-  accept and validate submitted events
-  append event before deriving command intents
-  select pending delivery whose target is available
-  invoke adapter notify without waiting for task completion
-  record delivery result and backoff where required
-  execute eligible deterministic Git or cleanup command intents
-  project new evidence and publish metrics
+  receive Event Store submission or runtime observation
+  validate and persist before deriving projections/intents
+  project aggregate, lineage, cache, and delivery state
+  select eligible queued delivery/intent by priority and policy
+  dispatch notification or execute deterministic side effect
+  collect controlled observation and emit/project outcome
+  return to idle; never wait for an agent's task completion
 ~~~
 
 The loop may be event-driven internally. It MUST NOT require polling agent
 terminals for workflow state. Health reconciliation is allowed on a bounded
 schedule because it observes process liveness, not agent conversation.
+
+## Orchestrator decomposition
+
+| Module | Responsibility | Lifecycle | Interaction | Limitation |
+| --- | --- | --- | --- | --- |
+| Event Store | append accepted evidence and command intents | runtime lifetime | projections, replay, audit | no blind effect replay |
+| Dispatcher | route an eligible event notice | per delivery | adapter and Session Registry | no blocking RPC |
+| Eligibility Scheduler | select queued delivery/intent | runtime lifetime | priority, retry, leases, policy | no model reasoning |
+| Durable Delivery Queue | retain notices until terminal outcome | event lifetime | Dispatcher and Event Store | not a transcript store |
+| Priority Policy | classify critical/high/normal/low work | config revision | Scheduler | cannot bypass authorization |
+| Retry Schedule | bounded delayed retry | delivery/intent lifetime | Scheduler and error handling | no retry of ambiguity |
+| Session Registry | report identity, lifecycle, capacity | session lifetime | Dispatcher and recovery | no authority grant |
+
+The modules may share one process and database in V2. They are separate
+responsibilities, not microservices. Persistent Claude/Codex sessions are
+registered stateful actors; they are not a Worker Pool.
 
 ## send-keys safety
 
@@ -79,7 +94,7 @@ unexpected terminal content can change how input is interpreted. Adapters MUST:
 1. send only generated fixed-form commands;
 2. validate all identifier and path components against strict patterns;
 3. avoid interpolating user task text into terminal commands;
-4. send payload through the event store or file reference, not keypresses;
+4. send payload through the Event Store or file reference, not keypresses;
 5. use a dedicated working directory and runtime client executable;
 6. cap retries and capture only bounded diagnostics;
 7. stop notification after ambiguous terminal state and mark unavailable.
@@ -89,6 +104,12 @@ unexpected terminal content can change how input is interpreted. Adapters MUST:
 The orchestrator checks tmux session existence, process launch status, optional
 adapter heartbeat, working directory, and session record consistency. It does
 not inspect normal conversation text to infer activity.
+
+Session Registry records parent session, fork/reconstruction type, and Knowledge
+Snapshot version when available. It publishes these fields to the derived
+Session Lineage Graph for diagnostics and cleanup. The graph cannot select a
+recipient or authorize a terminal command; Scheduler/Dispatcher continue to
+use current policy and Session Registry eligibility.
 
 | Observation | Meaning | Response |
 | --- | --- | --- |
@@ -112,6 +133,7 @@ External side effects are represented as persisted intents.
 | merge | valid approval and integration lock | merge.completed |
 | terminate-session | terminal feature state | session.terminated |
 | synchronize-root | reachable integration commit | knowledge.synchronized |
+| evolve-knowledge | validated merge evidence and root | snapshot publication |
 
 An intent can be safely retried only if its execution is idempotent or its
 confirmation query is deterministic. The merger checks Git ancestry before
@@ -135,7 +157,6 @@ explicit confirmation, recorded operator identity, and policy authorization.
 
 A local tmux server shares one host failure domain and one Unix-account trust
 boundary. Remote workers will require authenticated transport, remote
-supervision, distributed lease fencing, and a durable multi-writer event store.
+supervision, distributed lease fencing, and a durable multi-writer Event Store.
 The protocol intentionally does not depend on tmux so that replacement remains
 possible.
-

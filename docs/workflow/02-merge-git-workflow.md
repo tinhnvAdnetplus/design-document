@@ -93,6 +93,11 @@ second implementation commit and cannot amend, rebase, or merge application
 history. The metadata commit references the integrated commit range and cache
 digest so it can be audited or discarded independently.
 
+In V2 this checkpoint contains a Knowledge Snapshot manifest and provenance
+digest only. Knowledge Runtime validates the payload and the Git gateway
+enforces the dedicated metadata branch/path allow-list. It must never contain
+Conversation Cache content, application-source changes, or merge authority.
+
 ## Protected paths
 
 Policy may require additional review, tests, or human approval for paths such

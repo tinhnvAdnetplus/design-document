@@ -15,7 +15,7 @@ workflow inspectable: a plan has an author, code has a writer, a review has an
 authority, and a merge has a deterministic gate.
 
 Roles are logical capabilities, not proof that two sessions use distinct model
-vendors. The v1 profile assigns them to distinct Claude and Codex sessions to
+vendors. The baseline role profile assigns them to distinct Claude and Codex sessions to
 reduce correlated mistakes and keep approval authority unambiguous.
 
 ## Role catalog
@@ -61,7 +61,7 @@ These boundaries limit ambiguity more than they limit model capability.
 | Capability | Claude Root | Codex Root | Claude Planner | Codex Implementer | Claude Reviewer | Merger | Human |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | read repository | yes | yes | yes | yes | yes | required | policy |
-| write root cache | own only | own only | no | no | no | no | policy |
+| write Knowledge Cache | own only | own only | no | no | no | no | policy |
 | create feature fork | own adapter | own adapter | no | own adapter | own adapter | no | yes |
 | write feature worktree | no | no | no | assigned only | no | no | policy |
 | commit feature branch | no | no | no | assigned only | no | no | policy |
@@ -95,7 +95,7 @@ A root MUST NOT:
 
 A root MAY inspect Git, run read-only analysis, generate a feature fork,
 update its own derived cache, and emit structured planning or synchronization
-events. Root cache content and update mechanics are specified in
+events. Knowledge Cache content and update mechanics are specified in
 [Fork, Knowledge, and Prompt Cache](../runtime/05-fork-knowledge-prompt-cache.md).
 
 ## Feature session contract
@@ -120,12 +120,17 @@ Every session has independent identifiers:
 | --- | --- | --- | --- |
 | `agent_id` | `claude` | adapter/vendor role | configuration |
 | `root_id` | `claude-root` | one persistent root | durable state |
-| `feature_id` | `feat-2026-0042` | workflow aggregate | event log/Git refs |
+| `feature_id` | `feat-2026-0042` | workflow aggregate | Event Store/Git refs |
 | `session_id` | `ses_01…` | runtime-managed process instance | state store |
 | `tmux_session` | `codex-feature-feat-2026-0042` | terminal process group | live host |
 | `cli_resume_id` | vendor-specific | adapter optimization | best effort |
-| `correlation_id` | UUID | one event chain | event log |
-| `causation_id` | event UUID | direct predecessor | event log |
+| `correlation_id` | UUID | one event chain | Event Store |
+| `causation_id` | event UUID | direct predecessor | Event Store |
+
+V2 also records a `parent_session_id` for fork and reconstruction lineage and
+the `knowledge_snapshot_version` used to create a child. These fields are
+provenance metadata only. They do not permit child-to-parent terminal access,
+inherit a conversation cache, or grant a capability.
 
 The runtime-generated `session_id` MUST NOT be replaced by a vendor resume ID.
 An adapter can store one or more vendor IDs as opaque metadata, but never use
@@ -174,7 +179,7 @@ checkpoint is represented by the immutable synchronization event and cache
 digest. A root may produce different summaries because its cache represents its own
 model, but both MUST link facts to the same integrated Git range. A root cannot
 synchronize another root's cache, and a feature session cannot synchronize any
-root cache.
+Knowledge Cache.
 
 ## Decision records
 
@@ -187,7 +192,7 @@ The following decisions establish the baseline profile. Full records are in
 | ADR-002 | One persistent root per agent. | retain stable project model | roots require health management |
 | ADR-003 | One disposable fork per feature role. | prevent context inflation | fork lifecycle needed |
 | ADR-004 | Events, not RPC. | tolerate stalled CLIs | eventual visibility and retries |
-| ADR-005 | Claude approves, Codex implements. | deterministic role separation | policy is model-specific in v1 |
+| ADR-005 | Claude approves, Codex implements. | deterministic role separation | policy is model-specific in the baseline profile |
 | ADR-006 | `tmux` is the local process boundary. | inspectable local operation | no distributed transport |
 | ADR-007 | Worktree writer leases. | prevent edit collisions | cleanup and fencing required |
 
@@ -198,6 +203,16 @@ short-lived capability only through a new runtime-issued lease, and it MUST
 lose that capability when the lease expires, the feature reaches a terminal
 state, or policy is reloaded with a denial. Changing `role` on an existing
 session to bypass a workflow transition is prohibited.
+
+## Session Lineage Graph
+
+The runtime projects roots and their fork/reconstruction descendants as a
+directed acyclic forest. Roots can have multiple feature children, including
+concurrent children that have distinct feature IDs, worktrees, and leases. A
+child always records parent root/session, fork type, snapshot version, and
+terminal disposition. The graph supports diagnostics such as “which cache
+version informed this reviewer?” It is not a session communication graph:
+every handoff remains an Event Store event routed by the Dispatcher.
 
 The runtime MAY use one CLI process to host a root and launch a fork command
 inside it only where the CLI's semantics make that safe. The resulting child
@@ -213,7 +228,7 @@ independent review context, and a clear recovery point. The runtime minimizes
 unproductive handoff cost with compact event packets and persistent roots, not
 by eliminating review.
 
-Choosing Claude as the sole v1 approver is a governance policy, not a technical
+Choosing Claude as the sole baseline-profile approver is a governance policy, not a technical
 property. It simplifies enforcement and makes a misconfigured approval easy to
 detect. It also creates a dependency on one adapter class. Future profiles may
 allow two-person approval, a human approver, or another reviewer adapter if
@@ -224,7 +239,7 @@ they preserve a single explicit authorization rule per protected branch.
 Future work may add specialist roles such as security reviewer, migration
 reviewer, test worker, or documentation worker. Each new role MUST declare
 whether it can write a worktree, emit a gate decision, use network credentials,
-or update a root cache. Adding an agent type without adding those capabilities
+or update a Knowledge Cache. Adding an agent type without adding those capabilities
 to the policy matrix is non-conforming.
 
 The design also leaves room for weighted review quorum. That extension must

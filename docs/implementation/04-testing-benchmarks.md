@@ -41,6 +41,11 @@ versions.
 | T-13 | cache loss | rebuild from Git and evidence |
 | T-14 | path traversal event | rejected and audited |
 | T-15 | raw prompt sentinel | absent from default logs |
+| T-16 | Cache Taxonomy | Conversation Cache disabled; every layer registered |
+| T-17 | Knowledge Evolution | published facts cite Git/Event Store evidence |
+| T-18 | Session Lineage Graph | fork/reconstruction DAG has no authority edge |
+| T-19 | Scheduler fairness | priority and retry preserve bounded eligible delivery |
+| T-20 | Event Store replay | projections rebuild; no blind side effect replay |
 
 ## Property tests
 
@@ -52,6 +57,10 @@ sync without a reachable integration commit.
 Projection replay tests apply an event stream twice and assert identical final
 state. Idempotency tests submit the same event and command intent repeatedly,
 then confirm only one Git or terminal side effect occurs.
+
+Knowledge property tests reject unproven facts, oversized candidates, and
+Conversation Cache promotion. Lineage tests reject cycles and verify that a
+lineage edge cannot affect capability resolution or dispatch target selection.
 
 ## Adapter contract tests
 
@@ -86,6 +95,9 @@ Fault injection should occur before and after each durable boundary:
 | event database lock | bounded retry/no data corruption |
 | lost network CI lookup | merge blocks by policy |
 | clock jump | lease uses safe expiration handling |
+| Event Store replay after intent | confirmation query prevents duplicate effect |
+| corrupt cache artifact | Registry quarantines and rebuilds |
+| lineage parent missing | reconstruction marked root-cause, not fork |
 
 Chaos runs must use disposable repositories and never point at production
 remotes.
@@ -127,6 +139,5 @@ prompts unless a secure opt-in process authorizes it.
 ## Future improvements
 
 Future work may add formal model checking for the state machines, fuzzing for
-event parsers and path handling, and replay of anonymized production event logs
+event parsers and path handling, and replay of anonymized production Event Store records
 in an isolated environment.
-

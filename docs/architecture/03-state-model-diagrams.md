@@ -20,7 +20,9 @@ it records authority, lifecycle, delivery, and recovery evidence.
 | Session | session ID | role, adapter status, terminal identity, lifecycle | Git branch truth |
 | Lease | lease ID | resource, holder, expiry, fencing token | permission policy |
 | Delivery | delivery ID | target, attempt, acknowledgement | event validity |
-| Root cache | root ID | Git range and derived knowledge version | repository truth |
+| Knowledge Cache | root ID | Git range and derived knowledge version | repository truth |
+| Knowledge snapshot | root ID and version | bounded domain facts and provenance | transcript history |
+| Lineage node | session ID | parent/child fork or reconstruction relation | permissions or delivery route |
 | Merge | merge ID | candidate, approval binding, integration result | approval authority |
 
 A projection MUST retain the event IDs that produced each field. If two events
@@ -165,6 +167,45 @@ sequenceDiagram
     R->>O: knowledge.synchronized
 ~~~
 
+## Complete V2 runtime sequence
+
+~~~mermaid
+sequenceDiagram
+    participant O as Control Loop
+    participant CP as Claude Root/Planner
+    participant CI as Codex Root/Implementer
+    participant CR as Claude Reviewer
+    participant M as Merger
+    participant K as Knowledge Runtime
+    participant G as Git
+
+    O->>CP: fork planning packet
+    CP->>O: plan.ready
+    O->>CI: fork implementation packet and writer lease
+    CI->>G: commit feature head
+    CI->>O: implementation.ready
+    O->>CR: review packet
+    alt changes requested
+        CR->>O: changes.requested
+        O->>CI: retry implementation notice
+        CI->>O: implementation.ready(new head)
+        O->>CR: review packet
+    end
+    CR->>O: merge.approved
+    O->>M: eligible merge intent
+    M->>G: integrate exact reviewed head
+    M->>O: merge.completed
+    O->>K: synchronize/evolve snapshots
+    K->>G: collect integrated evidence
+    K->>O: knowledge.synchronized
+    O->>CP: publish snapshot, destroy feature child, idle
+    O->>CI: publish snapshot, destroy feature child, idle
+    Note over K,G: Optional metadata-only Root Update Commit
+~~~
+
+This is a lifecycle summary. Its retry branch does not preserve a stale approval
+and its final commit is never an application-code commit.
+
 ## Core sequence: crash and reconstruction
 
 ~~~mermaid
@@ -259,6 +300,20 @@ If historical policy is unavailable, the implementation MUST mark the projection
 policy-unverified. It MAY reconstruct operational visibility but MUST NOT
 automatically merge or grant new permissions from that projection.
 
+## Session lineage projection
+
+~~~mermaid
+flowchart TD
+    CR[Claude Root] -->|fork, snapshot 41| CP[Planner: feature 0042]
+    CR -->|fork, snapshot 41| RV[Reviewer: feature 0042]
+    XR[Codex Root] -->|fork, snapshot 39| CI[Implementer: feature 0042]
+    CI -.->|reconstruction lineage| CI2[Implementer retry: feature 0042]
+~~~
+
+Solid edges are fork lineage; dashed edges are fresh reconstruction lineage.
+This graph is a projection over session events and carries no transport or
+authority semantics.
+
 ## Trade-offs and extensions
 
 Finite state machines make invalid paths explicit but require migration effort
@@ -270,4 +325,3 @@ Future implementations may use a durable workflow engine or database
 transactions. They must preserve append-only evidence, idempotent delivery, and
 fencing. They must not hide an approval, lease grant, or merge behind an opaque
 queue action.
-
