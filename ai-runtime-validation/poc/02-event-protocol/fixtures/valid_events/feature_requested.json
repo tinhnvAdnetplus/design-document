@@ -1,0 +1,37 @@
+{
+  "event_id": "evt_01J9Z1A1B2C3",
+  "protocol": "ai-runtime.events/v1",
+  "type": "feature.requested",
+  "occurred_at": "2026-07-31T09:00:00Z",
+  "producer": {
+    "session_id": "ses_human_operator",
+    "role": "human_maintainer",
+    "adapter": "cli",
+    "adapter_version": "1.0.0"
+  },
+  "aggregate": {
+    "feature_id": "feat-0042",
+    "stream": "feature/feat-0042",
+    "sequence": 1
+  },
+  "correlation_id": "cor_01J9Z1A1B2C4",
+  "causation_id": null,
+  "idempotency_key": "feat-requested/feat-0042",
+  "policy_revision": "policy-2026-07-31.1",
+  "payload": {
+    "request": "Implement writer lease renewal with fencing token validation",
+    "target_ref": "main",
+    "risk_classification": "normal",
+    "requested_permissions": [],
+    "acceptance_criteria": [
+      "Writer lease renewal succeeds when session is active and feature is implementing",
+      "Renewal denied during review, merge, or cancellation",
+      "Fencing token incremented on renewal"
+    ]
+  },
+  "attachments": [],
+  "integrity": {
+    "content_sha256": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
+    "signature_ref": null
+  }
+}

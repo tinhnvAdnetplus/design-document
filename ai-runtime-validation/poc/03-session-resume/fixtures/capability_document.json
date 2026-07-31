@@ -1,0 +1,8 @@
+{
+  "adapter_id": "anthropic-v1",
+  "capabilities": {
+    "resume": true,
+    "prompt_cache": true,
+    "max_context": 200000
+  }
+}

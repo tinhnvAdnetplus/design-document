@@ -1,0 +1,16 @@
+{
+  "sessions": [
+    {
+      "id": "sess_1",
+      "role": "Claude Planner",
+      "capacity": 0,
+      "status": "busy"
+    },
+    {
+      "id": "sess_2",
+      "role": "Codex Implementer",
+      "capacity": 1,
+      "status": "idle"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "event_id": "evt_01J9Z6R3S4T5",
+  "protocol": "ai-runtime.events/v1",
+  "type": "merge.approved",
+  "occurred_at": "2026-07-31T11:15:00Z",
+  "producer": {
+    "session_id": "ses_claude_0042_review_1",
+    "role": "claude_reviewer",
+    "adapter": "claude",
+    "adapter_version": "2.1.0"
+  },
+  "lineage": {
+    "parent_session_id": "ses_claude_root",
+    "knowledge_snapshot_version": 42,
+    "edge_type": "fork"
+  },
+  "aggregate": {
+    "feature_id": "feat-0042",
+    "stream": "feature/feat-0042",
+    "sequence": 18
+  },
+  "correlation_id": "cor_01J9Z1A1B2C4",
+  "causation_id": "evt_01J9Z5Q2R3S4",
+  "idempotency_key": "merge-approved/feat-0042/ab12cd34",
+  "policy_revision": "policy-2026-07-31.1",
+  "payload": {
+    "feature_id": "feat-0042",
+    "reviewed_head": "ab12cd34ef56gh78ij90kl12mn34op56qr78st90",
+    "reviewed_base": "091e4d9c2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d",
+    "target_ref": "main",
+    "plan_digest": "31fd8e9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e",
+    "review_packet_digest": "cabe1234567890abcdef1234567890abcdef1234",
+    "check_evidence_digest": "eac1fedcba0987654321fedcba0987654321fedc",
+    "policy_revision": "policy-2026-07-31.1",
+    "expires_at": "2026-07-31T12:15:00Z",
+    "approval_scope": "merge"
+  },
+  "attachments": [],
+  "integrity": {
+    "content_sha256": "f0e1d2c3b4a5968778695a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d",
+    "signature_ref": null
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "role_contract": "claude-planner",
+  "repository_identity": "git@github.com:org/repo.git",
+  "knowledge_cache": "cache-idx-999",
+  "git_state": {
+    "head_sha": "a1b2c3d4",
+    "branch": "main"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "lease_id": "l_999",
+  "fencing_token": 42,
+  "expires_at": 1600000000,
+  "current_time": 1700000000,
+  "status": "expired"
+}

@@ -1,0 +1,56 @@
+{
+  "event_id": "evt_01J9Z4P2W5Y7",
+  "protocol": "ai-runtime.events/v1",
+  "type": "implementation.ready",
+  "occurred_at": "2026-07-31T10:24:00Z",
+  "producer": {
+    "session_id": "ses_codex_0042_1",
+    "role": "codex_implementer",
+    "adapter": "codex",
+    "adapter_version": "1.4.0"
+  },
+  "lineage": {
+    "parent_session_id": "ses_codex_root",
+    "knowledge_snapshot_version": 42,
+    "edge_type": "fork"
+  },
+  "aggregate": {
+    "feature_id": "feat-0042",
+    "stream": "feature/feat-0042",
+    "sequence": 12
+  },
+  "correlation_id": "cor_01J9Z4P2W5Y8",
+  "causation_id": "evt_01J9Z3K1M4X6",
+  "idempotency_key": "impl-ready/feat-0042/ab12cd34",
+  "policy_revision": "policy-2026-07-31.1",
+  "payload": {
+    "feature_branch": "ai/feat-0042",
+    "base_commit": "091e4d9c2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d",
+    "head_commit": "ab12cd34ef56gh78ij90kl12mn34op56qr78st90",
+    "merge_base": "091e4d9c2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d",
+    "changed_paths": [
+      "src/runtime/lease.ts",
+      "test/lease.test.ts"
+    ],
+    "diff_sha256": "a29145c2b3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0",
+    "tests": [
+      {
+        "command": "npm test -- lease",
+        "status": "passed",
+        "report_ref": "artifact://check/01"
+      }
+    ],
+    "generated_artifacts": [],
+    "migrations": [],
+    "known_risks": [],
+    "writer_lease": {
+      "lease_id": "lea_01",
+      "fencing_token": 17
+    }
+  },
+  "attachments": [],
+  "integrity": {
+    "content_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "signature_ref": null
+  }
+}

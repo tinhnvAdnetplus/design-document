@@ -1,0 +1,6 @@
+{
+  "event": "merge.approved",
+  "binding": {
+    "reviewed_head": "stale"
+  }
+}

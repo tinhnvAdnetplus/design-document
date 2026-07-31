@@ -1,0 +1,4 @@
+claude-root
+codex-root
+claude-feature-f123-plan-1
+codex-feature-f123-1

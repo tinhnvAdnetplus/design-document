@@ -1,0 +1,16 @@
+{
+  "queue": [
+    {
+      "id": "evt_1",
+      "status": "pending",
+      "priority": "high",
+      "attempts": 0
+    },
+    {
+      "id": "evt_2",
+      "status": "pending",
+      "priority": "normal",
+      "attempts": 2
+    }
+  ]
+}

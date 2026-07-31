@@ -1,0 +1,4 @@
+{
+  "target_accept_latency_ms": 50,
+  "target_notify_latency_ms": 100
+}

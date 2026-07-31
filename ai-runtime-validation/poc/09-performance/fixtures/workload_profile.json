@@ -1,0 +1,4 @@
+{
+  "concurrent_users": 10,
+  "events_per_second": 50
+}

@@ -1,0 +1,189 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AI Multi-Agent Runtime V2.2 Event Envelope",
+  "description": "Schema for validating ai-runtime.events/v1 event envelopes per Chapter 12",
+  "type": "object",
+  "required": [
+    "event_id",
+    "protocol",
+    "type",
+    "occurred_at",
+    "producer",
+    "aggregate",
+    "correlation_id",
+    "idempotency_key",
+    "policy_revision",
+    "payload",
+    "integrity"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Unique event identifier (opaque stable format)"
+    },
+    "protocol": {
+      "const": "ai-runtime.events/v1",
+      "description": "Protocol version \u2014 must be ai-runtime.events/v1"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "feature.requested",
+        "plan.ready",
+        "plan.approved",
+        "implementation.progress",
+        "implementation.ready",
+        "review.requested",
+        "changes.requested",
+        "merge.approved",
+        "merge.started",
+        "merge.completed",
+        "knowledge.sync.requested",
+        "knowledge.synchronized",
+        "knowledge.evolution.started",
+        "knowledge.snapshot.published",
+        "cache.invalidated",
+        "session.lineage.recorded",
+        "session.unavailable",
+        "lease.granted",
+        "lease.revoked",
+        "event.rejected"
+      ],
+      "description": "Event type from V2.2 event catalog"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC RFC 3339 timestamp"
+    },
+    "producer": {
+      "type": "object",
+      "required": [
+        "session_id",
+        "role",
+        "adapter",
+        "adapter_version"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "adapter": {
+          "type": "string"
+        },
+        "adapter_version": {
+          "type": "string"
+        }
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "properties": {
+        "parent_session_id": {
+          "type": "string"
+        },
+        "knowledge_snapshot_version": {
+          "type": "integer"
+        },
+        "edge_type": {
+          "type": "string",
+          "enum": [
+            "fork",
+            "reconstruction",
+            "root_replacement"
+          ]
+        }
+      }
+    },
+    "aggregate": {
+      "type": "object",
+      "required": [
+        "feature_id",
+        "stream",
+        "sequence"
+      ],
+      "properties": {
+        "feature_id": {
+          "type": "string"
+        },
+        "stream": {
+          "type": "string"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "correlation_id": {
+      "type": "string",
+      "description": "Identifier shared by one logical workflow"
+    },
+    "causation_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Identifier of the direct predecessor event"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "description": "Key for deduplication \u2014 same key with different contents is IDEMPOTENCY_CONFLICT"
+    },
+    "policy_revision": {
+      "type": "string",
+      "description": "Must resolve in policy store"
+    },
+    "payload": {
+      "type": "object",
+      "description": "Type-specific payload fields"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "uri": {
+            "type": "string"
+          },
+          "media_type": {
+            "type": "string"
+          },
+          "byte_size": {
+            "type": "integer"
+          },
+          "digest": {
+            "type": "string"
+          },
+          "retention_class": {
+            "type": "string"
+          },
+          "access_classification": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "required": [
+        "content_sha256"
+      ],
+      "properties": {
+        "content_sha256": {
+          "type": "string"
+        },
+        "signature_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

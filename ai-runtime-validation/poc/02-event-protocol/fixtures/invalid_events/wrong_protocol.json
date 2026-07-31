@@ -1,0 +1,14 @@
+{
+  "event_id": "evt-invalid-2",
+  "protocol": "old-protocol/v0",
+  "type": "feature.requested",
+  "occurred_at": "2023-10-01T12:00:00Z",
+  "producer": "user",
+  "aggregate": {
+    "id": "1",
+    "sequence": 1
+  },
+  "correlation_id": "1",
+  "idempotency_key": "1",
+  "payload": {}
+}

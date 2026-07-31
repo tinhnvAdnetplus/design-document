@@ -1,0 +1,1 @@
+echo "Received event: plan.ready" > /tmp/event_log.txt

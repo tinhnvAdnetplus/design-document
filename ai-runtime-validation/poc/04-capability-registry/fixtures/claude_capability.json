@@ -1,0 +1,7 @@
+{
+  "adapter": "claude",
+  "version": "1.0",
+  "resume": true,
+  "native_fork": true,
+  "synthetic_fork": false
+}

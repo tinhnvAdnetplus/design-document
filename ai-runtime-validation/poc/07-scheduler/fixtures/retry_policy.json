@@ -1,0 +1,5 @@
+{
+  "max_attempts": 5,
+  "base_backoff_ms": 1000,
+  "escalation_threshold": 3
+}

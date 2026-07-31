@@ -1,0 +1,9 @@
+{
+  "role_contract": "codex-implementer",
+  "repository_identity": "git@github.com:org/repo.git",
+  "knowledge_cache": "cache-idx-1000",
+  "git_state": {
+    "head_sha": "f5e6d7c8",
+    "branch": "feature/login-page"
+  }
+}

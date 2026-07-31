@@ -1,0 +1,7 @@
+{
+  "adapter": "codex",
+  "version": "1.0",
+  "resume": false,
+  "native_fork": false,
+  "synthetic_fork": true
+}

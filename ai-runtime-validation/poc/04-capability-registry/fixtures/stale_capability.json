@@ -1,0 +1,7 @@
+{
+  "adapter": "stale",
+  "version": "0.1",
+  "resume": true,
+  "native_fork": true,
+  "synthetic_fork": false
+}

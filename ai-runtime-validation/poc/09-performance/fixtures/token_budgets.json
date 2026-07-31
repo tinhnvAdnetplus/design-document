@@ -1,0 +1,4 @@
+{
+  "feature_packet_max_bytes": 131072,
+  "planning_budget_bytes": 32768
+}

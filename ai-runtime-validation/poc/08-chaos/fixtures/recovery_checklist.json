@@ -1,0 +1,15 @@
+{
+  "steps": [
+    "1. Acquire singleton lock",
+    "2. Verify Event Store integrity",
+    "3. Rebuild projections",
+    "4. Check tmux server liveness",
+    "5. Reconcile sessions",
+    "6. Clean orphans",
+    "7. Quarantine dirty worktrees",
+    "8. Check pending merges",
+    "9. Sweep dead queues",
+    "10. Verify Adapter caps",
+    "11. Resume Orchestrator"
+  ]
+}

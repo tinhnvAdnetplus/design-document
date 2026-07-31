@@ -1,0 +1,12 @@
+{
+  "faults": [
+    {
+      "type": "disk_full",
+      "component": "V2 Cache Taxonomy"
+    },
+    {
+      "type": "clock_jump",
+      "component": "Writer Lease"
+    }
+  ]
+}

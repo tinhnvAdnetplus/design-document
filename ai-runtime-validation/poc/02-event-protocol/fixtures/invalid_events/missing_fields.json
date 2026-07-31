@@ -1,0 +1,6 @@
+{
+  "event_id": "evt-invalid-missing-fields",
+  "protocol": "ai-runtime.events/v1",
+  "type": "feature.requested",
+  "_test_note": "Missing required fields: occurred_at, producer, aggregate, correlation_id, idempotency_key, policy_revision, payload, integrity. Should be rejected with SCHEMA_INVALID."
+}
