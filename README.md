@@ -1,7 +1,69 @@
-# Design Document
+# AI Multi-Agent Runtime — Design Specification
 
-This repository contains the design documentation.
+This repository is the normative architecture specification for **AI Multi-Agent
+Runtime**, a persistent collaboration runtime for Claude CLI and Codex CLI.
 
-## Progress
-- [ ] Chapter 01 - Introduction
-- [ ] Chapter 02 - Business Requirements
+The runtime keeps each CLI agent alive in its own `tmux` session, creates an
+isolated forked session for feature work, and uses Git as the sole durable
+source of truth. A session transcript, resume identifier, and prompt cache are
+explicitly disposable implementation details.
+
+## Reading the specification
+
+Start with the [documentation entry point](docs/README.md), then use the
+[table of contents](docs/SUMMARY.md). The document set uses the following
+normative terms:
+
+| Term | Meaning |
+| --- | --- |
+| **MUST** | Required for a conforming implementation. |
+| **MUST NOT** | Prohibited for a conforming implementation. |
+| **SHOULD** | Recommended unless a documented reason exists. |
+| **MAY** | Optional. |
+
+## Design invariants
+
+1. Git `HEAD` and the reachable Git object graph are the only source of truth.
+2. A root agent owns project-wide understanding but never implements a feature.
+3. Feature work happens in disposable forked sessions and isolated worktrees.
+4. Claude is the merge approver; Codex is the implementation agent in the
+   baseline workflow.
+5. Agent-to-agent interaction is asynchronous event delivery, never a blocking
+   request/reply dependency.
+6. Normal development neither restarts nor resumes a running agent process.
+7. Only a root session synchronizes long-lived knowledge after a merge.
+
+## Scope
+
+The initial release specifies a local, single-host runtime. It supports:
+
+- Claude CLI and Codex CLI as persistent processes;
+- `tmux` transport and process supervision boundaries;
+- Git worktrees for feature isolation;
+- append-only JSON events and agent acknowledgements;
+- restart recovery and best-effort CLI resume after a host or process failure;
+- logging, metrics, token accounting, and least-privilege execution.
+
+It does not replace Git hosting, CI, code review policy, secret management, or
+human responsibility for merge policy. Those integrations are described only
+where the runtime needs a stable boundary.
+
+## Repository layout
+
+```text
+docs/
+  architecture/     system structure, responsibilities, decisions
+  runtime/          session, cache, tmux, and orchestrator behavior
+  protocol/         event envelope, schemas, and delivery semantics
+  workflow/         feature, review, merge, Git, and synchronization flow
+  implementation/   configuration, layout, reference implementation, testing
+  operations/       observability, performance, recovery, and concurrency
+  security/         threat model and permission model
+  appendix/         roadmap, glossary, and normative examples
+```
+
+## Status
+
+This is a design specification. Interfaces marked `v1` are intended to remain
+compatible within the first production release. Experimental fields and future
+agent adapters are identified in their owning chapters.

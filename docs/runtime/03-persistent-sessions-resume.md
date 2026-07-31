@@ -1,0 +1,166 @@
+# 07 — Persistent Sessions and Resume
+
+## Purpose
+
+This chapter specifies why roots remain alive, when resume is permitted, and
+how the runtime recovers when it cannot resume. It establishes the rule that
+resume is an optimization, never a correctness dependency.
+
+## Persistent-session policy
+
+Normal development follows this policy:
+
+| Operation | Root session | Feature session |
+| --- | --- | --- |
+| start runtime | create or attach once | not created |
+| receive work | stay running | fork as needed |
+| finish work | remain idle | terminate at feature terminal state |
+| agent is busy | queue notice asynchronously | queue notice asynchronously |
+| normal next feature | reuse same root | create a new fork |
+| crash or reboot | recover; resume optional | recover; resume optional |
+| merge complete | sync knowledge | destroy |
+
+Restarting an otherwise healthy root merely to refresh context is prohibited.
+Context refresh is achieved by a root-owned Git-derived synchronization, not by
+discarding the process. Restarting a feature session to avoid a difficult task
+is also prohibited; a new fork requires an explicit recovery or abandonment
+transition.
+
+## Why persistence matters
+
+A persistent root avoids repeating stable project instructions, repository
+orientation, conventions, and recent integrated changes. It also keeps CLI tool
+state available. The runtime does not equate this convenience with durability:
+the root cache is written independently and can be reconstructed.
+
+Persistence has a cost. A long-lived CLI can leak memory, hold stale terminal
+state, or continue after a policy change. Health checks, bounded root caches,
+configuration revision checks, and explicit state transitions control that cost.
+
+## Exceptional-resume preconditions
+
+The runtime MAY attempt resume only when all conditions are true:
+
+1. a prior session was marked unavailable due to abnormal loss;
+2. the adapter provides a stored opaque resume reference;
+3. resume is enabled by configuration;
+4. the session role is still valid under current policy;
+5. Git base and assigned worktree satisfy recovery checks;
+6. no newer runtime session holds the same exclusive resource;
+7. the adapter can produce readiness evidence after resume.
+
+Failure of any condition selects fresh-session reconstruction. Resume never
+runs during ordinary idle, task handoff, or root knowledge synchronization.
+
+## Recovery decision tree
+
+~~~mermaid
+flowchart TD
+    A[Session unavailable] --> B{Prior process alive?}
+    B -->|yes| C[Reattach and validate identity]
+    B -->|no| D{Resume reference allowed and present?}
+    C --> E{Git and policy match?}
+    D -->|yes| F[Attempt vendor resume]
+    D -->|no| G[Create fresh session]
+    F --> H{Readiness and state validation pass?}
+    H -->|yes| E
+    H -->|no| G
+    E -->|yes| I[Mark ready]
+    E -->|no| G
+    G --> J[Build Git-derived reconstruction packet]
+    J --> I
+~~~
+
+The decision is deliberately conservative. Reattaching a wrong terminal or
+resuming a stale role is more dangerous than spending a bounded reconstruction
+prompt.
+
+## Reconstruction packet
+
+A fresh root packet contains stable role instructions, configuration revision,
+repository identity, integration head, root cache if valid, recent integrated
+ranges, known project constraints, and links to event evidence. A fresh feature
+packet additionally contains feature ID, plan, worktree status, writer lease
+status, review cycle, and target Git base.
+
+| Field | Root reconstruction | Feature reconstruction |
+| --- | ---: | ---: |
+| runtime and policy revision | required | required |
+| role contract | required | required |
+| repository and integration HEAD | required | required |
+| root cache provenance | required | selected |
+| feature plan | no | required |
+| worktree path and branch | no | required |
+| active lease and fencing token | no | if still valid |
+| commits and diff digest | recent range | required |
+| pending event references | selected | required |
+| raw transcript | never required | never required |
+
+The packet must state that it is a reconstruction, identify unknowns, and tell
+the agent to verify Git before acting. It must not claim continuity that cannot
+be proven.
+
+## Root recovery
+
+A recovered root receives no authority to edit code. It validates its cache
+against current integration HEAD. If the cache base is stale, it schedules a
+normal synchronization before accepting project-wide planning. A root that
+cannot load cache may still operate using Git inspection; token efficiency
+degrades but correctness remains.
+
+## Feature recovery
+
+A feature recovery is more constrained because it may own mutable state.
+
+| Worktree finding | Required action |
+| --- | --- |
+| clean, head matches recorded commit | reconstruct and continue |
+| clean, head advanced by known event | rebuild projection then continue |
+| dirty, owned session absent | quarantine and require policy/human resolution |
+| branch missing, commit reachable | recreate worktree from commit |
+| branch missing, commit unreachable | block and preserve forensic copy |
+| lease expired | do not write; request a new lease |
+| approval exists but base/head changed | invalidate approval and review again |
+
+A runtime must never auto-stage, auto-commit, reset, or delete a dirty feature
+worktree during recovery.
+
+## Resume verification
+
+After a vendor resume, the adapter verifies terminal session name, process
+identity where possible, current working directory, expected repository, role
+banner or sentinel, and ability to read the assigned event inbox. The
+orchestrator verifies session metadata, policy revision, feature projection,
+leases, and Git state. Both layers are required.
+
+## Operational controls
+
+| Setting | Default | Meaning |
+| --- | ---: | --- |
+| resume enabled | true | allow exceptional resume attempt |
+| maximum resume attempts | 1 | avoid loops and duplicate state |
+| root recovery deadline | 5 min | time before degraded alert |
+| feature recovery deadline | 15 min | time before escalation |
+| stale cache tolerance | 0 integrated commits | require sync before root planning |
+| dirty worktree action | quarantine | never discard by default |
+| reconstruction packet limit | 128 KiB | preserve prompt budget |
+
+## Trade-offs
+
+Native resume may preserve tool-specific conversational continuity and save
+tokens. It can also revive stale assumptions or fail across CLI upgrades. The
+Git-derived fresh path is slower but portable, inspectable, and reliable. The
+runtime prefers resume when verified and otherwise treats it as unavailable.
+
+A zero-restart normal policy may surface CLI memory leaks. Operators may
+explicitly drain and replace a root during a maintenance window, but this is a
+controlled recovery event with a reconstruction packet, not ordinary workflow
+behavior.
+
+## Future improvements
+
+Future adapters may cryptographically attest a resumed session, checkpoint a
+sanitized local context, or support transactional session snapshots. These
+features can reduce reconstruction cost but cannot alter the Git-first recovery
+requirement.
+
