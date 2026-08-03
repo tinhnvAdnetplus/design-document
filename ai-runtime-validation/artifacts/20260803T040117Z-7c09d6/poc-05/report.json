@@ -1,0 +1,93 @@
+{
+  "assertions": [
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "six named, populated domains",
+      "id": "KR-01",
+      "observed": "{\"architecture\": 1, \"business\": 1, \"convention\": 1, \"dependency\": 1, \"project\": 1, \"workspace\": 1}",
+      "status": "PASS",
+      "title": "snapshot contains all six domains"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.0,
+      "expected": "confirmed, inferred, open, transient",
+      "id": "KR-02",
+      "observed": "[\"confirmed\", \"inferred\", \"open\", \"transient\"]",
+      "status": "PASS",
+      "title": "fact taxonomy recognizes all classifications"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "every commit and path resolves",
+      "id": "KR-03",
+      "observed": "{\"commit\": \"b1e847b342ebb269627f7fca33363c1f47555535\", \"path\": \"architecture.txt\"}",
+      "status": "PASS",
+      "title": "confirmed facts resolve to Git provenance"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.0,
+      "expected": "missing provenance rejected",
+      "id": "KR-04",
+      "observed": "rejected",
+      "status": "PASS",
+      "title": "unproven confirmed fact is rejected"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": ">128 KiB input, <128 KiB output, confirmed fact retained",
+      "id": "KR-05",
+      "observed": "{\"after_bytes\": 246, \"before_bytes\": 164155}",
+      "status": "PASS",
+      "title": "compression bounds oversized context and retains proven facts"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.0,
+      "expected": "131073-byte packet rejected",
+      "id": "KR-06",
+      "observed": "{\"bytes\": 131073, \"result\": \"SCHEMA_INVALID:PACKET_BUDGET_EXCEEDED\"}",
+      "status": "PASS",
+      "title": "packet budget is enforced at byte boundary"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "merged commit reachable before evolution",
+      "id": "KR-07",
+      "observed": "{\"events\": [\"merge.completed\", \"knowledge.evolution.started\", \"knowledge.snapshot.published\"], \"reachable\": true}",
+      "status": "PASS",
+      "title": "knowledge evolution starts only from integrated Git evidence"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "independent layer values; no conversation directory",
+      "id": "KR-08",
+      "observed": "{\"conversation_enabled\": false, \"layers\": [\"knowledge\", \"prompt\", \"resume\"]}",
+      "status": "PASS",
+      "title": "cache taxonomy is isolated with Conversation Cache disabled"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.0,
+      "expected": "snapshot <=128 KiB",
+      "id": "KR-09",
+      "observed": "2337",
+      "status": "PASS",
+      "title": "published snapshot is bounded"
+    }
+  ],
+  "dependencies": [],
+  "failed": 0,
+  "name": "knowledge-runtime",
+  "passed": 9,
+  "poc": "05",
+  "score_percent": 100.0,
+  "status": "PASS",
+  "total": 9
+}

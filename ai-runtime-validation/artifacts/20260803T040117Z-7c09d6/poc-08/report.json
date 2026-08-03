@@ -1,0 +1,75 @@
+{
+  "assertions": [
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "victim absent; survivor present",
+      "id": "CHAOS-01",
+      "observed": "{\"survivor_alive\": true, \"victim_dead\": true}",
+      "status": "PASS",
+      "title": "killed session is detected while peers continue"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "durable event projects after restart",
+      "id": "CHAOS-02",
+      "observed": "{\"projection_was_absent\": true, \"replayed\": {\"event_count\": 1, \"side_effects_replayed\": 0, \"streams\": {\"feature/feat-validation\": {\"last_event_id\": \"evt-validation-001\", \"sequence\": 1, \"state\": \"feature.requested\"}}}}",
+      "status": "PASS",
+      "title": "crash after append is recovered by replay"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "dirty file preserved under quarantine",
+      "id": "CHAOS-03",
+      "observed": "{\"git_status\": \"?? dirty.txt\", \"quarantine\": \"/home/tinhnv/project/docs/design-document/ai-runtime-validation/artifacts/20260803T040117Z-7c09d6/poc-08/quarantine/dirty-repo\"}",
+      "status": "PASS",
+      "title": "dirty crash worktree is quarantined"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "feature reachable from actual integration ref",
+      "id": "CHAOS-04",
+      "observed": "{\"actual_ref\": \"89a36e64cb1de3248f206a3bec0e1f8f1ee646ed\", \"base\": \"dfdc36492d39956b965a0e7b96a7b2267625705b\", \"feature\": \"8e3e1731d47533d42ce30ba2676e19bbf795ed78\"}",
+      "status": "PASS",
+      "title": "merge outcome is reconciled from Git refs"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "old cache digest unchanged; fallback selected",
+      "id": "CHAOS-05",
+      "observed": "{\"after\": \"e098559c16e514920412857c5ea4dd9b3f0d94c5a1270c6fc4b66e6da591cc1c\", \"before\": \"e098559c16e514920412857c5ea4dd9b3f0d94c5a1270c6fc4b66e6da591cc1c\", \"result\": \"fallback_without_cache\"}",
+      "status": "PASS",
+      "title": "ENOSPC preserves prior cache and degrades safely"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.0,
+      "expected": "both safe-time and token checks deny",
+      "id": "CHAOS-06",
+      "observed": "{\"clock_check\": \"AUTHORIZATION_DENIED\", \"token_check\": \"AUTHORIZATION_DENIED\"}",
+      "status": "PASS",
+      "title": "clock jump and newer fencing token reject stale writes"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "exact Chapter 23 ordering",
+      "id": "CHAOS-07",
+      "observed": "[\"stop_side_effects\", \"validate_config_and_repo\", \"rebuild_projection\", \"inspect_git_and_worktrees\", \"reconcile_leases\", \"reconcile_sessions\", \"revalidate_capabilities\", \"select_recovery\", \"confirm_pending_intents\", \"resume_deliveries\", \"publish_report\"]",
+      "status": "PASS",
+      "title": "recovery procedure executes all 11 steps in order"
+    }
+  ],
+  "dependencies": [],
+  "failed": 0,
+  "name": "chaos",
+  "passed": 7,
+  "poc": "08",
+  "score_percent": 100.0,
+  "status": "PASS",
+  "total": 7
+}

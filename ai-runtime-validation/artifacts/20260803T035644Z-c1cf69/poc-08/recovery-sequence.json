@@ -1,0 +1,13 @@
+[
+  "stop_side_effects",
+  "validate_config_and_repo",
+  "rebuild_projection",
+  "inspect_git_and_worktrees",
+  "reconcile_leases",
+  "reconcile_sessions",
+  "revalidate_capabilities",
+  "select_recovery",
+  "confirm_pending_intents",
+  "resume_deliveries",
+  "publish_report"
+]

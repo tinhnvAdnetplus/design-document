@@ -1,0 +1,84 @@
+{
+  "assertions": [
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "session name and live pane PID verified",
+      "id": "RES-01",
+      "observed": "{\"identity\": \"codex-feature-resume-1:%0\", \"pane_pid\": \"53753\"}",
+      "status": "PASS",
+      "title": "live session reattaches with identity evidence"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "all eight exceptional-resume gates true",
+      "id": "RES-02",
+      "observed": "{\"abnormal_loss\": true, \"capability_resume\": true, \"config_enabled\": true, \"exclusive_resource_free\": true, \"git_valid\": true, \"readiness_evidence\": true, \"resume_ref\": true, \"role_valid\": true}",
+      "status": "PASS",
+      "title": "resume eligibility requires every precondition"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.0,
+      "expected": "resume=false prevents resume attempt",
+      "id": "RES-03",
+      "observed": "fresh_reconstruction",
+      "status": "PASS",
+      "title": "capability gate selects fresh reconstruction"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "tmux session absent after kill",
+      "id": "RES-04",
+      "observed": "true",
+      "status": "PASS",
+      "title": "abnormal session loss is observable"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "required fields present and <=128 KiB",
+      "id": "RES-05",
+      "observed": "{\"bytes\": 1011, \"missing\": []}",
+      "status": "PASS",
+      "title": "fresh reconstruction packet is complete and bounded"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "packet HEAD equals clean repository HEAD",
+      "id": "RES-06",
+      "observed": "{\"git\": \"dff262afb81ce67e4d03ca0e1e74dc356064e91c\", \"packet\": \"dff262afb81ce67e4d03ca0e1e74dc356064e91c\"}",
+      "status": "PASS",
+      "title": "packet Git state matches repository"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "dirty file preserved in quarantine",
+      "id": "RES-07",
+      "observed": "{\"content\": \"preserve me\\n\", \"dirty\": true, \"quarantine\": \"/home/tinhnv/project/docs/design-document/ai-runtime-validation/artifacts/20260803T035644Z-c1cf69/poc-03/quarantine/feature-repo\"}",
+      "status": "PASS",
+      "title": "dirty worktree is quarantined without deletion"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "no resume ID and a verifiable packet digest",
+      "id": "RES-08",
+      "observed": "{\"packet_sha256\": \"e3830dec07fe9795ba21837bf2ab4470d7d4b9c3e53b2213b9cdbff8dc05a389\", \"resume_id\": null, \"source\": \"git_reconstruction\"}",
+      "status": "PASS",
+      "title": "workflow reconstruction does not depend on resume IDs"
+    }
+  ],
+  "dependencies": [],
+  "failed": 0,
+  "name": "session-resume",
+  "passed": 8,
+  "poc": "03",
+  "score_percent": 100.0,
+  "status": "PASS",
+  "total": 8
+}

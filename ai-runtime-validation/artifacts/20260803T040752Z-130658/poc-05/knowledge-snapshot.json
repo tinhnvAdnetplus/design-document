@@ -1,0 +1,108 @@
+{
+  "cache_version": 1,
+  "facts": {
+    "architecture": [
+      {
+        "classification": "confirmed",
+        "evidence": {
+          "commits": [
+            "21278a2c02175395f4bb3c92679cf2c47f390adc"
+          ],
+          "paths": [
+            "architecture.txt"
+          ]
+        },
+        "statement": "validated architecture"
+      }
+    ],
+    "business": [
+      {
+        "classification": "confirmed",
+        "evidence": {
+          "commits": [
+            "21278a2c02175395f4bb3c92679cf2c47f390adc"
+          ],
+          "paths": [
+            "architecture.txt"
+          ]
+        },
+        "statement": "validated business"
+      }
+    ],
+    "convention": [
+      {
+        "classification": "confirmed",
+        "evidence": {
+          "commits": [
+            "21278a2c02175395f4bb3c92679cf2c47f390adc"
+          ],
+          "paths": [
+            "architecture.txt"
+          ]
+        },
+        "statement": "validated convention"
+      }
+    ],
+    "dependency": [
+      {
+        "classification": "confirmed",
+        "evidence": {
+          "commits": [
+            "21278a2c02175395f4bb3c92679cf2c47f390adc"
+          ],
+          "paths": [
+            "architecture.txt"
+          ]
+        },
+        "statement": "validated dependency"
+      }
+    ],
+    "project": [
+      {
+        "classification": "confirmed",
+        "evidence": {
+          "commits": [
+            "21278a2c02175395f4bb3c92679cf2c47f390adc"
+          ],
+          "paths": [
+            "architecture.txt"
+          ]
+        },
+        "statement": "validated project"
+      }
+    ],
+    "workspace": [
+      {
+        "classification": "confirmed",
+        "evidence": {
+          "commits": [
+            "21278a2c02175395f4bb3c92679cf2c47f390adc"
+          ],
+          "paths": [
+            "architecture.txt"
+          ]
+        },
+        "statement": "validated workspace"
+      }
+    ]
+  },
+  "generated_at": "2026-08-03T04:07:52.471886Z",
+  "limits": {
+    "max_bytes": 131072,
+    "max_facts": 500
+  },
+  "open_questions": [],
+  "repository": {
+    "integration_head": "21278a2c02175395f4bb3c92679cf2c47f390adc",
+    "integration_ref": "main"
+  },
+  "root_id": "claude-root",
+  "snapshot_domains": [
+    "project",
+    "architecture",
+    "business",
+    "workspace",
+    "dependency",
+    "convention"
+  ]
+}

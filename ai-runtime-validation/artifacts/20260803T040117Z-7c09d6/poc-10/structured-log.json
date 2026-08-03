@@ -1,0 +1,52 @@
+[
+  {
+    "event_id": "evt-validation-001",
+    "result": "accepted",
+    "type": "feature.requested"
+  },
+  {
+    "event_id": "evt-validation-002",
+    "result": "accepted",
+    "type": "plan.ready"
+  },
+  {
+    "event_id": "evt-validation-003",
+    "result": "accepted",
+    "type": "plan.approved"
+  },
+  {
+    "event_id": "evt-validation-004",
+    "result": "accepted",
+    "type": "implementation.ready"
+  },
+  {
+    "event_id": "evt-validation-005",
+    "result": "accepted",
+    "type": "review.requested"
+  },
+  {
+    "event_id": "evt-validation-006",
+    "result": "accepted",
+    "type": "merge.approved"
+  },
+  {
+    "event_id": "evt-validation-007",
+    "result": "accepted",
+    "type": "merge.started"
+  },
+  {
+    "event_id": "evt-validation-008",
+    "result": "accepted",
+    "type": "merge.completed"
+  },
+  {
+    "event_id": "evt-validation-009",
+    "result": "accepted",
+    "type": "knowledge.sync.requested"
+  },
+  {
+    "event_id": "evt-validation-010",
+    "result": "accepted",
+    "type": "knowledge.synchronized"
+  }
+]

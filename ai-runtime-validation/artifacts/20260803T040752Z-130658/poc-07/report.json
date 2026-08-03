@@ -1,0 +1,66 @@
+{
+  "assertions": [
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "serialized queue equals in-memory queue",
+      "id": "SCH-01",
+      "observed": "{\"count\": 3, \"path\": \"/home/tinhnv/project/docs/design-document/ai-runtime-validation/artifacts/20260803T040752Z-130658/poc-07/delivery-queue.json\"}",
+      "status": "PASS",
+      "title": "delivery queue survives reload"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.0,
+      "expected": "critical-new, high, normal-old",
+      "id": "SCH-02",
+      "observed": "[\"critical-new\", \"high\", \"normal-old\"]",
+      "status": "PASS",
+      "title": "priority dispatcher orders critical, high, normal"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.0,
+      "expected": "2,4,8,16 seconds and visible after threshold",
+      "id": "SCH-03",
+      "observed": "{\"escalation\": \"visible\", \"seconds\": [2, 4, 8, 16]}",
+      "status": "PASS",
+      "title": "retry uses exponential backoff with escalation"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.0,
+      "expected": "ready selected; all-busy queue remains pending",
+      "id": "SCH-04",
+      "observed": "{\"assigned\": \"ready\", \"pending_when_full\": true}",
+      "status": "PASS",
+      "title": "dispatcher respects session capacity"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.0,
+      "expected": "SLA-aged normal event dispatches before fresh critical",
+      "id": "SCH-05",
+      "observed": "[\"normal-aged\", \"critical-fresh\"]",
+      "status": "PASS",
+      "title": "aging prevents lower-priority starvation"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "1000-item tick <100 ms with no consumer wait",
+      "id": "SCH-06",
+      "observed": "{\"duration_ms\": 0.237, \"eligible\": 1000}",
+      "status": "PASS",
+      "title": "scheduler tick is non-blocking"
+    }
+  ],
+  "dependencies": [],
+  "failed": 0,
+  "name": "scheduler",
+  "passed": 6,
+  "poc": "07",
+  "score_percent": 100.0,
+  "status": "PASS",
+  "total": 6
+}

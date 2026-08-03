@@ -1,0 +1,66 @@
+{
+  "assertions": [
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "normal chain completes; requested->implementation denied",
+      "id": "RL-01",
+      "observed": "{\"final\": \"merge.completed\", \"invalid_jump_allowed\": false}",
+      "status": "PASS",
+      "title": "lifecycle accepts valid traversal and rejects jumps"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.0,
+      "expected": "HMAC validates head/base/plan/policy/role",
+      "id": "RL-02",
+      "observed": "{\"binding_sha256\": \"96704407440576cd4e696afc0a6a6b41f60b37d7fe96cf0809a3482e19a46077\", \"signature\": \"d5461383c6f4f735cb108c0a872674640f8b05d27ef479a0d87a0fab8e7e1b8e\"}",
+      "status": "PASS",
+      "title": "approval binding verifies exact immutable facts"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "changed head fails binding signature",
+      "id": "RL-03",
+      "observed": "false",
+      "status": "PASS",
+      "title": "post-approval code change invalidates approval"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.0,
+      "expected": "AUTHORIZATION_DENIED",
+      "id": "RL-04",
+      "observed": "AUTHORIZATION_DENIED",
+      "status": "PASS",
+      "title": "forged implementer approval is rejected"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.0,
+      "expected": "third changes.requested escalates",
+      "id": "RL-05",
+      "observed": "[\"redispatch\", \"redispatch\", \"escalate_and_block\"]",
+      "status": "PASS",
+      "title": "review-cycle limit escalates and blocks dispatch"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.0,
+      "expected": "one holder; recovery token increases",
+      "id": "RL-06",
+      "observed": "{\"collision\": [false, 1], \"first\": [true, 1], \"lease\": {\"fencing_token\": 2, \"holder\": \"codex_recovery\"}, \"recovery\": [true, 2]}",
+      "status": "PASS",
+      "title": "writer lease is exclusive and stale tokens are fenced"
+    }
+  ],
+  "dependencies": [],
+  "failed": 0,
+  "name": "review-loop",
+  "passed": 6,
+  "poc": "06",
+  "score_percent": 100.0,
+  "status": "PASS",
+  "total": 6
+}

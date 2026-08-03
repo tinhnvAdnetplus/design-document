@@ -1,0 +1,120 @@
+{
+  "assertions": [
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "zero schema errors",
+      "id": "EVT-01",
+      "observed": "[[], [], []]",
+      "status": "PASS",
+      "title": "valid fixtures satisfy Draft-07 schema"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "every invalid fixture has schema diagnostics",
+      "id": "EVT-02",
+      "observed": "{\"missing_fields.json\": [\"'occurred_at' is a required property\", \"'producer' is a required property\", \"'aggregate' is a required property\", \"'correlation_id' is a required property\", \"'idempotency_key' is a required property\", \"'policy_revision' is a required property\", \"'payload' is a required property\", \"'integrity' is a required property\", \"Additional properties are not allowed ('_test_note' was unexpected)\"], \"wrong_protocol.json\": [\"'policy_revision' is a required property\", \"'integrity' is a required property\", \"'ai-runtime.events/v1' was expected\", \"'user' is not of type 'object'\", \"'feature_id' is a required property\", \"'stream' is a required property\"]}",
+      "status": "PASS",
+      "title": "malformed fixtures are rejected"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "v2 rejected by v1 schema",
+      "id": "EVT-03",
+      "observed": "[\"'ai-runtime.events/v1' was expected\"]",
+      "status": "PASS",
+      "title": "unsupported schema version is rejected"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "three fsync-backed appends",
+      "id": "EVT-04",
+      "observed": "[\"APPENDED\", \"APPENDED\", \"APPENDED\"]",
+      "status": "PASS",
+      "title": "events append durably in aggregate order"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "duplicate ignored and store remains three events",
+      "id": "EVT-05",
+      "observed": "{\"count\": 3, \"result\": \"DUPLICATE_IGNORED\"}",
+      "status": "PASS",
+      "title": "exact duplicates are idempotent"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "IDEMPOTENCY_CONFLICT",
+      "id": "EVT-06",
+      "observed": "IDEMPOTENCY_CONFLICT",
+      "status": "PASS",
+      "title": "idempotency-key content conflicts are rejected"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "sequence gap rejected",
+      "id": "EVT-07",
+      "observed": "AGGREGATE_SEQUENCE_CONFLICT expected=4",
+      "status": "PASS",
+      "title": "aggregate ordering is enforced"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "three events project final state plan.approved",
+      "id": "EVT-08",
+      "observed": "{\"event_count\": 3, \"side_effects_replayed\": 0, \"streams\": {\"feature/feat-validation\": {\"last_event_id\": \"evt-validation-003\", \"sequence\": 3, \"state\": \"plan.approved\"}}}",
+      "status": "PASS",
+      "title": "replay reconstructs projection"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "byte-identical projections; zero blind side effects",
+      "id": "EVT-09",
+      "observed": "4d6877e5fd4dd38d8bb45a0f781537756b4a06b54fd035cba4a686f588369d6c",
+      "status": "PASS",
+      "title": "replay is deterministic and side-effect safe"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "modified payload fails digest",
+      "id": "EVT-10",
+      "observed": "{\"computed\": \"c3c8fb6e3d7f319b581a1b0320b4cb7da9235cd6d80caba0b7f9ec16252dc6af\", \"stored\": \"e5c7d12798546ba1cb41129ebda040b8e1fad7b26a6f5d0aa6b23b1c47b85f76\"}",
+      "status": "PASS",
+      "title": "tampering is detected by SHA-256"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "INVALID_SIGNATURE",
+      "id": "EVT-11",
+      "observed": "INVALID_SIGNATURE",
+      "status": "PASS",
+      "title": "invalid signatures are rejected"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "corruption names exact line",
+      "id": "EVT-12",
+      "observed": "CORRUPT_EVENT_STORE line 4: Expecting property name enclosed in double quotes",
+      "status": "PASS",
+      "title": "store corruption fails closed"
+    }
+  ],
+  "dependencies": [],
+  "failed": 0,
+  "name": "event-protocol",
+  "passed": 12,
+  "poc": "02",
+  "score_percent": 100.0,
+  "status": "PASS",
+  "total": 12
+}
