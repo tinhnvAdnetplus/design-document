@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "type", "payload"],
+  "properties": {
+    "event_id": {"type": "string", "minLength": 1},
+    "type": {"const": "feature.requested"},
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["probe"],
+      "properties": {"probe": {"const": "ack"}}
+    }
+  }
+}
