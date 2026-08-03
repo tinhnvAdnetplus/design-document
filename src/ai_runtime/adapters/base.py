@@ -6,7 +6,10 @@ import dataclasses
 import enum
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
+
+if TYPE_CHECKING:
+    from ..runtime.sessions import AdapterSessionContract
 
 
 class StructuredTask(enum.StrEnum):
@@ -42,6 +45,9 @@ class AgentAdapter(Protocol):
     @property
     def capability(self) -> AdapterCapability: ...
 
+    @property
+    def session_contract(self) -> AdapterSessionContract: ...
+
     def invoke(
         self,
         task: StructuredTask,
@@ -50,4 +56,7 @@ class AgentAdapter(Protocol):
         cwd: Path,
         schema: Mapping[str, Any],
         timeout_seconds: float,
+        feature_id: str | None = None,
     ) -> AdapterResult: ...
+
+    def acknowledge(self, result: AdapterResult) -> None: ...

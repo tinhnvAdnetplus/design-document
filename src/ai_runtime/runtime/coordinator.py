@@ -15,6 +15,7 @@ from ..events import new_event
 from ..git import GitInvariantError, GitWorkspaceManager, Lease, LeaseManager, MergeBinding, Workspace
 from ..store import EventStoreConfig, EventWriter, GroupCommitConfig, GroupCommitPolicy
 from .schemas import IMPLEMENTATION_SCHEMA, PLAN_SCHEMA, REVIEW_SCHEMA
+from .sessions import SessionSupervisor
 from .state import FeaturePhase, FeatureState, project_feature
 
 
@@ -81,11 +82,32 @@ class RuntimeCoordinator:
             EventStoreConfig(config.state_dir / "events.db"),
             GroupCommitConfig(policy=GroupCommitPolicy.IMMEDIATE, max_batch_size=1),
         )
+        bindable = [
+            adapter
+            for adapter in (self.planner, self.implementer, self.reviewer)
+            if callable(getattr(adapter, "bind_supervisor", None))
+        ]
+        self.supervisor = SessionSupervisor(config.state_dir) if bindable else None
+        for adapter in bindable:
+            adapter.bind_supervisor(self.supervisor)
         self._started = False
 
     def __enter__(self) -> "RuntimeCoordinator":
         self.writer.start()
         self._started = True
+        if self.supervisor is not None:
+            acknowledged = frozenset(
+                value
+                for event in self.writer.iter_events()
+                for value in self._turn_ids(event)
+            )
+            self.supervisor.reconcile(
+                acknowledged_turn_ids=acknowledged,
+                adapter_versions={
+                    adapter.capability.name: adapter.capability.version
+                    for adapter in (self.planner, self.implementer, self.reviewer)
+                },
+            )
         return self
 
     def __exit__(self, *_: object) -> None:
@@ -97,14 +119,42 @@ class RuntimeCoordinator:
             self._started = False
 
     @staticmethod
-    def _producer(adapter: AgentAdapter, role: str, feature_id: str) -> dict[str, str]:
+    def _producer(
+        adapter: AgentAdapter,
+        role: str,
+        feature_id: str,
+        result=None,
+    ) -> dict[str, str]:
         capability = adapter.capability
+        observed_session = None
+        if result is not None:
+            candidate = result.evidence.get("session_id")
+            if isinstance(candidate, str):
+                observed_session = candidate
         return {
-            "session_id": f"{capability.name}-{role}-{feature_id}",
+            "session_id": observed_session or f"{capability.name}-{role}-{feature_id}",
             "role": role,
             "adapter": capability.name,
             "adapter_version": capability.version,
         }
+
+    @staticmethod
+    def _turn_ids(value: Any):
+        if isinstance(value, Mapping):
+            turn_id = value.get("turn_id")
+            if isinstance(turn_id, str):
+                yield turn_id
+            for child in value.values():
+                yield from RuntimeCoordinator._turn_ids(child)
+        elif isinstance(value, list):
+            for child in value:
+                yield from RuntimeCoordinator._turn_ids(child)
+
+    @staticmethod
+    def _acknowledge(adapter: AgentAdapter, result) -> None:
+        acknowledge = getattr(adapter, "acknowledge", None)
+        if callable(acknowledge):
+            acknowledge(result)
 
     @staticmethod
     def _human_producer(identity: str) -> dict[str, str]:
@@ -271,8 +321,9 @@ class RuntimeCoordinator:
             cwd=self.config.repository,
             schema=PLAN_SCHEMA,
             timeout_seconds=self.config.adapter_timeout_seconds,
+            feature_id=state.feature_id,
         )
-        return self._append(
+        projected = self._append(
             state,
             "plan.ready",
             {**dict(result.value), "adapter_evidence": dict(result.evidence)},
@@ -280,9 +331,12 @@ class RuntimeCoordinator:
                 self.planner,
                 "temporary_planner" if self.planner.capability.temporary else "claude_planner",
                 state.feature_id,
+                result,
             ),
             purpose="plan-ready",
         )
+        self._acknowledge(self.planner, result)
+        return projected
 
     def _workspace_from_state(self, state: FeatureState) -> Workspace:
         data = state.workspace or {}
@@ -364,6 +418,7 @@ class RuntimeCoordinator:
             cwd=workspace.path,
             schema=IMPLEMENTATION_SCHEMA,
             timeout_seconds=self.config.adapter_timeout_seconds,
+            feature_id=state.feature_id,
         )
         self.leases.validate(lease)
         if self.git.ref_snapshot(excluded_branch=workspace.branch) != protected_refs:
@@ -391,9 +446,10 @@ class RuntimeCoordinator:
                 "tests": result.value["tests"],
                 "adapter_evidence": adapter_evidence,
             },
-            self._producer(self.implementer, "codex_implementer", state.feature_id),
+            self._producer(self.implementer, "codex_implementer", state.feature_id, result),
             purpose=f"implementation-ready-{actual_head}",
         )
+        self._acknowledge(self.implementer, result)
         return self._revoke_implementation_lease(state)
 
     def _revoke_implementation_lease(self, state: FeatureState) -> FeatureState:
@@ -519,6 +575,7 @@ class RuntimeCoordinator:
             cwd=review_cwd,
             schema=REVIEW_SCHEMA,
             timeout_seconds=self.config.adapter_timeout_seconds,
+            feature_id=state.feature_id,
         )
         verdict = result.value.get("verdict")
         payload = {
@@ -530,7 +587,7 @@ class RuntimeCoordinator:
             "adapter_evidence": dict(result.evidence),
         }
         if verdict == "changes_requested":
-            return self._append(
+            projected = self._append(
                 state,
                 "changes.requested",
                 payload,
@@ -542,20 +599,25 @@ class RuntimeCoordinator:
                         else "claude_reviewer"
                     ),
                     state.feature_id,
+                    result,
                 ),
                 purpose=f"changes-requested-{implementation.get('head')}",
             )
+            self._acknowledge(self.reviewer, result)
+            return projected
         if verdict != "approve":
             raise RuntimePolicyError(f"unsupported review verdict: {verdict}")
         if self.reviewer.capability.merge_authority:
-            return self._append(
+            projected = self._append(
                 state,
                 "merge.approved",
                 {**payload, "authority": "claude_reviewer"},
-                self._producer(self.reviewer, "claude_reviewer", state.feature_id),
+                self._producer(self.reviewer, "claude_reviewer", state.feature_id, result),
                 purpose=f"merge-approved-{implementation.get('head')}",
             )
-        return self._append(
+            self._acknowledge(self.reviewer, result)
+            return projected
+        projected = self._append(
             state,
             "implementation.progress",
             {
@@ -564,9 +626,16 @@ class RuntimeCoordinator:
                 "authority": "advisory",
                 "temporary_adapter": self.reviewer.capability.name,
             },
-            self._producer(self.reviewer, "temporary_review_advisor", state.feature_id),
+            self._producer(
+                self.reviewer,
+                "temporary_review_advisor",
+                state.feature_id,
+                result,
+            ),
             purpose=f"review-recommended-{implementation.get('head')}",
         )
+        self._acknowledge(self.reviewer, result)
+        return projected
 
     def approve_merge(
         self,
@@ -612,6 +681,7 @@ class RuntimeCoordinator:
                 self._workspace_from_state(state),
                 merged_head=reviewed_head,
             )
+            self._terminate_feature_sessions(feature_id)
             return state
         if state.phase == FeaturePhase.MERGING:
             return self._reconcile_merge(state)
@@ -645,7 +715,15 @@ class RuntimeCoordinator:
             purpose=f"merge-completed-{merge_head}",
         )
         self.git.cleanup(workspace, merged_head=binding.reviewed_head)
+        self._terminate_feature_sessions(feature_id)
         return state
+
+    def _terminate_feature_sessions(self, feature_id: str) -> None:
+        if self.supervisor is None:
+            return
+        for record in self.supervisor.records():
+            if record.feature_id == feature_id and record.state.value != "TERMINATED":
+                self.supervisor.terminate(record.session_id)
 
     def _reconcile_merge(self, state: FeatureState) -> FeatureState:
         implementation = state.implementation or {}
@@ -677,4 +755,5 @@ class RuntimeCoordinator:
             purpose=f"merge-completed-{merge_head}",
         )
         self.git.cleanup(self._workspace_from_state(state), merged_head=binding.reviewed_head)
+        self._terminate_feature_sessions(state.feature_id)
         return state

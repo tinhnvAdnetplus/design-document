@@ -7,13 +7,27 @@ import json
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
-import time
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
 from .base import AdapterCapability, AdapterError, AdapterResult, StructuredTask
+from ..runtime.sessions import (
+    AdapterSessionContract,
+    ForkCapability,
+    ReadinessDetector,
+    SessionRecoveryRequiredError,
+    SessionSpec,
+    SessionSupervisor,
+    SessionUnavailableError,
+    StructuredOutputChannel,
+    TerminationBehavior,
+    TransportMode,
+    TrustPromptBehavior,
+    TurnRequest,
+)
 
 
 def _digest(value: str) -> str:
@@ -152,6 +166,7 @@ class _SubprocessAdapter:
     def __init__(self, *, binary: str, model: str | None = None):
         self.binary = binary
         self.model = model
+        self.supervisor: SessionSupervisor | None = None
         path = shutil.which(binary)
         if path is None:
             raise AdapterError(f"adapter executable is unavailable: {binary}")
@@ -162,6 +177,16 @@ class _SubprocessAdapter:
         if version.returncode != 0:
             raise AdapterError(f"cannot discover {binary} version")
         self.version = (version.stdout + version.stderr).strip().splitlines()[0]
+
+    def bind_supervisor(self, supervisor: SessionSupervisor) -> None:
+        """Bind the required runtime transport before the first invocation."""
+        if self.supervisor is not None and self.supervisor is not supervisor:
+            raise AdapterError("adapter is already bound to a different session supervisor")
+        self.supervisor = supervisor
+
+    @property
+    def session_contract(self) -> AdapterSessionContract:
+        return self._session_contract
 
     def _command(
         self,
@@ -183,9 +208,14 @@ class _SubprocessAdapter:
         cwd: Path,
         schema: Mapping[str, Any],
         timeout_seconds: float,
+        feature_id: str | None = None,
     ) -> AdapterResult:
         if task not in self.capability.roles:
             raise AdapterError(f"{self.capability.name} does not support task {task}")
+        if self.supervisor is None:
+            raise AdapterError(
+                f"{self.capability.name} has no SessionSupervisor; direct subprocess fallback is disabled"
+            )
         timeout = min(max(float(timeout_seconds), 5.0), 300.0)
         with tempfile.TemporaryDirectory(prefix="ai-runtime-schema-") as temporary:
             schema_path = Path(temporary) / f"{task}.schema.json"
@@ -199,46 +229,134 @@ class _SubprocessAdapter:
                 schema_json=schema_json,
                 timeout_seconds=timeout,
             )
-            started = time.perf_counter_ns()
             try:
-                result = subprocess.run(
-                    command,
-                    cwd=cwd,
-                    text=True,
-                    capture_output=True,
-                    timeout=timeout + 5,
-                    check=False,
+                session_id = self._session_id(task, cwd, feature_id)
+                spool = self.supervisor.spool_dir / session_id
+                worker_path = Path(__file__).resolve().parents[1] / "runtime" / "_session_worker.py"
+                launch = (
+                    sys.executable,
+                    str(worker_path),
+                    "--spool",
+                    str(spool),
+                    "--identity",
+                    "{session_identity}",
                 )
-            except subprocess.TimeoutExpired as exc:
+                detector = ReadinessDetector(
+                    r"^AI_RUNTIME_READY {session_identity}$",
+                    pane_lines=40,
+                )
+                spec = SessionSpec(
+                    session_id=session_id,
+                    adapter=self.capability.name,
+                    adapter_version=self.capability.version,
+                    role=str(task),
+                    cwd=cwd,
+                    launch_command=launch,
+                    readiness=detector,
+                    trust_prompt=TrustPromptBehavior.NOT_APPLICABLE,
+                    termination=self.session_contract.termination,
+                    transport_mode=TransportMode.TMUX_SUPERVISED_NONINTERACTIVE_V1,
+                    feature_id=feature_id,
+                    resume=self.session_contract.resume,
+                    fork=self.session_contract.fork,
+                )
+                self.supervisor.start(spec, readiness_timeout=min(timeout, 30))
+                prompt_sha = _digest(prompt)
+                turn_id = "turn-" + _digest(
+                    "\0".join(
+                        (
+                            self.capability.name,
+                            self.capability.version,
+                            str(task),
+                            str(cwd.resolve()),
+                            prompt_sha,
+                        )
+                    )
+                )[:48]
+                observation = self.supervisor.send_turn(
+                    spec,
+                    TurnRequest(
+                        turn_id=turn_id,
+                        command=tuple(command),
+                        cwd=cwd,
+                        timeout_seconds=timeout,
+                        prompt_sha256=prompt_sha,
+                        task=str(task),
+                    ),
+                )
+            except (SessionUnavailableError, SessionRecoveryRequiredError) as exc:
                 raise AdapterError(
-                    f"{self.capability.name} {task} timed out after {timeout:.0f}s"
+                    f"{self.capability.name} persistent transport failed closed: {exc}"
                 ) from exc
-        duration_ms = (time.perf_counter_ns() - started) / 1_000_000
-        if result.returncode != 0:
-            detail = _redact(result.stderr or result.stdout, cwd)
-            raise AdapterError(
-                f"{self.capability.name} {task} exited {result.returncode}: {detail}"
+        if observation.timed_out:
+            self.supervisor.reject_turn(
+                observation.session_id,
+                observation.turn_id,
+                reason="adapter_timeout",
+                evidence=observation.evidence,
             )
-        value = _extract_structured(result.stdout, task, self.required_keys[task])
+            raise AdapterError(f"{self.capability.name} {task} timed out after {timeout:.0f}s")
+        if observation.exit_code != 0:
+            detail = _redact(observation.stderr or observation.stdout, cwd)
+            self.supervisor.reject_turn(
+                observation.session_id,
+                observation.turn_id,
+                reason="adapter_nonzero_exit",
+                evidence=observation.evidence,
+            )
+            raise AdapterError(
+                f"{self.capability.name} {task} exited {observation.exit_code}: {detail}"
+            )
+        value = _extract_structured(observation.stdout, task, self.required_keys[task])
         if value is None:
+            self.supervisor.reject_turn(
+                observation.session_id,
+                observation.turn_id,
+                reason="invalid_structured_result",
+                evidence=observation.evidence,
+            )
             raise AdapterError(
                 f"{self.capability.name} returned no valid structured {task} result; "
-                f"{_shape_diagnostic(result.stdout)}"
+                f"{_shape_diagnostic(observation.stdout)}"
             )
-        _validate_result(task, value)
+        try:
+            _validate_result(task, value)
+        except AdapterError:
+            self.supervisor.reject_turn(
+                observation.session_id,
+                observation.turn_id,
+                reason="structured_result_contract_violation",
+                evidence=observation.evidence,
+            )
+            raise
         evidence = {
             "adapter": self.capability.name,
             "adapter_version": self.capability.version,
             "task": str(task),
-            "duration_ms": round(duration_ms, 3),
-            "exit_code": result.returncode,
-            "stdout_sha256": _digest(result.stdout),
-            "stderr_sha256": _digest(result.stderr),
-            "stdout_bytes": len(result.stdout.encode("utf-8")),
-            "stderr_bytes": len(result.stderr.encode("utf-8")),
-            "prompt_sha256": _digest(prompt),
+            **dict(observation.evidence),
         }
         return AdapterResult(value=value, evidence=evidence)
+
+    def acknowledge(self, result: AdapterResult) -> None:
+        if self.supervisor is None:
+            raise AdapterError("cannot acknowledge without a SessionSupervisor")
+        session_id = result.evidence.get("session_id")
+        turn_id = result.evidence.get("turn_id")
+        if not isinstance(session_id, str) or not isinstance(turn_id, str):
+            raise AdapterError("adapter result lacks supervised turn identity")
+        self.supervisor.acknowledge_turn(session_id, turn_id)
+
+    def _session_id(
+        self,
+        task: StructuredTask,
+        cwd: Path,
+        feature_id: str | None,
+    ) -> str:
+        scope = _digest(str(cwd.resolve()))[:16]
+        feature = feature_id or "root"
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}", feature):
+            raise AdapterError("feature_id is not safe for session identity")
+        return f"{self.capability.name}-{task}-{feature}-{scope}"
 
 
 class AntigravityAdapter(_SubprocessAdapter):
@@ -256,6 +374,28 @@ class AntigravityAdapter(_SubprocessAdapter):
             writes_workspace=False,
             merge_authority=False,
             temporary=True,
+        )
+        self._session_contract = AdapterSessionContract(
+            launch_command=(
+                self.path,
+                "--sandbox",
+                "--mode",
+                "plan",
+                "--disable-slash-commands",
+                "--log-file",
+                "/dev/null",
+                "--model",
+                str(self.model),
+            ),
+            readiness=ReadinessDetector(
+                r"Plan mode:",
+                trust_pattern=r"Do you trust the contents",
+            ),
+            trust_prompt=TrustPromptBehavior.ACCEPT_DISPOSABLE_ONLY,
+            resume=True,
+            fork=ForkCapability.SYNTHETIC,
+            structured_output=StructuredOutputChannel.JSON_STDOUT,
+            termination=TerminationBehavior.GRACEFUL_THEN_KILL,
         )
 
     @property
@@ -300,6 +440,21 @@ class ClaudeCLIAdapter(_SubprocessAdapter):
             merge_authority=True,
             temporary=False,
         )
+        interactive = [self.path, "--permission-mode", "plan", "--disable-slash-commands"]
+        if self.model:
+            interactive.extend(["--model", self.model])
+        self._session_contract = AdapterSessionContract(
+            launch_command=tuple(interactive),
+            readiness=ReadinessDetector(
+                r"(?:^|\n).*?[❯>]\s*$",
+                trust_pattern=r"Do you trust the contents",
+            ),
+            trust_prompt=TrustPromptBehavior.REJECT,
+            resume=True,
+            fork=ForkCapability.NATIVE,
+            structured_output=StructuredOutputChannel.JSON_STDOUT,
+            termination=TerminationBehavior.GRACEFUL_THEN_KILL,
+        )
 
     @property
     def capability(self) -> AdapterCapability:
@@ -338,6 +493,28 @@ class CodexCLIAdapter(_SubprocessAdapter):
             writes_workspace=True,
             merge_authority=False,
             temporary=False,
+        )
+        interactive = [
+            self.path,
+            "--sandbox",
+            "workspace-write",
+            "--ask-for-approval",
+            "never",
+            "--no-alt-screen",
+        ]
+        if self.model:
+            interactive.extend(["--model", self.model])
+        self._session_contract = AdapterSessionContract(
+            launch_command=tuple(interactive),
+            readiness=ReadinessDetector(
+                r"model:\s+(?!loading)\S+",
+                trust_pattern=r"Do you trust the contents",
+            ),
+            trust_prompt=TrustPromptBehavior.REJECT,
+            resume=True,
+            fork=ForkCapability.NATIVE,
+            structured_output=StructuredOutputChannel.JSONL_STDOUT,
+            termination=TerminationBehavior.GRACEFUL_THEN_KILL,
         )
 
     @property

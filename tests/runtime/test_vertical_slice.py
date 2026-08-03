@@ -51,7 +51,7 @@ class ScriptedAdapter:
     def capability(self):
         return self._capability
 
-    def invoke(self, task, *, prompt, cwd, schema, timeout_seconds):
+    def invoke(self, task, *, prompt, cwd, schema, timeout_seconds, feature_id=None):
         self.calls += 1
         if self.action is not None:
             self.action(Path(cwd))
