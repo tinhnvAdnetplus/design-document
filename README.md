@@ -94,3 +94,32 @@ See the [validation roadmap](ai-runtime-validation/ROADMAP.md), the
 [evidence portability audit](ai-runtime-validation/reports/evidence-portability-audit.md).
 The live decision is recorded in
 [PoC 11](ai-runtime-validation/poc/11-real-cli-integration/RESULT.md).
+
+## Minimal runtime vertical slice
+
+The repository now includes an executable local vertical slice in
+`src/ai_runtime`. It connects the SQLite Event Store to structured CLI
+adapters, replayable feature state, isolated Git worktrees, fenced writer
+leases, immutable review/head binding, a human gate for temporary reviewers,
+and a conservative merge/cleanup gateway.
+
+Claude remains the production default and the only agent adapter allowed to
+declare merge authority. Antigravity is available only as an explicit temporary
+planner/review advisor; an accepted Antigravity review still requires a human
+exact-head approval:
+
+```bash
+# Production profile: Claude plans/reviews, Codex implements.
+ai-runtime --repo /path/to/repo request \
+  --feature-id feat-0042 --request "Implement the approved change"
+
+# Temporary validation profile: Antigravity has advisory authority only.
+ai-runtime --repo /path/to/repo \
+  --planner agy --reviewer agy --allow-temporary-reviewer \
+  request --feature-id feat-0042 --request "Implement the approved change"
+```
+
+Plan approval, temporary merge approval, and merge are separate commands. Use
+`ai-runtime --help` for the complete interface. The implementation and live
+validation record is in the
+[minimal vertical-slice report](reports/phase-3/minimal-runtime-vertical-slice.md).
