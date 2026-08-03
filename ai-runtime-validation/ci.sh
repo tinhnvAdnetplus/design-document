@@ -2,4 +2,4 @@
 set -Eeuo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 "${ROOT}/scripts/validate_environment.sh"
-exec "${ROOT}/run-all.sh"
+exec python3 "${ROOT}/lib/validation_lab.py" run --poc all

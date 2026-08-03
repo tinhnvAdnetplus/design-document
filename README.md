@@ -81,3 +81,14 @@ changing the Git-first source-of-truth boundary. See the
 [V2 Architecture Review](docs/architecture/05-v2-architecture-review.md),
 [V2 Design Decisions](docs/architecture/06-v2-design-decisions.md), and
 [V1 → V2 Migration Guide](docs/implementation/05-v1-v2-migration-plan.md).
+
+Implementation and validation have separate maturity levels:
+
+- the frozen contract laboratory has passed 82/82 assertions;
+- the SQLite WAL Event Store is a merge-ready production-oriented vertical slice;
+- live Antigravity/Codex compatibility is tracked by the isolated Phase 2C PoC;
+- the complete multi-agent runtime is not yet a production implementation.
+
+See the [validation roadmap](ai-runtime-validation/ROADMAP.md), the
+[Phase 3 Event Store recommendation](reports/phase-3/recommendation.md), and the
+[evidence portability audit](ai-runtime-validation/reports/evidence-portability-audit.md).

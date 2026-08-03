@@ -6,15 +6,21 @@ This roadmap defines the phased execution order for validating the AI Multi-Agen
 
 ## Phase 2B Execution Status
 
-Authoritative manifest-enabled CI run: `artifacts/20260803T032110Z-2986e3` (`81/82` assertions passed).
+Status: **CONTRACT VALIDATION COMPLETE**.
+
+The final legacy-format run `artifacts/20260803T040752Z-130658` passed
+`82/82` assertions. Evidence format v2 now exports nested repositories as
+verified Git bundles so new manifests remain valid on a clean checkout.
 
 | Status | Scope |
 | --- | --- |
-| **Completed** | Shared assertion/evidence infrastructure; framework path repair; PoCs 01–08 and 10; JSON/JUnit/Markdown/SHA-256 reporting; CI and selected/full runners |
-| **In Progress** | PoC 09 event-acceptance performance: 8/9 assertions pass |
-| **Blocked** | Durable event acceptance p99 is above the frozen 50 ms target on this ext4 host; a Phase 3 Event Store implementation or storage strategy is required before this can be closed |
+| **Completed** | PoCs 01–10; 82/82 assertions; portable evidence format v2; SQLite WAL Event Store vertical slice; clean-checkout CI workflow |
+| **In Progress** | Phase 2C live Antigravity/Codex integration spike (PoC 11) |
+| **Blocked** | Production runtime expansion remains gated on live CLI process, structured output, resume/fork, timeout, and cleanup evidence |
 
-The real Claude/Codex vendor CLI compatibility run also remains a Phase 3 integration dependency. Phase 2B validates deterministic adapter contracts and does not claim live-vendor behavior.
+Phase 2B validates deterministic adapter contracts and does not claim
+live-vendor behavior. Phase 2C temporarily uses Antigravity (`agy`) in place of
+Claude CLI and keeps live, quota-consuming probes outside the default suite.
 
 ---
 

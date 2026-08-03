@@ -1,0 +1,29 @@
+name: validation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  contract-and-event-store:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install system validation tools
+        run: sudo apt-get update && sudo apt-get install -y jq tmux
+      - name: Install package and validation dependency
+        run: python -m pip install -e '.[validation]'
+      - name: Event Store tests
+        run: PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests -v
+      - name: Contract validation suite
+        run: ai-runtime-validation/ci.sh
+      - name: Verify newest evidence package
+        if: always()
+        run: |
+          newest="$(find ai-runtime-validation/artifacts -mindepth 1 -maxdepth 1 -type d | sort | tail -1)"
+          ai-runtime-validation/scripts/verify-evidence.sh "$newest"

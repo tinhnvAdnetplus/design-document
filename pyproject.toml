@@ -8,6 +8,8 @@ version = "0.1.0"
 description = "Production infrastructure for the AI Multi-Agent Runtime"
 requires-python = ">=3.11"
 
+[project.optional-dependencies]
+validation = ["jsonschema>=4.19,<5"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
-

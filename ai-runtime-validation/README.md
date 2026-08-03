@@ -43,7 +43,8 @@ ai-runtime-validation/
     ├── 07-scheduler/            ← Eligibility Scheduler and Dispatcher
     ├── 08-chaos/                ← Fault injection and recovery
     ├── 09-performance/          ← Benchmarks and token budgets
-    └── 10-end-to-end/           ← Full integrated workflow validation
+    ├── 10-end-to-end/           ← Contract-level integrated workflow validation
+    └── 11-real-cli-integration/ ← Opt-in live Antigravity/Codex probes
 ```
 
 ## Each PoC Contains
@@ -90,6 +91,10 @@ Run the entire suite from this directory with:
 
 Run selected PoCs with `./run-selected.sh 01 02`, or use `./ci.sh` as the CI entrypoint. Every run stores an environment record, assertion-level JSON reports, a Markdown summary, a failure report, captured artifacts, and JUnit XML under a unique `artifacts/<run-id>/` directory.
 
+PoC 11 is intentionally excluded from the default suite because it invokes
+authenticated vendor models and consumes quota. Run it explicitly from its own
+directory after reviewing its safety and budget controls.
+
 ### 4. Compare Results
 
 After execution, compare observed behavior against `EXPECTED.md` and record findings in `RESULT.md`.
@@ -109,6 +114,8 @@ Execute phases in order defined in [`ROADMAP.md`](ROADMAP.md). Each phase builds
 | `openssl` | 1.1+ | SHA-256 integrity hashing |
 | `python3` | 3.8+ | Validation engine and measured test workloads |
 | Python `jsonschema` | Draft-07 support | Event envelope contract validation |
+| `agy` | 1.1+ | Optional Phase 2C Antigravity live integration |
+| `codex` | 0.146+ | Optional Phase 2C Codex live integration |
 
 ## Architectural Invariants Under Validation
 

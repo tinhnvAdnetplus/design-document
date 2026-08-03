@@ -1171,7 +1171,7 @@ def poc_10(lab: Lab) -> None:
                      "isolated tmux socket has no server", server_gone)
     lab.assert_value("E2E-10", "event store is durable and schema-valid", store_path.stat().st_size > 0 and all(not list(validator.iter_errors(event)) for event in events),
                      "fsync-backed non-empty store; zero schema errors", {"bytes": store_path.stat().st_size, "events": len(events)})
-    lab.dependencies.append("Real vendor Claude/Codex CLI compatibility remains a Phase 3 integration dependency; this run uses deterministic contract adapters.")
+    lab.dependencies.append("Real vendor Antigravity/Codex CLI compatibility is validated separately by PoC 11; this run uses deterministic contract adapters.")
 
 
 POC_FUNCTIONS: dict[str, Callable[[Lab], None]] = {
@@ -1185,21 +1185,114 @@ def git_revision() -> str:
     return result.stdout.strip() if result.returncode == 0 else "not-a-git-worktree"
 
 
+def redact_local_text(value: str) -> str:
+    replacements = {
+        str(Path.home()): "$HOME",
+        str(ROOT.parent): "$PROJECT_ROOT",
+        str(ROOT): "$VALIDATION_ROOT",
+    }
+    redacted = value
+    for source, replacement in sorted(replacements.items(), key=lambda item: len(item[0]), reverse=True):
+        redacted = redacted.replace(source, replacement)
+    return redacted
+
+
 def environment_report() -> dict[str, Any]:
+    version_arguments = {
+        "bash": ["--version"],
+        "git": ["--version"],
+        "tmux": ["-V"],
+        "jq": ["--version"],
+        "python3": ["--version"],
+        "sha256sum": ["--version"],
+        "timeout": ["--version"],
+        "agy": ["--version"],
+        "codex": ["--version"],
+    }
     commands = {}
-    for name in ["bash", "git", "tmux", "jq", "python3", "sha256sum", "timeout"]:
+    for name, arguments in version_arguments.items():
         path = shutil.which(name)
-        commands[name] = {"available": bool(path), "path": path}
+        version = None
+        version_exit_code = None
+        if path:
+            result = command(path, *arguments, check=False, timeout=5)
+            version_exit_code = result.returncode
+            output = (result.stdout + "\n" + result.stderr).strip().splitlines()
+            if output:
+                version = redact_local_text(output[0][:500])
+        commands[name] = {
+            "available": bool(path),
+            "path": redact_local_text(path) if path else None,
+            "version": version,
+            "version_exit_code": version_exit_code,
+        }
     return {
         "captured_at": utc_now(),
         "git_revision": git_revision(),
         "platform": platform.platform(),
-        "hostname": platform.node(),
+        "hostname_sha256": sha256(platform.node()),
         "python": platform.python_version(),
         "jsonschema": metadata.version("jsonschema") if jsonschema else "unavailable",
         "cpu_count": os.cpu_count(),
         "commands": commands,
     }
+
+
+def materialize_portable_git_evidence(run_dir: Path) -> list[dict[str, Any]]:
+    """Replace nested Git metadata with portable bundles and redacted facts."""
+    repositories = []
+    git_directories = sorted(
+        (path for path in run_dir.rglob(".git") if path.is_dir()),
+        key=lambda path: len(path.parts),
+        reverse=True,
+    )
+    for git_directory in git_directories:
+        if not git_directory.exists():
+            continue
+        repository = git_directory.parent
+        relative_repository = str(repository.relative_to(run_dir))
+        head = git(repository, "rev-parse", "HEAD").stdout.strip()
+        refs = [
+            {"object": line.split("\t", 1)[0], "ref": line.split("\t", 1)[1]}
+            for line in git(
+                repository,
+                "for-each-ref",
+                "--format=%(objectname)%09%(refname)",
+            ).stdout.splitlines()
+            if "\t" in line
+        ]
+        status = git(
+            repository,
+            "status",
+            "--porcelain=v1",
+            "--untracked-files=all",
+        ).stdout.splitlines()
+        bundle_path = repository / "repository.git.bundle"
+        git(repository, "bundle", "create", str(bundle_path), "--all")
+        verification = git(repository, "bundle", "verify", str(bundle_path), check=False)
+        if verification.returncode != 0:
+            raise AssertionError(f"portable Git bundle verification failed for {relative_repository}")
+        record = {
+            "format_version": 1,
+            "repository": relative_repository,
+            "head": head,
+            "refs": refs,
+            "status_porcelain": status,
+            "bundle": str(bundle_path.relative_to(run_dir)),
+            "bundle_sha256": sha256(bundle_path.read_bytes()),
+            "bundle_verified": True,
+        }
+        (repository / "repository-evidence.json").write_text(
+            json.dumps(record, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        shutil.rmtree(git_directory)
+        repositories.append(record)
+    (run_dir / "portable-git-evidence.json").write_text(
+        json.dumps(repositories, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return repositories
 
 
 def write_junit(run_dir: Path, reports: list[dict[str, Any]]) -> None:
@@ -1221,6 +1314,7 @@ def write_junit(run_dir: Path, reports: list[dict[str, Any]]) -> None:
 
 
 def write_summary(run_dir: Path, reports: list[dict[str, Any]], environment: dict[str, Any]) -> dict[str, Any]:
+    portable_repositories = materialize_portable_git_evidence(run_dir)
     passed = sum(report["passed"] for report in reports)
     total = sum(report["total"] for report in reports)
     failed = total - passed
@@ -1235,6 +1329,8 @@ def write_summary(run_dir: Path, reports: list[dict[str, Any]], environment: dic
         "failed": failed,
         "total": total,
         "completion_percent": completion,
+        "evidence_format_version": 2,
+        "portable_git_repositories": len(portable_repositories),
         "pocs": reports,
     }
     (run_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
