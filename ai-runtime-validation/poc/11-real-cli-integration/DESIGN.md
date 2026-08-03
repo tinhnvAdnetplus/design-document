@@ -8,6 +8,8 @@
 - Antigravity runs with `--sandbox --mode plan` and a disabled CLI log.
 - Codex runs with read-only sandboxing and approval policy `never`.
 - The workspace is a disposable minimal repository with no project secrets.
+- Interactive trust prompts are accepted only for that disposable repository,
+  then the arithmetic probe is injected with tmux `send-keys`.
 - Raw stdout/stderr are never written. Evidence retains hashes, byte counts,
   exit status, timings, and a redacted bounded excerpt.
 
@@ -19,7 +21,7 @@ discovery
    └─ codex structured event ─ codex resume
                                   │
                                   └─ codex native fork in tmux
-agy interactive tmux ─────────────┘
+agy interactive tmux/send-keys ──┘
                   concurrent readiness + cleanup
 ```
 

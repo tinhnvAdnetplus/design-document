@@ -356,24 +356,24 @@ def main() -> int:
             tmux = ["tmux", "-L", socket]
             agy_tmux_command = [
                 "agy", "--sandbox", "--mode", "plan", "--disable-slash-commands", "--log-file", "/dev/null",
-                "--model", agy_model, "--prompt-interactive",
-                "Compute 193 plus 251. Respond with only the decimal result.",
+                "--model", agy_model,
             ]
             codex_tmux_command = [
                 "codex", "--sandbox", "read-only", "--ask-for-approval", "never", "--cd", str(fixture),
                 "--no-alt-screen",
             ]
             if codex_session:
-                codex_tmux_command.extend([
-                    "fork", codex_session, "Compute 173 plus 249. Respond with only the decimal result."
-                ])
+                codex_tmux_command.extend(["fork", codex_session])
             else:
-                codex_tmux_command.append("Compute 173 plus 249. Respond with only the decimal result.")
+                codex_tmux_command.append("resume")
             call_counts["agy"] += 1
             call_counts["codex"] += 1
             tmux_started = time.perf_counter_ns()
             captures = {"agy": "", "codex": ""}
             detected = {"agy": False, "codex": False}
+            trust_detected = {"agy": False, "codex": False}
+            trust_accepted = {"agy": False, "codex": False}
+            prompt_sent = {"agy": False, "codex": False}
             pane_status = {}
             try:
                 subprocess.run(
@@ -386,6 +386,38 @@ def main() -> int:
                     check=True, timeout=10,
                 )
                 subprocess.run([*tmux, "set-option", "-t", "codex-probe", "remain-on-exit", "on"], check=True)
+                readiness_deadline = time.monotonic() + min(timeout, 15)
+                while time.monotonic() < readiness_deadline and not all(trust_detected.values()):
+                    for cli, session in (("agy", "agy-probe"), ("codex", "codex-probe")):
+                        captured = subprocess.run(
+                            [*tmux, "capture-pane", "-p", "-S", "-80", "-t", f"{session}:0.0"],
+                            text=True, capture_output=True, check=False,
+                        ).stdout
+                        trust_detected[cli] = "Do you trust the contents" in captured
+                    if not all(trust_detected.values()):
+                        time.sleep(0.5)
+                for cli, session in (("agy", "agy-probe"), ("codex", "codex-probe")):
+                    if trust_detected[cli]:
+                        accepted = subprocess.run(
+                            [*tmux, "send-keys", "-t", f"{session}:0.0", "Enter"],
+                            text=True, capture_output=True, check=False,
+                        )
+                        trust_accepted[cli] = accepted.returncode == 0
+                time.sleep(3)
+                prompts = {
+                    "agy": "Compute 193 plus 251. Respond with only the decimal result.",
+                    "codex": "Compute 173 plus 249. Respond with only the decimal result.",
+                }
+                for cli, session in (("agy", "agy-probe"), ("codex", "codex-probe")):
+                    sent = subprocess.run(
+                        [*tmux, "send-keys", "-t", f"{session}:0.0", "-l", prompts[cli]],
+                        text=True, capture_output=True, check=False,
+                    )
+                    entered = subprocess.run(
+                        [*tmux, "send-keys", "-t", f"{session}:0.0", "Enter"],
+                        text=True, capture_output=True, check=False,
+                    )
+                    prompt_sent[cli] = sent.returncode == entered.returncode == 0
                 deadline = time.monotonic() + timeout
                 while time.monotonic() < deadline and not all(detected.values()):
                     for cli, session, marker in [
@@ -433,6 +465,9 @@ def main() -> int:
                     "launch_mode": "interactive" if cli == "agy" else (
                         "native_fork" if codex_session else "interactive"
                     ),
+                    "trust_prompt_detected": trust_detected[cli],
+                    "trust_accepted": trust_accepted[cli],
+                    "prompt_sent_via_tmux": prompt_sent[cli],
                     "pane": pane_status[cli],
                 }
                 for cli in ("agy", "codex")
@@ -470,6 +505,8 @@ def main() -> int:
             results["resume"].get(cli, {}).get("memory_match", False) for cli in ("agy", "codex")
         ] + [
             results["tmux"].get(cli, {}).get("response_detected", False) for cli in ("agy", "codex")
+        ] + [
+            results["tmux"].get(cli, {}).get("prompt_sent_via_tmux", False) for cli in ("agy", "codex")
         ] + [
             results["fixture_clean"],
             results["tmux"].get("cleanup_exit_code") == 0,

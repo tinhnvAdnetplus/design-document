@@ -15,3 +15,15 @@
 The CLI ordering and schema compatibility issues were corrected before the
 decision run. The failed iteration is preserved as negative integration
 evidence rather than being relabeled as a vendor incompatibility.
+
+## Probe iteration `20260803T073147Z-cd0d46`
+
+- Structured JSON and actual resume passed for both Antigravity and Codex.
+- Both tmux processes remained alive, but neither produced a response marker.
+- A no-model readiness inspection showed both CLIs were waiting at their
+  workspace trust dialogs. Initial prompt arguments therefore had not reached
+  the model.
+
+The decision probe now accepts trust only for its disposable fixture and sends
+the prompt afterward through tmux `send-keys`, matching the intended runtime
+transport more closely.

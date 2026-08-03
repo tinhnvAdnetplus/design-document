@@ -1,0 +1,233 @@
+{
+  "adaptations": [
+    "Replace the Claude adapter with a version-bound Antigravity adapter for Phase 2C.",
+    "Use synthetic Git-derived reconstruction because agy 1.1.10 exposes no native fork flag.",
+    "Prefer JSON Schema output channels over terminal scraping for protocol events."
+  ],
+  "call_counts": {
+    "agy": 3,
+    "codex": 3
+  },
+  "captured_at": "2026-08-03T07:31:50.079770Z",
+  "decision": "PHASE_3_BLOCKED",
+  "discovery": {
+    "agy": {
+      "available": true,
+      "capabilities": {
+        "native_fork_declared": false,
+        "resume_declared": true,
+        "sandbox_declared": true,
+        "structured_output_declared": true,
+        "synthetic_fork_declared": true
+      },
+      "help_sha256": "1a76a80acd0731942eb5c31db9f57ceaa2634b082d6bdc05c4eb9c6d8a3788e5",
+      "path": "$HOME/.local/bin/agy",
+      "version": "1.1.10",
+      "version_exit_code": 0
+    },
+    "codex": {
+      "available": true,
+      "capabilities": {
+        "native_fork_declared": true,
+        "resume_declared": true,
+        "sandbox_declared": true,
+        "structured_output_declared": true,
+        "synthetic_fork_declared": true
+      },
+      "help_sha256": "201d600d7c66121058e12c516b81ccaf66858ee8e284a81dfdb3ef6e82fa6334",
+      "path": "$HOME/.nvm/versions/node/v26.2.0/bin/codex",
+      "version": "codex-cli 0.146.0",
+      "version_exit_code": 0
+    },
+    "tmux": {
+      "available": true,
+      "capabilities": {},
+      "help_sha256": "6defd9c844fd541bda2e10d48e2b198f00944927a5c1040e53bd0df25252a9bd",
+      "path": "/usr/bin/tmux",
+      "version": "tmux 3.6",
+      "version_exit_code": 0
+    }
+  },
+  "fixture_clean": true,
+  "fixture_status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "git_revision": "8efc1cf9c53af7be9a02f215c1dd4d23692dc69b",
+  "limits": {
+    "max_calls_per_cli": 3,
+    "timeout_seconds": 60.0
+  },
+  "mode": "live",
+  "models": {
+    "agy": "gemini-3.6-flash-low",
+    "codex": "cli-default"
+  },
+  "redaction_checks": {
+    "email_absent": true,
+    "fixture_path_absent": true,
+    "home_path_absent": true,
+    "nonce_absent": true,
+    "tmux_capture_not_retained": true
+  },
+  "resume": {
+    "agy": {
+      "command": [
+        "agy",
+        "--sandbox",
+        "--mode",
+        "plan",
+        "--disable-slash-commands",
+        "--log-file",
+        "/dev/null",
+        "--model",
+        "gemini-3.6-flash-low",
+        "--output-format",
+        "json",
+        "--json-schema",
+        "$REPO/ai-runtime-validation/poc/11-real-cli-integration/fixtures/resume_schema.json",
+        "--conversation",
+        "<REDACTED_UUID>",
+        "--print-timeout",
+        "60s",
+        "--print",
+        "<PROMPT_REDACTED>"
+      ],
+      "duration_ms": 6503.909,
+      "exit_code": 0,
+      "memory_match": true,
+      "prompt_sha256": "167ca9e09061500200480d779db9caee7517ffe25fa2a241f7795970826d9e0d",
+      "stderr_bytes": 0,
+      "stderr_excerpt_redacted": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 610,
+      "stdout_excerpt_redacted": "{\"conversation_id\":\"<REDACTED_UUID>\",\"status\":\"SUCCESS\",\"response\":\"{\\n  \\\"remembered\\\": \\\"<REDACTED_NONCE>\\\"\\n}\\n\",\"duration_seconds\":29.052798894,\"num_turns\":2,\"structured_output\":{\"event_id\":\"cli-probe\",\"payload\":{\"probe\":\"ack\"},\"type\":\"feature.requested\"},\"json_schema\":{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"remembered\"],\"properties\":{\"remembered\":{\"type\":\"string\",\"minLength\":1}}},\"usage\":{\"input_tokens\":38852,\"output_tokens\":78,\"thinking_tokens\":0,\"cache_read_tokens\":0,\"total_tokens\":38930}}\n",
+      "stdout_sha256": "70d46a7a7c0906dbb497d2f5e687481016eed5fc31b85e6dbd6787b769f49f0d",
+      "timed_out": false
+    },
+    "codex": {
+      "command": [
+        "codex",
+        "--sandbox",
+        "read-only",
+        "--ask-for-approval",
+        "never",
+        "--cd",
+        "$FIXTURE",
+        "exec",
+        "resume",
+        "--ignore-rules",
+        "--json",
+        "--output-schema",
+        "$REPO/ai-runtime-validation/poc/11-real-cli-integration/fixtures/resume_schema.json",
+        "<REDACTED_UUID>",
+        "<PROMPT_REDACTED>"
+      ],
+      "duration_ms": 11930.235,
+      "exit_code": 0,
+      "memory_match": true,
+      "prompt_sha256": "167ca9e09061500200480d779db9caee7517ffe25fa2a241f7795970826d9e0d",
+      "stderr_bytes": 0,
+      "stderr_excerpt_redacted": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 393,
+      "stdout_excerpt_redacted": "{\"type\":\"thread.started\",\"thread_id\":\"<REDACTED_UUID>\"}\n{\"type\":\"turn.started\"}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_0\",\"type\":\"agent_message\",\"text\":\"{\\\"remembered\\\":\\\"<REDACTED_NONCE>\\\"}\"}}\n{\"type\":\"turn.completed\",\"usage\":{\"input_tokens\":28080,\"cached_input_tokens\":0,\"cache_write_input_tokens\":0,\"output_tokens\":62,\"reasoning_output_tokens\":0}}\n",
+      "stdout_sha256": "54f48ea31a73aa33f6f4ce3c95d9d14f4430da0b05243255b1e30a68ac4f220e",
+      "timed_out": false
+    }
+  },
+  "run_id": "20260803T073147Z-cd0d46",
+  "structured": {
+    "agy": {
+      "command": [
+        "agy",
+        "--sandbox",
+        "--mode",
+        "plan",
+        "--disable-slash-commands",
+        "--log-file",
+        "/dev/null",
+        "--model",
+        "gemini-3.6-flash-low",
+        "--output-format",
+        "json",
+        "--json-schema",
+        "$REPO/ai-runtime-validation/poc/11-real-cli-integration/fixtures/event_schema.json",
+        "--print-timeout",
+        "60s",
+        "--print",
+        "<PROMPT_REDACTED>"
+      ],
+      "duration_ms": 7961.428,
+      "exit_code": 0,
+      "prompt_sha256": "8aa01d13b913fcf5b26613a54fbba0b7670c18f6d471902a9b7286fc75af48b3",
+      "schema_valid": true,
+      "session_id_present": true,
+      "session_id_sha256": "f452575a77b7487a4171f4236079b65aedf93b9c1129cf0c1d34642694723fc1",
+      "stderr_bytes": 0,
+      "stderr_excerpt_redacted": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 839,
+      "stdout_excerpt_redacted": "{\"conversation_id\":\"<REDACTED_UUID>\",\"status\":\"SUCCESS\",\"response\":\"{\\\"event_id\\\":\\\"cli-probe\\\",\\\"payload\\\":{\\\"probe\\\":\\\"ack\\\"},\\\"type\\\":\\\"feature.requested\\\"}\\n\",\"duration_seconds\":1.890534724,\"num_turns\":1,\"structured_output\":{\"event_id\":\"cli-probe\",\"payload\":{\"probe\":\"ack\"},\"type\":\"feature.requested\"},\"json_schema\":{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"event_id\",\"type\",\"payload\"],\"properties\":{\"event_id\":{\"type\":\"string\",\"minLength\":1},\"type\":{\"type\":\"string\",\"const\":\"feature.requested\"},\"payload\":{\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"probe\"],\"properties\":{\"probe\":{\"type\":\"string\",\"const\":\"ack\"}}}}},\"usage\":{\"input_tokens\":19363,\"output_tokens\":38,\"thinking_tokens\":0,\"cache_read_tokens\":0,\"total_tokens\":19401}}\n",
+      "stdout_sha256": "a043621003eff47310623351b17b9a178834a0823cfbbcb49220db54dc806235",
+      "timed_out": false
+    },
+    "codex": {
+      "command": [
+        "codex",
+        "--sandbox",
+        "read-only",
+        "--ask-for-approval",
+        "never",
+        "--cd",
+        "$FIXTURE",
+        "exec",
+        "--skip-git-repo-check",
+        "--ignore-rules",
+        "--json",
+        "--output-schema",
+        "$REPO/ai-runtime-validation/poc/11-real-cli-integration/fixtures/event_schema.json",
+        "<PROMPT_REDACTED>"
+      ],
+      "duration_ms": 20643.621,
+      "exit_code": 0,
+      "prompt_sha256": "8aa01d13b913fcf5b26613a54fbba0b7670c18f6d471902a9b7286fc75af48b3",
+      "schema_valid": true,
+      "session_id_present": true,
+      "session_id_sha256": "812094a023449e4769a4353c2ab0acd619bdc789dbbd547bbfd325d7b1753e88",
+      "stderr_bytes": 39,
+      "stderr_excerpt_redacted": "Reading additional input from stdin...\n",
+      "stderr_sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+      "stdout_bytes": 431,
+      "stdout_excerpt_redacted": "{\"type\":\"thread.started\",\"thread_id\":\"<REDACTED_UUID>\"}\n{\"type\":\"turn.started\"}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_0\",\"type\":\"agent_message\",\"text\":\"{\\\"event_id\\\":\\\"cli-probe\\\",\\\"type\\\":\\\"feature.requested\\\",\\\"payload\\\":{\\\"probe\\\":\\\"ack\\\"}}\"}}\n{\"type\":\"turn.completed\",\"usage\":{\"input_tokens\":14034,\"cached_input_tokens\":0,\"cache_write_input_tokens\":0,\"output_tokens\":30,\"reasoning_output_tokens\":0}}\n",
+      "stdout_sha256": "7c4ca760e4a2843b7d0efb405da72b85ff5dfb0aabd346aec7f18fb751e1a2c5",
+      "timed_out": false
+    }
+  },
+  "tmux": {
+    "agy": {
+      "captured_output_bytes": 341,
+      "captured_output_sha256": "282ae57c9ca343035dfb85fd8ba399cfe23ef6439e51cec6b64b6548c8614a7c",
+      "duration_ms": 60791.966,
+      "launch_mode": "interactive",
+      "pane": {
+        "current_command": "agy",
+        "dead": false,
+        "exit_status": null,
+        "query_exit_code": 0
+      },
+      "response_detected": false
+    },
+    "cleanup_exit_code": 0,
+    "codex": {
+      "captured_output_bytes": 333,
+      "captured_output_sha256": "ce1006130167979fc69088bfa1d9f312515a0ba119f85d6aeae5fbe0c61abd42",
+      "duration_ms": 60791.966,
+      "launch_mode": "native_fork",
+      "pane": {
+        "current_command": "node",
+        "dead": false,
+        "exit_status": null,
+        "query_exit_code": 0
+      },
+      "response_detected": false
+    }
+  }
+}
