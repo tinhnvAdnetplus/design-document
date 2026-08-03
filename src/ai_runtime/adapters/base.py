@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
 
 if TYPE_CHECKING:
+    from ..runtime.feature_sessions import PersistentAdapterDeclaration
     from ..runtime.sessions import AdapterSessionContract
 
 
@@ -47,6 +48,9 @@ class AgentAdapter(Protocol):
 
     @property
     def session_contract(self) -> AdapterSessionContract: ...
+
+    @property
+    def persistent_declaration(self) -> PersistentAdapterDeclaration: ...
 
     def invoke(
         self,

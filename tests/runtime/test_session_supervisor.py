@@ -108,6 +108,12 @@ class SessionSupervisorTests(unittest.TestCase):
         self.assertEqual(SessionState.BUSY, self.supervisor.read(spec.session_id).state)
         self.assertEqual("tmux_supervised_noninteractive_v1", result.evidence["transport_mode"])
         self.assertNotIn("RAW_MODEL_SENTINEL", json.dumps(result.evidence))
+        response = (
+            self.supervisor._turn_dir(spec.session_id) / f"{result.turn_id}.response.json"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("RAW_MODEL_SENTINEL", response)
+        self.assertNotIn('"stdout":', response)
+        self.assertNotIn('"stderr":', response)
         self.supervisor.acknowledge_turn(spec.session_id, result.turn_id)
         self.assertEqual(SessionState.READY, self.supervisor.read(spec.session_id).state)
         self.assertEqual([], list(self.supervisor._turn_dir(spec.session_id).iterdir()))
@@ -149,6 +155,47 @@ class SessionSupervisorTests(unittest.TestCase):
         self.assertEqual("1", counter.read_text())
         replacement.acknowledge_turn(spec.session_id, request.turn_id)
         self.assertEqual([], list(replacement._turn_dir(spec.session_id).iterdir()))
+
+    def test_restart_sanitizes_pre_increment_raw_response_spool(self):
+        spec = self.spec("legacy-raw-spool")
+        self.supervisor.start(spec)
+        request = self.request("turn-legacy-raw")
+        turn_dir = self.supervisor._turn_dir(spec.session_id)
+        (turn_dir / f"{request.turn_id}.request.json").write_text(
+            json.dumps(
+                {
+                    "turn_id": request.turn_id,
+                    "command": list(request.command),
+                    "cwd": str(request.cwd),
+                    "timeout_seconds": request.timeout_seconds,
+                    "prompt_sha256": request.prompt_sha256,
+                    "task": request.task,
+                }
+            ),
+            encoding="utf-8",
+        )
+        response = turn_dir / f"{request.turn_id}.response.json"
+        response.write_text(
+            json.dumps(
+                {
+                    "turn_id": request.turn_id,
+                    "prompt_sha256": request.prompt_sha256,
+                    "stdout": '{"ok": true}',
+                    "stderr": "RAW_MODEL_SENTINEL",
+                    "exit_code": 0,
+                    "timed_out": False,
+                    "duration_ms": 1,
+                }
+            ),
+            encoding="utf-8",
+        )
+        replacement = SessionSupervisor(self.root / "state")
+        replacement.reconcile()
+        sanitized = response.read_text(encoding="utf-8")
+        self.assertNotIn("RAW_MODEL_SENTINEL", sanitized)
+        self.assertNotIn('"stdout":', sanitized)
+        self.assertNotIn('"stderr":', sanitized)
+        self.assertIn("stderr_sha256", sanitized)
 
     def test_missing_tmux_reconstructs_only_when_worktree_clean(self):
         clean = self.spec("clean-reconstruct")
@@ -258,13 +305,23 @@ class SessionSupervisorTests(unittest.TestCase):
             agy = AntigravityAdapter()
             claude = ClaudeCLIAdapter()
             codex = CodexCLIAdapter()
-        self.assertTrue(claude.capability.merge_authority)
+            with self.assertRaisesRegex(AdapterError, "validation provenance"):
+                ClaudeCLIAdapter(merge_authority=True)
+            authoritative_claude = ClaudeCLIAdapter(
+                merge_authority=True, authority_validation_sha256="a" * 64
+            )
+        self.assertFalse(claude.capability.merge_authority)
+        self.assertTrue(authoritative_claude.capability.merge_authority)
         self.assertFalse(agy.capability.merge_authority)
         self.assertTrue(agy.capability.temporary)
         self.assertEqual(ForkCapability.SYNTHETIC, agy.session_contract.fork)
-        self.assertEqual(ForkCapability.NATIVE, claude.session_contract.fork)
+        self.assertEqual(ForkCapability.SYNTHETIC, claude.session_contract.fork)
         self.assertTrue(codex.capability.writes_workspace)
-        self.assertIn("workspace-write", codex.session_contract.launch_command)
+        self.assertIn("read-only", codex.session_contract.launch_command)
+        self.assertFalse(codex.capability.native_fork)
+        self.assertEqual(
+            "fail_closed", claude.persistent_declaration.structured_terminal_events
+        )
         for adapter in (agy, claude, codex):
             self.assertTrue(adapter.session_contract.resume)
             self.assertTrue(adapter.session_contract.readiness.ready_pattern)

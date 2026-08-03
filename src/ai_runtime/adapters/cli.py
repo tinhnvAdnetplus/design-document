@@ -14,6 +14,10 @@ from pathlib import Path
 from typing import Any
 
 from .base import AdapterCapability, AdapterError, AdapterResult, StructuredTask
+from ..runtime.feature_sessions import (
+    CapabilityValidation,
+    PersistentAdapterDeclaration,
+)
 from ..runtime.sessions import (
     AdapterSessionContract,
     ForkCapability,
@@ -187,6 +191,10 @@ class _SubprocessAdapter:
     @property
     def session_contract(self) -> AdapterSessionContract:
         return self._session_contract
+
+    @property
+    def persistent_declaration(self) -> PersistentAdapterDeclaration:
+        return self._persistent_declaration
 
     def _command(
         self,
@@ -397,6 +405,27 @@ class AntigravityAdapter(_SubprocessAdapter):
             structured_output=StructuredOutputChannel.JSON_STDOUT,
             termination=TerminationBehavior.GRACEFUL_THEN_KILL,
         )
+        self._persistent_declaration = PersistentAdapterDeclaration(
+            adapter="antigravity",
+            adapter_version=self.version,
+            declaration_revision=f"antigravity-persistent-v1-{_digest(self.version)[:12]}",
+            roles=frozenset({"planner", "reviewer"}),
+            root_launch_command=self._session_contract.launch_command,
+            root_readiness=self._session_contract.readiness,
+            synthetic_launch_command=self._session_contract.launch_command,
+            native_fork_command=None,
+            resume_command=None,
+            persistent_root=CapabilityValidation.FAIL_CLOSED,
+            native_fork=CapabilityValidation.FAIL_CLOSED,
+            resume=CapabilityValidation.FAIL_CLOSED,
+            structured_terminal_events=CapabilityValidation.FAIL_CLOSED,
+            validation_provenance_sha256=None,
+            writes_workspace=False,
+            merge_authority=False,
+            temporary=True,
+            trust_prompt=self._session_contract.trust_prompt,
+            termination=self._session_contract.termination,
+        )
 
     @property
     def capability(self) -> AdapterCapability:
@@ -425,19 +454,28 @@ class AntigravityAdapter(_SubprocessAdapter):
 
 
 class ClaudeCLIAdapter(_SubprocessAdapter):
-    """Production planner/reviewer adapter and baseline merge authority."""
+    """Production planner/reviewer and the only authority-eligible adapter."""
 
-    def __init__(self, *, model: str | None = None, binary: str = "claude"):
+    def __init__(
+        self,
+        *,
+        model: str | None = None,
+        binary: str = "claude",
+        merge_authority: bool = False,
+        authority_validation_sha256: str | None = None,
+    ):
         super().__init__(binary=binary, model=model)
+        if merge_authority and not re.fullmatch(r"[0-9a-f]{64}", authority_validation_sha256 or ""):
+            raise AdapterError("Claude merge authority requires explicit live validation provenance")
         self._capability = AdapterCapability(
             name="claude",
             version=self.version,
             roles=frozenset({StructuredTask.PLAN, StructuredTask.REVIEW}),
             structured_output=True,
             resume=True,
-            native_fork=True,
+            native_fork=False,
             writes_workspace=False,
-            merge_authority=True,
+            merge_authority=merge_authority,
             temporary=False,
         )
         interactive = [self.path, "--permission-mode", "plan", "--disable-slash-commands"]
@@ -451,9 +489,30 @@ class ClaudeCLIAdapter(_SubprocessAdapter):
             ),
             trust_prompt=TrustPromptBehavior.REJECT,
             resume=True,
-            fork=ForkCapability.NATIVE,
+            fork=ForkCapability.SYNTHETIC,
             structured_output=StructuredOutputChannel.JSON_STDOUT,
             termination=TerminationBehavior.GRACEFUL_THEN_KILL,
+        )
+        self._persistent_declaration = PersistentAdapterDeclaration(
+            adapter="claude",
+            adapter_version=self.version,
+            declaration_revision=f"claude-persistent-v1-{_digest(self.version)[:12]}",
+            roles=frozenset({"planner", "reviewer"}),
+            root_launch_command=self._session_contract.launch_command,
+            root_readiness=self._session_contract.readiness,
+            synthetic_launch_command=self._session_contract.launch_command,
+            native_fork_command=None,
+            resume_command=None,
+            persistent_root=CapabilityValidation.FAIL_CLOSED,
+            native_fork=CapabilityValidation.FAIL_CLOSED,
+            resume=CapabilityValidation.FAIL_CLOSED,
+            structured_terminal_events=CapabilityValidation.FAIL_CLOSED,
+            validation_provenance_sha256=authority_validation_sha256,
+            writes_workspace=False,
+            merge_authority=merge_authority,
+            temporary=False,
+            trust_prompt=self._session_contract.trust_prompt,
+            termination=self._session_contract.termination,
         )
 
     @property
@@ -489,7 +548,7 @@ class CodexCLIAdapter(_SubprocessAdapter):
             roles=frozenset({StructuredTask.IMPLEMENT}),
             structured_output=True,
             resume=True,
-            native_fork=True,
+            native_fork=False,
             writes_workspace=True,
             merge_authority=False,
             temporary=False,
@@ -497,7 +556,7 @@ class CodexCLIAdapter(_SubprocessAdapter):
         interactive = [
             self.path,
             "--sandbox",
-            "workspace-write",
+            "read-only",
             "--ask-for-approval",
             "never",
             "--no-alt-screen",
@@ -512,9 +571,30 @@ class CodexCLIAdapter(_SubprocessAdapter):
             ),
             trust_prompt=TrustPromptBehavior.REJECT,
             resume=True,
-            fork=ForkCapability.NATIVE,
+            fork=ForkCapability.SYNTHETIC,
             structured_output=StructuredOutputChannel.JSONL_STDOUT,
             termination=TerminationBehavior.GRACEFUL_THEN_KILL,
+        )
+        self._persistent_declaration = PersistentAdapterDeclaration(
+            adapter="codex",
+            adapter_version=self.version,
+            declaration_revision=f"codex-persistent-v1-{_digest(self.version)[:12]}",
+            roles=frozenset({"implementer"}),
+            root_launch_command=self._session_contract.launch_command,
+            root_readiness=self._session_contract.readiness,
+            synthetic_launch_command=self._session_contract.launch_command,
+            native_fork_command=None,
+            resume_command=None,
+            persistent_root=CapabilityValidation.FAIL_CLOSED,
+            native_fork=CapabilityValidation.FAIL_CLOSED,
+            resume=CapabilityValidation.FAIL_CLOSED,
+            structured_terminal_events=CapabilityValidation.FAIL_CLOSED,
+            validation_provenance_sha256=None,
+            writes_workspace=True,
+            merge_authority=False,
+            temporary=False,
+            trust_prompt=self._session_contract.trust_prompt,
+            termination=self._session_contract.termination,
         )
 
     @property
