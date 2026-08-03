@@ -5,12 +5,12 @@
   "required": ["event_id", "type", "payload"],
   "properties": {
     "event_id": {"type": "string", "minLength": 1},
-    "type": {"const": "feature.requested"},
+    "type": {"type": "string", "const": "feature.requested"},
     "payload": {
       "type": "object",
       "additionalProperties": false,
       "required": ["probe"],
-      "properties": {"probe": {"const": "ack"}}
+      "properties": {"probe": {"type": "string", "const": "ack"}}
     }
   }
 }

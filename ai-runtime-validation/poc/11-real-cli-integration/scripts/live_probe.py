@@ -277,9 +277,9 @@ def main() -> int:
             )
 
             agy_command = [
-                "agy", "--print", "--sandbox", "--mode", "plan", "--disable-slash-commands",
+                "agy", "--sandbox", "--mode", "plan", "--disable-slash-commands",
                 "--log-file", "/dev/null", "--model", agy_model, "--output-format", "json",
-                "--json-schema", str(EVENT_SCHEMA), "--print-timeout", f"{int(timeout)}s", event_prompt,
+                "--json-schema", str(EVENT_SCHEMA), "--print-timeout", f"{int(timeout)}s", "--print", event_prompt,
             ]
             call_counts["agy"] += 1
             agy_result, agy_evidence = command_evidence(
@@ -321,10 +321,10 @@ def main() -> int:
             resume_prompt = "Return only JSON with remembered equal to the nonce I asked you to remember."
             if agy_session and call_counts["agy"] < MAX_CALLS_PER_CLI:
                 agy_resume_command = [
-                    "agy", "--print", "--sandbox", "--mode", "plan", "--disable-slash-commands",
+                    "agy", "--sandbox", "--mode", "plan", "--disable-slash-commands",
                     "--log-file", "/dev/null", "--model", agy_model, "--output-format", "json",
                     "--json-schema", str(RESUME_SCHEMA), "--conversation", agy_session,
-                    "--print-timeout", f"{int(timeout)}s", resume_prompt,
+                    "--print-timeout", f"{int(timeout)}s", "--print", resume_prompt,
                 ]
                 call_counts["agy"] += 1
                 resumed, evidence = command_evidence(
@@ -374,6 +374,7 @@ def main() -> int:
             tmux_started = time.perf_counter_ns()
             captures = {"agy": "", "codex": ""}
             detected = {"agy": False, "codex": False}
+            pane_status = {}
             try:
                 subprocess.run(
                     [*tmux, "new-session", "-d", "-s", "agy-probe", "-c", str(fixture), shlex.join(agy_tmux_command)],
@@ -400,6 +401,27 @@ def main() -> int:
                     if not all(detected.values()):
                         time.sleep(1)
             finally:
+                for cli, session in (("agy", "agy-probe"), ("codex", "codex-probe")):
+                    pane = subprocess.run(
+                        [
+                            *tmux,
+                            "display-message",
+                            "-p",
+                            "-t",
+                            f"{session}:0.0",
+                            "#{pane_dead}\t#{pane_dead_status}\t#{pane_current_command}",
+                        ],
+                        text=True,
+                        capture_output=True,
+                        check=False,
+                    )
+                    fields = pane.stdout.strip().split("\t")
+                    pane_status[cli] = {
+                        "query_exit_code": pane.returncode,
+                        "dead": fields[0] == "1" if len(fields) > 0 else None,
+                        "exit_status": fields[1] or None if len(fields) > 1 else None,
+                        "current_command": redact(fields[2], fixture) if len(fields) > 2 else None,
+                    }
                 cleanup = subprocess.run([*tmux, "kill-server"], text=True, capture_output=True, check=False)
             tmux_duration = (time.perf_counter_ns() - tmux_started) / 1_000_000
             results["tmux"] = {
@@ -411,6 +433,7 @@ def main() -> int:
                     "launch_mode": "interactive" if cli == "agy" else (
                         "native_fork" if codex_session else "interactive"
                     ),
+                    "pane": pane_status[cli],
                 }
                 for cli in ("agy", "codex")
             }
