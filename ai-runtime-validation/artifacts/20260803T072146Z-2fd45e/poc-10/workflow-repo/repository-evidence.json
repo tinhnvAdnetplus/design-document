@@ -1,0 +1,19 @@
+{
+  "bundle": "poc-10/workflow-repo/repository.git.bundle",
+  "bundle_sha256": "ca773c8857b8812f224415fc415b991b50fa533e80a8238eb262916295376db3",
+  "bundle_verified": true,
+  "format_version": 1,
+  "head": "e9a0ddda4b364562dc1e9f4d60cf3885b344df6e",
+  "refs": [
+    {
+      "object": "333aa860b90e3dd504e12bb52c35171d87bb4f51",
+      "ref": "refs/heads/feature/e2e"
+    },
+    {
+      "object": "e9a0ddda4b364562dc1e9f4d60cf3885b344df6e",
+      "ref": "refs/heads/main"
+    }
+  ],
+  "repository": "poc-10/workflow-repo",
+  "status_porcelain": []
+}

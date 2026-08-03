@@ -748,3 +748,183 @@ Executed entries are appended below in run order. Evidence links are relative to
 **Architecture impact:** No specification change; executable evidence collected.
 
 ---
+
+### EXP-20260803T072146Z-2fd45e-POC-01 — Executable tmux-runtime validation
+
+| Field | Value |
+| --- | --- |
+| **Date** | 2026-08-03T07:21:47.380026Z |
+| **Phase** | Phase 1 |
+| **PoC** | poc/01-tmux-runtime |
+| **Git revision** | `1ee96f7dc65c3737c3bda7e28f5b23df75e10d0e` |
+| **Evidence** | `artifacts/20260803T072146Z-2fd45e/poc-01/report.json` |
+
+**Command:** `./scripts/run-selected.sh 01`
+
+**Conclusion:** PASS — 8/8 measurable assertions passed.
+
+**Architecture impact:** No specification change; executable evidence collected.
+
+---
+
+### EXP-20260803T072146Z-2fd45e-POC-02 — Executable event-protocol validation
+
+| Field | Value |
+| --- | --- |
+| **Date** | 2026-08-03T07:21:47.380026Z |
+| **Phase** | Phase 2 |
+| **PoC** | poc/02-event-protocol |
+| **Git revision** | `1ee96f7dc65c3737c3bda7e28f5b23df75e10d0e` |
+| **Evidence** | `artifacts/20260803T072146Z-2fd45e/poc-02/report.json` |
+
+**Command:** `./scripts/run-selected.sh 02`
+
+**Conclusion:** PASS — 12/12 measurable assertions passed.
+
+**Architecture impact:** No specification change; executable evidence collected.
+
+---
+
+### EXP-20260803T072146Z-2fd45e-POC-03 — Executable session-resume validation
+
+| Field | Value |
+| --- | --- |
+| **Date** | 2026-08-03T07:21:47.380026Z |
+| **Phase** | Phase 3 |
+| **PoC** | poc/03-session-resume |
+| **Git revision** | `1ee96f7dc65c3737c3bda7e28f5b23df75e10d0e` |
+| **Evidence** | `artifacts/20260803T072146Z-2fd45e/poc-03/report.json` |
+
+**Command:** `./scripts/run-selected.sh 03`
+
+**Conclusion:** PASS — 8/8 measurable assertions passed.
+
+**Architecture impact:** No specification change; executable evidence collected.
+
+---
+
+### EXP-20260803T072146Z-2fd45e-POC-04 — Executable capability-registry validation
+
+| Field | Value |
+| --- | --- |
+| **Date** | 2026-08-03T07:21:47.380026Z |
+| **Phase** | Phase 4 |
+| **PoC** | poc/04-capability-registry |
+| **Git revision** | `1ee96f7dc65c3737c3bda7e28f5b23df75e10d0e` |
+| **Evidence** | `artifacts/20260803T072146Z-2fd45e/poc-04/report.json` |
+
+**Command:** `./scripts/run-selected.sh 04`
+
+**Conclusion:** PASS — 7/7 measurable assertions passed.
+
+**Architecture impact:** No specification change; executable evidence collected.
+
+---
+
+### EXP-20260803T072146Z-2fd45e-POC-05 — Executable knowledge-runtime validation
+
+| Field | Value |
+| --- | --- |
+| **Date** | 2026-08-03T07:21:47.380026Z |
+| **Phase** | Phase 5 |
+| **PoC** | poc/05-knowledge-runtime |
+| **Git revision** | `1ee96f7dc65c3737c3bda7e28f5b23df75e10d0e` |
+| **Evidence** | `artifacts/20260803T072146Z-2fd45e/poc-05/report.json` |
+
+**Command:** `./scripts/run-selected.sh 05`
+
+**Conclusion:** PASS — 9/9 measurable assertions passed.
+
+**Architecture impact:** No specification change; executable evidence collected.
+
+---
+
+### EXP-20260803T072146Z-2fd45e-POC-06 — Executable review-loop validation
+
+| Field | Value |
+| --- | --- |
+| **Date** | 2026-08-03T07:21:47.380026Z |
+| **Phase** | Phase 6 |
+| **PoC** | poc/06-review-loop |
+| **Git revision** | `1ee96f7dc65c3737c3bda7e28f5b23df75e10d0e` |
+| **Evidence** | `artifacts/20260803T072146Z-2fd45e/poc-06/report.json` |
+
+**Command:** `./scripts/run-selected.sh 06`
+
+**Conclusion:** PASS — 6/6 measurable assertions passed.
+
+**Architecture impact:** No specification change; executable evidence collected.
+
+---
+
+### EXP-20260803T072146Z-2fd45e-POC-07 — Executable scheduler validation
+
+| Field | Value |
+| --- | --- |
+| **Date** | 2026-08-03T07:21:47.380026Z |
+| **Phase** | Phase 7 |
+| **PoC** | poc/07-scheduler |
+| **Git revision** | `1ee96f7dc65c3737c3bda7e28f5b23df75e10d0e` |
+| **Evidence** | `artifacts/20260803T072146Z-2fd45e/poc-07/report.json` |
+
+**Command:** `./scripts/run-selected.sh 07`
+
+**Conclusion:** PASS — 6/6 measurable assertions passed.
+
+**Architecture impact:** No specification change; executable evidence collected.
+
+---
+
+### EXP-20260803T072146Z-2fd45e-POC-08 — Executable chaos validation
+
+| Field | Value |
+| --- | --- |
+| **Date** | 2026-08-03T07:21:47.380026Z |
+| **Phase** | Phase 8 |
+| **PoC** | poc/08-chaos |
+| **Git revision** | `1ee96f7dc65c3737c3bda7e28f5b23df75e10d0e` |
+| **Evidence** | `artifacts/20260803T072146Z-2fd45e/poc-08/report.json` |
+
+**Command:** `./scripts/run-selected.sh 08`
+
+**Conclusion:** PASS — 7/7 measurable assertions passed.
+
+**Architecture impact:** No specification change; executable evidence collected.
+
+---
+
+### EXP-20260803T072146Z-2fd45e-POC-09 — Executable performance validation
+
+| Field | Value |
+| --- | --- |
+| **Date** | 2026-08-03T07:21:47.380026Z |
+| **Phase** | Phase 9 |
+| **PoC** | poc/09-performance |
+| **Git revision** | `1ee96f7dc65c3737c3bda7e28f5b23df75e10d0e` |
+| **Evidence** | `artifacts/20260803T072146Z-2fd45e/poc-09/report.json` |
+
+**Command:** `./scripts/run-selected.sh 09`
+
+**Conclusion:** PASS — 9/9 measurable assertions passed.
+
+**Architecture impact:** No specification change; executable evidence collected.
+
+---
+
+### EXP-20260803T072146Z-2fd45e-POC-10 — Executable end-to-end validation
+
+| Field | Value |
+| --- | --- |
+| **Date** | 2026-08-03T07:21:47.380026Z |
+| **Phase** | Phase 10 |
+| **PoC** | poc/10-end-to-end |
+| **Git revision** | `1ee96f7dc65c3737c3bda7e28f5b23df75e10d0e` |
+| **Evidence** | `artifacts/20260803T072146Z-2fd45e/poc-10/report.json` |
+
+**Command:** `./scripts/run-selected.sh 10`
+
+**Conclusion:** PASS — 10/10 measurable assertions passed.
+
+**Architecture impact:** No specification change; executable evidence collected.
+
+---

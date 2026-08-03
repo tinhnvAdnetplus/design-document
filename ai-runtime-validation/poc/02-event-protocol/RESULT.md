@@ -3,9 +3,9 @@
 - Status: **PASS**
 - Assertions: **12/12**
 - Score: **100.0%**
-- Executed at: `2026-08-03T03:21:10.493027Z`
-- Git revision: `3cfe3261b7169b96d98dc416aa92f93aa93c8863`
-- Evidence: [`artifacts/20260803T032110Z-2986e3/poc-02/report.json`](../../artifacts/20260803T032110Z-2986e3/poc-02/report.json)
+- Executed at: `2026-08-03T07:21:47.380026Z`
+- Git revision: `1ee96f7dc65c3737c3bda7e28f5b23df75e10d0e`
+- Evidence: [`artifacts/20260803T072146Z-2fd45e/poc-02/report.json`](../../artifacts/20260803T072146Z-2fd45e/poc-02/report.json)
 
 ## Assertion evidence
 

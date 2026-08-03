@@ -1,0 +1,15 @@
+{
+  "bundle": "poc-09/history-repo/repository.git.bundle",
+  "bundle_sha256": "baac214c8165f15e15e6d37f29d2fa32dbabd8f110fbba1ebe97f43d001defea",
+  "bundle_verified": true,
+  "format_version": 1,
+  "head": "9376c2bc080d41f693727dcb61d2f39afbb16ab1",
+  "refs": [
+    {
+      "object": "9376c2bc080d41f693727dcb61d2f39afbb16ab1",
+      "ref": "refs/heads/main"
+    }
+  ],
+  "repository": "poc-09/history-repo",
+  "status_porcelain": []
+}

@@ -1,0 +1,108 @@
+[
+  {
+    "bundle": "poc-08/quarantine/dirty-repo/repository.git.bundle",
+    "bundle_sha256": "d3fb7ca75356e1e9fa8659921034ba7562bc3c2c96848cbae037d772362fede2",
+    "bundle_verified": true,
+    "format_version": 1,
+    "head": "8b8541e4314ec2173541bb0ca7b9cdac3d72857c",
+    "refs": [
+      {
+        "object": "8b8541e4314ec2173541bb0ca7b9cdac3d72857c",
+        "ref": "refs/heads/main"
+      }
+    ],
+    "repository": "poc-08/quarantine/dirty-repo",
+    "status_porcelain": [
+      "?? dirty.txt"
+    ]
+  },
+  {
+    "bundle": "poc-03/quarantine/feature-repo/repository.git.bundle",
+    "bundle_sha256": "d3fb7ca75356e1e9fa8659921034ba7562bc3c2c96848cbae037d772362fede2",
+    "bundle_verified": true,
+    "format_version": 1,
+    "head": "8b8541e4314ec2173541bb0ca7b9cdac3d72857c",
+    "refs": [
+      {
+        "object": "8b8541e4314ec2173541bb0ca7b9cdac3d72857c",
+        "ref": "refs/heads/main"
+      }
+    ],
+    "repository": "poc-03/quarantine/feature-repo",
+    "status_porcelain": [
+      "?? uncommitted.txt"
+    ]
+  },
+  {
+    "bundle": "poc-08/merge-repo/repository.git.bundle",
+    "bundle_sha256": "67c109ad99448c0a397c017497c5a7dbc7a7f1533e7a3d3d37af7d057d6f8ab2",
+    "bundle_verified": true,
+    "format_version": 1,
+    "head": "b5c1053ae1b55ef6e15b3c81eeec1d912fe0d809",
+    "refs": [
+      {
+        "object": "401838d095e7dac963168e5ed9cd66a3d4a09940",
+        "ref": "refs/heads/feature"
+      },
+      {
+        "object": "b5c1053ae1b55ef6e15b3c81eeec1d912fe0d809",
+        "ref": "refs/heads/main"
+      }
+    ],
+    "repository": "poc-08/merge-repo",
+    "status_porcelain": []
+  },
+  {
+    "bundle": "poc-09/history-repo/repository.git.bundle",
+    "bundle_sha256": "baac214c8165f15e15e6d37f29d2fa32dbabd8f110fbba1ebe97f43d001defea",
+    "bundle_verified": true,
+    "format_version": 1,
+    "head": "9376c2bc080d41f693727dcb61d2f39afbb16ab1",
+    "refs": [
+      {
+        "object": "9376c2bc080d41f693727dcb61d2f39afbb16ab1",
+        "ref": "refs/heads/main"
+      }
+    ],
+    "repository": "poc-09/history-repo",
+    "status_porcelain": []
+  },
+  {
+    "bundle": "poc-05/repo/repository.git.bundle",
+    "bundle_sha256": "79199bb6b5a327cecc4a13c6edc195d6233ea923e9ce461bb176192de13f3215",
+    "bundle_verified": true,
+    "format_version": 1,
+    "head": "b90d4a25fead7ec74ff99dfb45a8e85e7a40fc0d",
+    "refs": [
+      {
+        "object": "ef82f587b1a8b0c28ad47e428ca93221f57edbf8",
+        "ref": "refs/heads/feature"
+      },
+      {
+        "object": "b90d4a25fead7ec74ff99dfb45a8e85e7a40fc0d",
+        "ref": "refs/heads/main"
+      }
+    ],
+    "repository": "poc-05/repo",
+    "status_porcelain": []
+  },
+  {
+    "bundle": "poc-10/workflow-repo/repository.git.bundle",
+    "bundle_sha256": "ca773c8857b8812f224415fc415b991b50fa533e80a8238eb262916295376db3",
+    "bundle_verified": true,
+    "format_version": 1,
+    "head": "e9a0ddda4b364562dc1e9f4d60cf3885b344df6e",
+    "refs": [
+      {
+        "object": "333aa860b90e3dd504e12bb52c35171d87bb4f51",
+        "ref": "refs/heads/feature/e2e"
+      },
+      {
+        "object": "e9a0ddda4b364562dc1e9f4d60cf3885b344df6e",
+        "ref": "refs/heads/main"
+      }
+    ],
+    "repository": "poc-10/workflow-repo",
+    "status_porcelain": []
+  }
+]

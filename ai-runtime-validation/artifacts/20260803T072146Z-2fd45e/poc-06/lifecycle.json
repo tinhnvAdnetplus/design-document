@@ -1,0 +1,10 @@
+[
+  "feature.requested",
+  "plan.ready",
+  "plan.approved",
+  "implementation.ready",
+  "review.requested",
+  "merge.approved",
+  "merge.started",
+  "merge.completed"
+]

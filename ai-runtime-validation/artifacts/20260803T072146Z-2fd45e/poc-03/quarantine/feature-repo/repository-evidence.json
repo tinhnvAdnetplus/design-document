@@ -1,0 +1,17 @@
+{
+  "bundle": "poc-03/quarantine/feature-repo/repository.git.bundle",
+  "bundle_sha256": "d3fb7ca75356e1e9fa8659921034ba7562bc3c2c96848cbae037d772362fede2",
+  "bundle_verified": true,
+  "format_version": 1,
+  "head": "8b8541e4314ec2173541bb0ca7b9cdac3d72857c",
+  "refs": [
+    {
+      "object": "8b8541e4314ec2173541bb0ca7b9cdac3d72857c",
+      "ref": "refs/heads/main"
+    }
+  ],
+  "repository": "poc-03/quarantine/feature-repo",
+  "status_porcelain": [
+    "?? uncommitted.txt"
+  ]
+}
