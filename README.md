@@ -86,9 +86,11 @@ Implementation and validation have separate maturity levels:
 
 - the frozen contract laboratory has passed 82/82 assertions;
 - the SQLite WAL Event Store is a merge-ready production-oriented vertical slice;
-- live Antigravity/Codex compatibility is tracked by the isolated Phase 2C PoC;
+- live Antigravity/Codex compatibility is approved with documented adapter adaptations;
 - the complete multi-agent runtime is not yet a production implementation.
 
 See the [validation roadmap](ai-runtime-validation/ROADMAP.md), the
 [Phase 3 Event Store recommendation](reports/phase-3/recommendation.md), and the
 [evidence portability audit](ai-runtime-validation/reports/evidence-portability-audit.md).
+The live decision is recorded in
+[PoC 11](ai-runtime-validation/poc/11-real-cli-integration/RESULT.md).

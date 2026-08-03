@@ -12,15 +12,25 @@ The final legacy-format run `artifacts/20260803T040752Z-130658` passed
 `82/82` assertions. Evidence format v2 now exports nested repositories as
 verified Git bundles so new manifests remain valid on a clean checkout.
 
+## Phase 2C Execution Status
+
+Status: **REAL CLI INTEGRATION APPROVED WITH ADAPTATIONS**.
+
+Run `poc/11-real-cli-integration/artifacts/20260803T074311Z-729272` validated
+Antigravity 1.1.10 and Codex CLI 0.146.0 with real authenticated model calls.
+Both CLIs passed structured JSON Schema output, actual resume, concurrent tmux
+readiness, prompt delivery, response capture, clean fixture, and teardown gates.
+
 | Status | Scope |
 | --- | --- |
-| **Completed** | PoCs 01–10; 82/82 assertions; portable evidence format v2; SQLite WAL Event Store vertical slice; clean-checkout CI workflow |
-| **In Progress** | Phase 2C live Antigravity/Codex integration spike (PoC 11) |
-| **Blocked** | Production runtime expansion remains gated on live CLI process, structured output, resume/fork, timeout, and cleanup evidence |
+| **Completed** | PoCs 01–10; 82/82 assertions; portable evidence format v2; SQLite WAL Event Store vertical slice; clean-checkout CI; Phase 2C live CLI spike |
+| **Next** | Implement the minimal Adapter → Session Supervisor → Event ingestion vertical slice around the existing Event Store |
+| **Adaptations** | Version-bind the Antigravity adapter; use Git-derived synthetic reconstruction because `agy` has no native fork; use native structured output instead of terminal scraping for events |
 
 Phase 2B validates deterministic adapter contracts and does not claim
 live-vendor behavior. Phase 2C temporarily uses Antigravity (`agy`) in place of
 Claude CLI and keeps live, quota-consuming probes outside the default suite.
+The approved decision does not declare the complete runtime production-ready.
 
 ---
 

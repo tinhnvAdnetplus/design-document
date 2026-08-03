@@ -50,3 +50,18 @@ startup latency and quota consumption.
 
 The final probe adds a five-second post-readiness stabilization interval and
 one bounded Enter retry if no response is observed after ten seconds.
+
+## Decision run `20260803T074311Z-729272`
+
+All required gates passed:
+
+- both CLIs returned schema-valid structured events;
+- both resumed the correct session and recalled the nonce;
+- both trust/readiness states were detected in isolated tmux panes;
+- prompts were delivered with `send-keys` and response markers were captured;
+- Codex executed through its native fork path;
+- fixture cleanliness, teardown, manifest, and redaction checks passed.
+
+Decision: **PHASE_3_APPROVED_WITH_ADAPTATIONS**. Antigravity remains a
+version-bound Phase 2C substitution and requires Git-derived synthetic
+reconstruction because version 1.1.10 does not declare native fork support.
