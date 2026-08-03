@@ -1,0 +1,139 @@
+{
+  "base_revision": "571baf5",
+  "branch": "phase-3/persistent-root-native-fork",
+  "capability_decision": {
+    "agy_fork": "synthetic_only",
+    "claude_native_fork": "fail_closed_pending_live_validation",
+    "claude_persistent_root": "fail_closed_pending_live_validation",
+    "codex_native_fork": "fail_closed_pending_current_contract_validation",
+    "codex_persistent_root": "fail_closed_pending_live_validation",
+    "deterministic_fixture_native_fork": "validated",
+    "deterministic_fixture_root": "validated",
+    "deterministic_fixture_synthetic_fork": "validated",
+    "runtime_reference_terminal_events": "validated"
+  },
+  "captured_at": "2026-08-03T15:27:36.163787Z",
+  "format": "ai-runtime-evidence/v2",
+  "format_version": 2,
+  "limitations": [
+    "Installed persistent Claude/Codex TUI channels were discovery-only and were not used as workflow protocols.",
+    "The runtime-owned reference channel is deterministic, but no installed CLI is declared compatible until disposable live validation passes.",
+    "The legacy supervised non-interactive path remains transitional and does not preserve model context across turns.",
+    "Antigravity 1.1.10 remains temporary, advisory-only, and synthetic-reconstruction-only."
+  ],
+  "model_calls": {
+    "agy": 0,
+    "claude": 0,
+    "codex": 0
+  },
+  "privacy_checks": {
+    "absolute_home_absent": true,
+    "absolute_repository_absent": true,
+    "credential_assignment_absent": true,
+    "email_absent": true,
+    "raw_model_marker_absent": true,
+    "raw_pane_marker_absent": true,
+    "raw_prompt_absent": true,
+    "raw_transcript_fields_absent": true
+  },
+  "privacy_contract": {
+    "durable_idempotent_result_ack": true,
+    "raw_model_transcript_retained": false,
+    "raw_pane_retained": false,
+    "raw_prompt_in_evidence": false,
+    "raw_stderr_retained": false,
+    "raw_stdout_retained": false,
+    "retained_invalid_output_fields": [
+      "sha256",
+      "byte_count",
+      "duration_ms",
+      "exit_status",
+      "bounded_non_content_diagnostic"
+    ],
+    "structured_results_validated_before_event_append": true
+  },
+  "production_readiness": {
+    "claude_merge_authority_default_enabled": false,
+    "native_forks_live_validated_in_increment": [],
+    "persistent_claude_root": false,
+    "persistent_codex_root": false,
+    "structured_channel": "transitional_adapter_boundary"
+  },
+  "status": "PASS",
+  "subject": "persistent-root-native-feature-fork-transport",
+  "tested_revision": "c251bb1d99c3558172d56571f0a04debb724c29e",
+  "tool_discovery": {
+    "agy": {
+      "available": true,
+      "version": "1.1.10",
+      "version_exit_code": 0
+    },
+    "claude": {
+      "available": true,
+      "version": "2.1.197 (Claude Code)",
+      "version_exit_code": 0
+    },
+    "codex": {
+      "available": true,
+      "version": "codex-cli 0.146.0",
+      "version_exit_code": 0
+    },
+    "git": {
+      "available": true,
+      "version": "git version 2.53.0",
+      "version_exit_code": 0
+    },
+    "python3": {
+      "available": true,
+      "version": "Python 3.14.4",
+      "version_exit_code": 0
+    },
+    "tmux": {
+      "available": true,
+      "version": "tmux 3.6",
+      "version_exit_code": 0
+    }
+  },
+  "verification": {
+    "clean_clone_contract_assertions": {
+      "assertions_passed": 82,
+      "assertions_total": 82,
+      "diagnostic_redacted": "",
+      "duration_ms": 2837.849,
+      "exit_code": 0,
+      "passed": true,
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 5912,
+      "stdout_sha256": "53a4b3f0863bde81c3b02b9879a958f6abfdcb04a2cea8a947b8cf00d17465b3",
+      "timed_out": false
+    },
+    "clean_clone_runtime_tests": {
+      "diagnostic_redacted": "",
+      "duration_ms": 30288.541,
+      "exit_code": 0,
+      "passed": true,
+      "stderr_bytes": 8506,
+      "stderr_sha256": "e695cba1b71f5c74ee0867035007caed7be3605e33da810e729ffdd5289de32d",
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests_run": 46,
+      "timed_out": false
+    },
+    "clean_clone_started_clean": true,
+    "normative_docs_unchanged": true,
+    "runtime_tests": {
+      "diagnostic_redacted": "",
+      "duration_ms": 32648.117,
+      "exit_code": 0,
+      "passed": true,
+      "stderr_bytes": 8506,
+      "stderr_sha256": "e9263855d9a1c89f7b3a21c531dd561b90c54305257317c2c6815a196b0ccf33",
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests_run": 46,
+      "timed_out": false
+    },
+    "source_started_clean": true
+  }
+}

@@ -1,0 +1,9 @@
+[
+  {
+    "base_revision": "571baf5",
+    "contract_assertion_count": 82,
+    "normative_docs_changed": false,
+    "runtime_test_count": 46,
+    "tested_revision": "c251bb1d99c3558172d56571f0a04debb724c29e"
+  }
+]
