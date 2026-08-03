@@ -297,6 +297,7 @@ def main() -> int:
 
             codex_command = [
                 "codex", "--sandbox", "read-only", "--ask-for-approval", "never", "--cd", str(fixture),
+                "--config", 'model_reasoning_effort="low"',
             ]
             if codex_model:
                 codex_command.extend(["--model", codex_model])
@@ -339,6 +340,7 @@ def main() -> int:
             if codex_session and call_counts["codex"] < MAX_CALLS_PER_CLI:
                 codex_resume_command = [
                     "codex", "--sandbox", "read-only", "--ask-for-approval", "never", "--cd", str(fixture),
+                    "--config", 'model_reasoning_effort="low"',
                     "exec", "resume", "--ignore-rules", "--json", "--output-schema", str(RESUME_SCHEMA),
                     codex_session, resume_prompt,
                 ]
@@ -360,7 +362,7 @@ def main() -> int:
             ]
             codex_tmux_command = [
                 "codex", "--sandbox", "read-only", "--ask-for-approval", "never", "--cd", str(fixture),
-                "--no-alt-screen",
+                "--config", 'model_reasoning_effort="low"', "--no-alt-screen",
             ]
             if codex_session:
                 codex_tmux_command.extend(["fork", codex_session])
@@ -373,6 +375,8 @@ def main() -> int:
             detected = {"agy": False, "codex": False}
             trust_detected = {"agy": False, "codex": False}
             trust_accepted = {"agy": False, "codex": False}
+            readiness_detected = {"agy": False, "codex": False}
+            readiness_ms = {"agy": None, "codex": None}
             prompt_sent = {"agy": False, "codex": False}
             pane_status = {}
             try:
@@ -403,12 +407,35 @@ def main() -> int:
                             text=True, capture_output=True, check=False,
                         )
                         trust_accepted[cli] = accepted.returncode == 0
-                time.sleep(3)
+                readiness_started = time.perf_counter_ns()
+                readiness_deadline = time.monotonic() + min(timeout, 30)
+                while time.monotonic() < readiness_deadline and not all(readiness_detected.values()):
+                    for cli, session in (("agy", "agy-probe"), ("codex", "codex-probe")):
+                        if readiness_detected[cli]:
+                            continue
+                        captured = subprocess.run(
+                            [*tmux, "capture-pane", "-p", "-S", "-80", "-t", f"{session}:0.0"],
+                            text=True, capture_output=True, check=False,
+                        ).stdout
+                        if cli == "agy":
+                            ready = "Plan mode:" in captured
+                        else:
+                            ready = bool(re.search(r"model:\s+(?!loading)\S+", captured))
+                        if ready:
+                            readiness_detected[cli] = True
+                            readiness_ms[cli] = round(
+                                (time.perf_counter_ns() - readiness_started) / 1_000_000,
+                                3,
+                            )
+                    if not all(readiness_detected.values()):
+                        time.sleep(0.5)
                 prompts = {
                     "agy": "Compute 193 plus 251. Respond with only the decimal result.",
                     "codex": "Compute 173 plus 249. Respond with only the decimal result.",
                 }
                 for cli, session in (("agy", "agy-probe"), ("codex", "codex-probe")):
+                    if not readiness_detected[cli]:
+                        continue
                     sent = subprocess.run(
                         [*tmux, "send-keys", "-t", f"{session}:0.0", "-l", prompts[cli]],
                         text=True, capture_output=True, check=False,
@@ -467,6 +494,8 @@ def main() -> int:
                     ),
                     "trust_prompt_detected": trust_detected[cli],
                     "trust_accepted": trust_accepted[cli],
+                    "readiness_detected": readiness_detected[cli],
+                    "readiness_ms": readiness_ms[cli],
                     "prompt_sent_via_tmux": prompt_sent[cli],
                     "pane": pane_status[cli],
                 }
@@ -507,6 +536,8 @@ def main() -> int:
             results["tmux"].get(cli, {}).get("response_detected", False) for cli in ("agy", "codex")
         ] + [
             results["tmux"].get(cli, {}).get("prompt_sent_via_tmux", False) for cli in ("agy", "codex")
+        ] + [
+            results["tmux"].get(cli, {}).get("readiness_detected", False) for cli in ("agy", "codex")
         ] + [
             results["fixture_clean"],
             results["tmux"].get("cleanup_exit_code") == 0,

@@ -27,3 +27,16 @@ evidence rather than being relabeled as a vendor incompatibility.
 The decision probe now accepts trust only for its disposable fixture and sends
 the prompt afterward through tmux `send-keys`, matching the intended runtime
 transport more closely.
+
+## Probe iteration `20260803T073535Z-6ede9b`
+
+- Both structured-output and resume gates passed again.
+- Trust prompts were detected and accepted, and both `send-keys` operations
+  returned success.
+- A focused screen inspection showed Antigravity was ready at “Plan mode” and
+  responded correctly, while Codex was still at `model: loading` when the fixed
+  three-second delay expired.
+
+The probe now waits for CLI-specific readiness evidence instead of sleeping for
+a fixed interval. Codex probe turns also use low reasoning effort to reduce
+startup latency and quota consumption.
