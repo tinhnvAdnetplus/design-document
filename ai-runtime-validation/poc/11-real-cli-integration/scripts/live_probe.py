@@ -378,6 +378,7 @@ def main() -> int:
             readiness_detected = {"agy": False, "codex": False}
             readiness_ms = {"agy": None, "codex": None}
             prompt_sent = {"agy": False, "codex": False}
+            submission_retry = {"agy": False, "codex": False}
             pane_status = {}
             try:
                 subprocess.run(
@@ -429,6 +430,8 @@ def main() -> int:
                             )
                     if not all(readiness_detected.values()):
                         time.sleep(0.5)
+                if any(readiness_detected.values()):
+                    time.sleep(5)
                 prompts = {
                     "agy": "Compute 193 plus 251. Respond with only the decimal result.",
                     "codex": "Compute 173 plus 249. Respond with only the decimal result.",
@@ -446,6 +449,7 @@ def main() -> int:
                     )
                     prompt_sent[cli] = sent.returncode == entered.returncode == 0
                 deadline = time.monotonic() + timeout
+                response_started = time.monotonic()
                 while time.monotonic() < deadline and not all(detected.values()):
                     for cli, session, marker in [
                         ("agy", "agy-probe", "444"),
@@ -457,6 +461,15 @@ def main() -> int:
                         )
                         captures[cli] = captured.stdout + captured.stderr
                         detected[cli] = marker in captures[cli]
+                    if time.monotonic() - response_started >= 10:
+                        for cli, session in (("agy", "agy-probe"), ("codex", "codex-probe")):
+                            if detected[cli] or submission_retry[cli] or not prompt_sent[cli]:
+                                continue
+                            retried = subprocess.run(
+                                [*tmux, "send-keys", "-t", f"{session}:0.0", "Enter"],
+                                text=True, capture_output=True, check=False,
+                            )
+                            submission_retry[cli] = retried.returncode == 0
                     if not all(detected.values()):
                         time.sleep(1)
             finally:
@@ -497,6 +510,7 @@ def main() -> int:
                     "readiness_detected": readiness_detected[cli],
                     "readiness_ms": readiness_ms[cli],
                     "prompt_sent_via_tmux": prompt_sent[cli],
+                    "submission_enter_retried": submission_retry[cli],
                     "pane": pane_status[cli],
                 }
                 for cli in ("agy", "codex")

@@ -40,3 +40,13 @@ transport more closely.
 The probe now waits for CLI-specific readiness evidence instead of sleeping for
 a fixed interval. Codex probe turns also use low reasoning effort to reduce
 startup latency and quota consumption.
+
+## Probe iteration `20260803T074021Z-0e6ffc`
+
+- Direct structured and resume gates passed with lower Codex latency.
+- Trust, readiness, and prompt delivery were all observed, but readiness was
+  declared only 0.5–1 second after trust acceptance and the first Enter was
+  consumed during final TUI initialization.
+
+The final probe adds a five-second post-readiness stabilization interval and
+one bounded Enter retry if no response is observed after ten seconds.

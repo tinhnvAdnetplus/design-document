@@ -1,0 +1,38 @@
+{
+  "agy": {
+    "available": true,
+    "capabilities": {
+      "native_fork_declared": false,
+      "resume_declared": true,
+      "sandbox_declared": true,
+      "structured_output_declared": true,
+      "synthetic_fork_declared": true
+    },
+    "help_sha256": "1a76a80acd0731942eb5c31db9f57ceaa2634b082d6bdc05c4eb9c6d8a3788e5",
+    "path": "$HOME/.local/bin/agy",
+    "version": "1.1.10",
+    "version_exit_code": 0
+  },
+  "codex": {
+    "available": true,
+    "capabilities": {
+      "native_fork_declared": true,
+      "resume_declared": true,
+      "sandbox_declared": true,
+      "structured_output_declared": true,
+      "synthetic_fork_declared": true
+    },
+    "help_sha256": "201d600d7c66121058e12c516b81ccaf66858ee8e284a81dfdb3ef6e82fa6334",
+    "path": "$HOME/.nvm/versions/node/v26.2.0/bin/codex",
+    "version": "codex-cli 0.146.0",
+    "version_exit_code": 0
+  },
+  "tmux": {
+    "available": true,
+    "capabilities": {},
+    "help_sha256": "6defd9c844fd541bda2e10d48e2b198f00944927a5c1040e53bd0df25252a9bd",
+    "path": "/usr/bin/tmux",
+    "version": "tmux 3.6",
+    "version_exit_code": 0
+  }
+}
