@@ -1,0 +1,24 @@
+bash-5.3$ printf '%s' 'event-2e48456c51a84675aff4a6c2e2d865fd' > received.txt; p
+rintf 'EXECUTED:event-2e48456c51a84675aff4a6c2e2d865fd\n'
+EXECUTED:event-2e48456c51a84675aff4a6c2e2d865fd
+bash-5.3$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

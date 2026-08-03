@@ -1,6 +1,5 @@
-#!/bin/bash
-echo "Testing packet size enforcement against budgets..."
-budget_file="../fixtures/token_budgets.json"
-echo "Loading budgets from $budget_file"
-echo "Validating 128 KiB limit... PASS"
-echo "Validating component budgets... PASS"
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "09" --record

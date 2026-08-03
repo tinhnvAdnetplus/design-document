@@ -1,19 +1,27 @@
-# Execution Steps: PoC 08
+# PoC 08 — chaos: Execution Guide
 
 ## Prerequisites
-- Bash 4.4+
-- `jq` installed
 
-## Steps
-1. Run `scripts/run_all.sh` to execute the chaos suite.
-2. Or run individual scripts:
-   - `./scripts/chaos_session_kill.sh`
-   - `./scripts/chaos_event_store.sh`
-   - `./scripts/chaos_worktree.sh`
-   - `./scripts/chaos_merge.sh`
-   - `./scripts/chaos_disk_full.sh`
-   - `./scripts/chaos_clock_jump.sh`
-   - `./scripts/test_recovery_order.sh`
+Run from the validation workspace once:
 
-## Expected Output
-The recovery scripts should detect the simulated failures and apply the Chapter 23 resolution steps, logging `[PASS]` for each.
+```bash
+../../scripts/validate_environment.sh
+```
+
+## Execute
+
+From this PoC directory:
+
+```bash
+./scripts/run_all.sh
+```
+
+Or from the validation workspace:
+
+```bash
+../../run-selected.sh 08
+```
+
+The command exits zero only when every measurable assertion passes. Failures exit non-zero with diagnostics. Each run creates an isolated directory under `artifacts/`, writes JSON and JUnit-compatible evidence, updates `RESULT.md`, and appends `experiment-log.md`.
+
+All other scripts in `scripts/` are compatibility entrypoints into the same complete PoC assertion set; they do not report unconditional success.

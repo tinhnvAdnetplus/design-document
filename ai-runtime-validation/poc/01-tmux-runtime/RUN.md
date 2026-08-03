@@ -1,29 +1,27 @@
-# Execution Steps: 01-tmux-runtime
+# PoC 01 — tmux-runtime: Execution Guide
 
 ## Prerequisites
-- `tmux` installed on the system (version 3.0+ recommended).
-- Bash shell.
 
-## Execution Steps
-1. Navigate to the script directory:
-   ```bash
-   cd scripts/
-   ```
-2. Execute the full PoC runner:
-   ```bash
-   ./run_all.sh
-   ```
-3. Alternatively, run the scripts interactively:
-   ```bash
-   ./create_sessions.sh
-   ./check_sessions.sh
-   ./send_event_notice.sh
-   ./cleanup_sessions.sh
-   ```
+Run from the validation workspace once:
 
-## Expected Output
-The runner should output logs confirming:
-- Creation of `claude-root` and feature sessions.
-- Verification that sessions exist via `has-session`.
-- Delivery of the event notification.
-- Successful cleanup of all sessions upon completion.
+```bash
+../../scripts/validate_environment.sh
+```
+
+## Execute
+
+From this PoC directory:
+
+```bash
+./scripts/run_all.sh
+```
+
+Or from the validation workspace:
+
+```bash
+../../run-selected.sh 01
+```
+
+The command exits zero only when every measurable assertion passes. Failures exit non-zero with diagnostics. Each run creates an isolated directory under `artifacts/`, writes JSON and JUnit-compatible evidence, updates `RESULT.md`, and appends `experiment-log.md`.
+
+All other scripts in `scripts/` are compatibility entrypoints into the same complete PoC assertion set; they do not report unconditional success.

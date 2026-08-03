@@ -1,0 +1,19 @@
+{
+  "confirmed": [
+    {
+      "classification": "confirmed",
+      "evidence": {
+        "commits": [
+          "3ae419f58ad3516b564499adf0fa328f1de81468"
+        ],
+        "paths": [
+          "architecture.txt"
+        ]
+      },
+      "statement": "critical confirmed fact"
+    }
+  ],
+  "transient": [
+    "40 transient chunks omitted; see source evidence"
+  ]
+}

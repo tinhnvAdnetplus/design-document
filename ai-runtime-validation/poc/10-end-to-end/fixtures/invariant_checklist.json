@@ -1,4 +1,14 @@
 {
-  "INV-01": "pass",
-  "INV-10": "pass"
+  "required_invariants": [
+    "INV-01",
+    "INV-02",
+    "INV-03",
+    "INV-04",
+    "INV-05",
+    "INV-06",
+    "INV-07",
+    "INV-08",
+    "INV-09",
+    "INV-10"
+  ]
 }

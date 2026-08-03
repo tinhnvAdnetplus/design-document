@@ -1,44 +1,26 @@
 # Phase 06 Report — Review Loop and Approval
 
-## Overview
+## Executed Result
 
-This report documents the results of validating the feature and review lifecycle, approval binding, escalation, and authorization enforcement.
+- Status: **PASS**
+- Assertions: **6/6**
+- Executed: `2026-08-03T03:21:10.493027Z`
+- Git revision: `3cfe3261b7169b96d98dc416aa92f93aa93c8863`
+- Assertion report: [PoC RESULT](../poc/06-review-loop/RESULT.md)
+- Machine evidence: [report.json](../artifacts/20260803T032110Z-2986e3/poc-06/report.json)
 
-**PoC:** [`poc/06-review-loop`](../poc/06-review-loop/README.md)
-**Spec Reference:** Chapters 8, 14 — Session Lifecycle, Feature and Review Lifecycle
-**Invariants Tested:** INV-03 (single writer), INV-04 (Claude approval only), INV-08 (disposable)
+## Validated Scope
 
-## Experiments Executed
-
-| ID | Experiment | Result |
-| --- | --- | --- |
-| EXP-001 | Complete lifecycle traversal | ☐ Pending |
-| EXP-002 | Approval binding immutability | ☐ Pending |
-| EXP-003 | Stale approval invalidation | ☐ Pending |
-| EXP-004 | Review/fix escalation | ☐ Pending |
-| EXP-005 | Forged approval rejection | ☐ Pending |
-| EXP-006 | Writer lease management | ☐ Pending |
-
-## Evidence Collected
-
-_To be filled after experiment execution._
-
-## Successes
-
-_To be filled after experiment execution._
+State transitions, immutable approval binding, stale/forged rejection, escalation, writer lease were exercised through observable assertions. Failure paths returned explicit diagnostics instead of unconditional success output.
 
 ## Failures
 
-_To be filled after experiment execution._
+No assertion failures were observed in the authoritative run.
 
-## Known Limitations
+## Limitations
 
-_To be filled after experiment execution._
-
-## Recommendations
-
-_To be filled after experiment execution._
+This is deterministic local architecture validation. Live Claude/Codex vendor CLI compatibility remains a Phase 3 integration activity.
 
 ## Specification Impact
 
-_Does this phase reveal anything that should be noted for V2.2 clarification or future revision?_
+No V2.2 architecture defect or documentation correction was required.

@@ -1,4 +1,5 @@
-#!/bin/bash
-# Kills tmux sessions at random points
-echo "[INFO] Simulating tmux session kill..."
-echo "[PASS] System handles orphaned tmux sessions via PID check."
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "08" --record

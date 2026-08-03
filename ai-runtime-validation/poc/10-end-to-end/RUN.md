@@ -1,16 +1,27 @@
-# Running PoC 10
+# PoC 10 — end-to-end: Execution Guide
 
 ## Prerequisites
-- Bash 4.4+
-- `jq` for checking fixtures
-- Git
 
-## Execution Steps
-Run the complete end-to-end integration test:
+Run from the validation workspace once:
+
 ```bash
-cd scripts/
-./run_all.sh
+../../scripts/validate_environment.sh
 ```
 
-## Expected Output
-Step-by-step console logs showing the progression of the feature lifecycle, invariant checks passing, and an end-to-end report generated at the end.
+## Execute
+
+From this PoC directory:
+
+```bash
+./scripts/run_all.sh
+```
+
+Or from the validation workspace:
+
+```bash
+../../run-selected.sh 10
+```
+
+The command exits zero only when every measurable assertion passes. Failures exit non-zero with diagnostics. Each run creates an isolated directory under `artifacts/`, writes JSON and JUnit-compatible evidence, updates `RESULT.md`, and appends `experiment-log.md`.
+
+All other scripts in `scripts/` are compatibility entrypoints into the same complete PoC assertion set; they do not report unconditional success.

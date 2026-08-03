@@ -4,6 +4,18 @@
 
 This roadmap defines the phased execution order for validating the AI Multi-Agent Runtime V2.2 Architecture Specification. Each phase builds on validated assumptions from prior phases and produces measurable evidence.
 
+## Phase 2B Execution Status
+
+Authoritative manifest-enabled CI run: `artifacts/20260803T032110Z-2986e3` (`81/82` assertions passed).
+
+| Status | Scope |
+| --- | --- |
+| **Completed** | Shared assertion/evidence infrastructure; framework path repair; PoCs 01–08 and 10; JSON/JUnit/Markdown/SHA-256 reporting; CI and selected/full runners |
+| **In Progress** | PoC 09 event-acceptance performance: 8/9 assertions pass |
+| **Blocked** | Durable event acceptance p99 is above the frozen 50 ms target on this ext4 host; a Phase 3 Event Store implementation or storage strategy is required before this can be closed |
+
+The real Claude/Codex vendor CLI compatibility run also remains a Phase 3 integration dependency. Phase 2B validates deterministic adapter contracts and does not claim live-vendor behavior.
+
 ---
 
 ## Phase Dependency Graph

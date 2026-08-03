@@ -1,8 +1,5 @@
-#!/bin/bash
-# scripts/cleanup_sessions.sh
-# Tears down the tmux server and cleans up test sessions.
-
-SOCKET="ai-runtime"
-echo "[INFO] Killing all sessions on socket ${SOCKET}..."
-tmux -L $SOCKET kill-server 2>/dev/null || true
-echo "[SUCCESS] Cleanup complete."
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "01" --record

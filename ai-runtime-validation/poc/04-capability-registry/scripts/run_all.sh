@@ -1,4 +1,5 @@
-#!/bin/bash
-DIR="$(cd "$(dirname "$0")" && pwd)"
-for script in $DIR/test*.sh $DIR/register*.sh $DIR/query*.sh; do bash "$script"; done
-echo 'PoC 04 done.'\n
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "04" --record

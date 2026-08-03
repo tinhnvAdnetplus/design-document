@@ -1,15 +1,5 @@
-#!/bin/bash
-# scripts/test_fresh_reconstruction.sh
-PACKET=$1
-
-echo "[INFO] Attempting fresh reconstruction..."
-if [ ! -f "$PACKET" ]; then
-  echo "[FAIL] Reconstruction packet missing."
-  exit 1
-fi
-
-ROLE=$(jq -r '.role_contract' "$PACKET")
-HEAD=$(jq -r '.git_state.head_sha' "$PACKET")
-
-echo "[INFO] Reconstructing agent for role: $ROLE at commit: $HEAD"
-echo "[PASS] Fresh reconstruction complete."
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "03" --record

@@ -1,5 +1,5 @@
-#!/bin/bash
-# Tests bounded retry with escalation
-echo "[INFO] Testing retry backoff..."
-cat ../fixtures/retry_policy.json
-echo "[PASS] Backoff policy applied correctly."
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "07" --record

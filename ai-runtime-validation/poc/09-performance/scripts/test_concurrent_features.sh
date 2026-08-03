@@ -1,5 +1,5 @@
-#!/bin/bash
-echo "Testing concurrent non-conflicting feature flows..."
-echo "Starting 10 flows..."
-sleep 2
-echo "All flows completed successfully within latency targets. PASS"
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "09" --record

@@ -82,6 +82,14 @@ cat RUN.md             # Follow execution steps
 ./scripts/run_all.sh   # Run the experiment
 ```
 
+Run the entire suite from this directory with:
+
+```bash
+./run-all.sh
+```
+
+Run selected PoCs with `./run-selected.sh 01 02`, or use `./ci.sh` as the CI entrypoint. Every run stores an environment record, assertion-level JSON reports, a Markdown summary, a failure report, captured artifacts, and JUnit XML under a unique `artifacts/<run-id>/` directory.
+
 ### 4. Compare Results
 
 After execution, compare observed behavior against `EXPECTED.md` and record findings in `RESULT.md`.
@@ -99,7 +107,8 @@ Execute phases in order defined in [`ROADMAP.md`](ROADMAP.md). Each phase builds
 | `git` | 2.30+ | Worktree and merge validation |
 | `jq` | 1.6+ | JSON event processing |
 | `openssl` | 1.1+ | SHA-256 integrity hashing |
-| `python3` | 3.8+ | Optional: advanced fixture generation |
+| `python3` | 3.8+ | Validation engine and measured test workloads |
+| Python `jsonschema` | Draft-07 support | Event envelope contract validation |
 
 ## Architectural Invariants Under Validation
 

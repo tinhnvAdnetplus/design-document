@@ -1,45 +1,26 @@
 # Phase 02 Report — Event Protocol and Event Store
 
-## Overview
+## Executed Result
 
-This report documents the results of validating the V2.2 JSON event envelope, validation pipeline, and append-only Event Store semantics.
+- Status: **PASS**
+- Assertions: **12/12**
+- Executed: `2026-08-03T03:21:10.493027Z`
+- Git revision: `3cfe3261b7169b96d98dc416aa92f93aa93c8863`
+- Assertion report: [PoC RESULT](../poc/02-event-protocol/RESULT.md)
+- Machine evidence: [report.json](../artifacts/20260803T032110Z-2986e3/poc-02/report.json)
 
-**PoC:** [`poc/02-event-protocol`](../poc/02-event-protocol/README.md)
-**Spec Reference:** Chapters 11–13 — Communication Protocol, Message Format, Protocol Error Handling
-**Invariants Tested:** INV-09 (correlation and provenance)
+## Validated Scope
 
-## Experiments Executed
-
-| ID | Experiment | Result |
-| --- | --- | --- |
-| EXP-001 | Event envelope generation | ☐ Pending |
-| EXP-002 | Schema validation (valid events) | ☐ Pending |
-| EXP-003 | Schema validation (invalid events) | ☐ Pending |
-| EXP-004 | Idempotency key deduplication | ☐ Pending |
-| EXP-005 | Content integrity SHA-256 | ☐ Pending |
-| EXP-006 | Event Store append-only semantics | ☐ Pending |
-| EXP-007 | Projection rebuild from replay | ☐ Pending |
-
-## Evidence Collected
-
-_To be filled after experiment execution._
-
-## Successes
-
-_To be filled after experiment execution._
+Draft-07 schema, versioning, SHA-256, signatures, idempotency, ordering, replay, corruption were exercised through observable assertions. Failure paths returned explicit diagnostics instead of unconditional success output.
 
 ## Failures
 
-_To be filled after experiment execution._
+No assertion failures were observed in the authoritative run.
 
-## Known Limitations
+## Limitations
 
-_To be filled after experiment execution._
-
-## Recommendations
-
-_To be filled after experiment execution._
+This is deterministic local architecture validation. Live Claude/Codex vendor CLI compatibility remains a Phase 3 integration activity.
 
 ## Specification Impact
 
-_Does this phase reveal anything that should be noted for V2.2 clarification or future revision?_
+No V2.2 architecture defect or documentation correction was required.

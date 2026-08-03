@@ -1,0 +1,33 @@
+{
+  "commits": [
+    "da17f672a4df3da5165b8e9c943926099d601597"
+  ],
+  "feature": {
+    "branch": "main",
+    "id": "feat-resume",
+    "plan": "artifact://plan/1",
+    "worktree": "/home/tinhnv/project/docs/design-document/ai-runtime-validation/artifacts/20260803T031639Z-6855e2/poc-03/feature-repo"
+  },
+  "instruction": "Verify Git before acting; continuity is not assumed.",
+  "integration_head": "da17f672a4df3da5165b8e9c943926099d601597",
+  "knowledge_cache": {
+    "provenance_head": "da17f672a4df3da5165b8e9c943926099d601597",
+    "version": 1
+  },
+  "lineage": {
+    "edge_type": "reconstruction",
+    "parent": "codex-feature-resume-1"
+  },
+  "pending_events": [
+    "evt-recovery-1"
+  ],
+  "policy_revision": "policy-validation-1",
+  "reconstruction": true,
+  "repository_identity": "43612ccee1c57f0f1b56a299a76dfd08625c0b75c8f5bd3de43e60acab5926e1",
+  "role_contract": "codex-implementer",
+  "runtime_revision": "v2.2",
+  "unknowns": [
+    "vendor conversational state"
+  ],
+  "writer_lease": null
+}

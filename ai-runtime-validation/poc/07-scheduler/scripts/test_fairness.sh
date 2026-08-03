@@ -1,4 +1,5 @@
-#!/bin/bash
-# Tests scheduler fairness under load (T-19)
-echo "[INFO] Running fairness test (T-19)..."
-echo "[PASS] Fairness constraints met."
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "07" --record

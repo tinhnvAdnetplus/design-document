@@ -1,5 +1,5 @@
-#!/bin/bash
-# Simulates durable delivery queue behavior
-echo "[INFO] Simulating durable delivery queue..."
-cat ../fixtures/delivery_queue.json | jq .
-echo "[PASS] Delivery queue simulation completed."
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "07" --record

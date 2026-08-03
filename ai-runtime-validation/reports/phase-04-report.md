@@ -1,44 +1,26 @@
 # Phase 04 Report — Capability Registry
 
-## Overview
+## Executed Result
 
-This report documents the results of validating the Capability Registry's gating, revalidation, and mismatch handling behavior.
+- Status: **PASS**
+- Assertions: **7/7**
+- Executed: `2026-08-03T03:21:10.493027Z`
+- Git revision: `3cfe3261b7169b96d98dc416aa92f93aa93c8863`
+- Assertion report: [PoC RESULT](../poc/04-capability-registry/RESULT.md)
+- Machine evidence: [report.json](../artifacts/20260803T032110Z-2986e3/poc-04/report.json)
 
-**PoC:** [`poc/04-capability-registry`](../poc/04-capability-registry/README.md)
-**Spec Reference:** Chapters 5, 6, 10 — Runtime Overview, Adapters, Orchestrator
-**Invariants Tested:** Related to INV-06 (resume gating)
+## Validated Scope
 
-## Experiments Executed
-
-| ID | Experiment | Result |
-| --- | --- | --- |
-| EXP-001 | Capability Document registration | ☐ Pending |
-| EXP-002 | Fork gating (native/synthetic) | ☐ Pending |
-| EXP-003 | Resume gating (resume=true) | ☐ Pending |
-| EXP-004 | Revalidation triggers | ☐ Pending |
-| EXP-005 | Mismatch → ADAPTER_UNAVAILABLE | ☐ Pending |
-| EXP-006 | Stale document rejection | ☐ Pending |
-
-## Evidence Collected
-
-_To be filled after experiment execution._
-
-## Successes
-
-_To be filled after experiment execution._
+Registration, fork/resume gates, trigger revalidation, stale rejection, mismatch fencing were exercised through observable assertions. Failure paths returned explicit diagnostics instead of unconditional success output.
 
 ## Failures
 
-_To be filled after experiment execution._
+No assertion failures were observed in the authoritative run.
 
-## Known Limitations
+## Limitations
 
-_To be filled after experiment execution._
-
-## Recommendations
-
-_To be filled after experiment execution._
+This is deterministic local architecture validation. Live Claude/Codex vendor CLI compatibility remains a Phase 3 integration activity.
 
 ## Specification Impact
 
-_Does this phase reveal anything that should be noted for V2.2 clarification or future revision?_
+No V2.2 architecture defect or documentation correction was required.

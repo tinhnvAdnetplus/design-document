@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="ai-runtime-validation" tests="8" failures="0" timestamp="2026-08-03T03:14:25.221503Z"><testcase classname="poc.01.tmux-runtime" name="TMUX-01 named sessions exist" time="0.000002"><system-out>expected: exactly four V2.2-named sessions
+observed: ["claude-feature-f123-plan-1", "claude-root", "codex-feature-f123-1", "codex-root"]</system-out></testcase><testcase classname="poc.01.tmux-runtime" name="TMUX-02 each session owns a pane" time="0.000002"><system-out>expected: one pane per session
+observed: {"claude-feature-f123-plan-1": ["%2"], "claude-root": ["%0"], "codex-feature-f123-1": ["%3"], "codex-root": ["%1"]}</system-out></testcase><testcase classname="poc.01.tmux-runtime" name="TMUX-03 working directories are assigned" time="0.000001"><system-out>expected: each pane cwd equals assigned isolated directory
+observed: {"claude-feature-f123-plan-1": "/home/tinhnv/project/docs/design-document/ai-runtime-validation/artifacts/20260803T031425Z-e9778b/poc-01/workspace/claude-feature", "claude-root": "/home/tinhnv/project/docs/design-document/ai-runtime-validation/artifacts/20260803T031425Z-e9778b/poc-01/workspace/claude-root", "codex-feature-f123-1": "/home/tinhnv/project/docs/design-document/ai-runtime-validation/artifacts/20260803T031425Z-e9778b/poc-01/workspace/codex-feature", "codex-root": "/home/tinhnv/project/docs/design-document/ai-runtime-validation/artifacts/20260803T031425Z-e9778b/poc-01/workspace/codex-root"}</system-out></testcase><testcase classname="poc.01.tmux-runtime" name="TMUX-04 event command is received and executed" time="0.000002"><system-out>expected: target marker contains unique command token
+observed: event-b63f0f26a194439d9db019b309fbea6b</system-out></testcase><testcase classname="poc.01.tmux-runtime" name="TMUX-05 pane output is capturable" time="0.000001"><system-out>expected: captured pane includes execution token
+observed: bash-5.3$ printf '%s' 'event-b63f0f26a194439d9db019b309fbea6b' &gt; received.txt; p
+rintf 'EXECUTED:event-b63f0f26a194439d9db019b309fbea6b\n'
+EXECUTED:event-b63f0f26a194439d9db019b309fbea6b
+bash-5.3$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</system-out></testcase><testcase classname="poc.01.tmux-runtime" name="TMUX-06 session files are isolated" time="0.000001"><system-out>expected: only target workspace receives marker
+observed: {"claude-feature-f123-plan-1": false, "claude-root": true, "codex-feature-f123-1": false, "codex-root": false}</system-out></testcase><testcase classname="poc.01.tmux-runtime" name="TMUX-07 notification submission is non-blocking" time="0.000001"><system-out>expected: tmux send-keys returns in &lt;100 ms
+observed: 8.497</system-out></testcase><testcase classname="poc.01.tmux-runtime" name="TMUX-08 cleanup removes every session" time="0.000001"><system-out>expected: has-session fails for all created sessions
+observed: true</system-out></testcase></testsuite>

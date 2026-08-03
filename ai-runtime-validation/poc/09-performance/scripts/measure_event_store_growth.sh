@@ -1,4 +1,5 @@
-#!/bin/bash
-echo "Tracking Event Store growth rate..."
-echo "Simulating 1000 events..."
-echo "Average size: 1.2KB per event. PASS"
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "09" --record

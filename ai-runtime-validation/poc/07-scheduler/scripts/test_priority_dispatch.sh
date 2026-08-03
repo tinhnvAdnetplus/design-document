@@ -1,5 +1,5 @@
-#!/bin/bash
-# Tests priority-based event dispatch
-echo "[INFO] Testing priority dispatch..."
-cat ../fixtures/priority_events.json | jq 'sort_by(.priority)'
-echo "[PASS] Priority dispatch sorted and routed correctly."
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "07" --record

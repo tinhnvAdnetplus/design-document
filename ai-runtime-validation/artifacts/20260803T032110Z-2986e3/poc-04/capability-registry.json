@@ -1,0 +1,20 @@
+{
+  "claude": {
+    "adapter": "claude",
+    "native_fork": true,
+    "resume": true,
+    "status": "ADAPTER_UNAVAILABLE",
+    "synthetic_fork": false,
+    "validated_at": "2026-08-03T03:21:21.441138Z",
+    "version": "1.0"
+  },
+  "codex": {
+    "adapter": "codex",
+    "native_fork": false,
+    "resume": false,
+    "status": "AVAILABLE",
+    "synthetic_fork": true,
+    "validated_at": "2026-08-03T03:21:21.441145Z",
+    "version": "1.0"
+  }
+}

@@ -1,46 +1,26 @@
 # Phase 05 Report — Knowledge Runtime
 
-## Overview
+## Executed Result
 
-This report documents the results of validating Knowledge Runtime, Knowledge Snapshots, Knowledge Compression, and Knowledge Evolution behavior.
+- Status: **PASS**
+- Assertions: **9/9**
+- Executed: `2026-08-03T03:21:10.493027Z`
+- Git revision: `3cfe3261b7169b96d98dc416aa92f93aa93c8863`
+- Assertion report: [PoC RESULT](../poc/05-knowledge-runtime/RESULT.md)
+- Machine evidence: [report.json](../artifacts/20260803T032110Z-2986e3/poc-05/report.json)
 
-**PoC:** [`poc/05-knowledge-runtime`](../poc/05-knowledge-runtime/README.md)
-**Spec Reference:** Chapter 9 — Knowledge Runtime; Chapter 16 — Knowledge Synchronization
-**Invariants Tested:** INV-01 (Git-first), INV-05 (post-merge knowledge sync only)
+## Validated Scope
 
-## Experiments Executed
-
-| ID | Experiment | Result |
-| --- | --- | --- |
-| EXP-001 | Knowledge Snapshot schema (6 domains) | ☐ Pending |
-| EXP-002 | Fact classification | ☐ Pending |
-| EXP-003 | Provenance validation | ☐ Pending |
-| EXP-004 | Knowledge Compression pipeline | ☐ Pending |
-| EXP-005 | Knowledge Evolution after merge | ☐ Pending |
-| EXP-006 | Cache Taxonomy isolation | ☐ Pending |
-| EXP-007 | Token budget enforcement | ☐ Pending |
-| EXP-008 | Unproven fact rejection | ☐ Pending |
-
-## Evidence Collected
-
-_To be filled after experiment execution._
-
-## Successes
-
-_To be filled after experiment execution._
+Six domains, classification, Git provenance, compression, budget, evolution, cache isolation were exercised through observable assertions. Failure paths returned explicit diagnostics instead of unconditional success output.
 
 ## Failures
 
-_To be filled after experiment execution._
+No assertion failures were observed in the authoritative run.
 
-## Known Limitations
+## Limitations
 
-_To be filled after experiment execution._
-
-## Recommendations
-
-_To be filled after experiment execution._
+This is deterministic local architecture validation. Live Claude/Codex vendor CLI compatibility remains a Phase 3 integration activity.
 
 ## Specification Impact
 
-_Does this phase reveal anything that should be noted for V2.2 clarification or future revision?_
+No V2.2 architecture defect or documentation correction was required.

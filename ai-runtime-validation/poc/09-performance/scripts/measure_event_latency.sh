@@ -1,7 +1,5 @@
-#!/bin/bash
-echo "Measuring event accept and notify latency..."
-# Simulate event submission
-sleep 0.02
-echo "Accept latency: 23ms"
-sleep 0.05
-echo "Notify latency: 51ms"
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "09" --record

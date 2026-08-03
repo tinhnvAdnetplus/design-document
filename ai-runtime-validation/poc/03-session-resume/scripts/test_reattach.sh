@@ -1,11 +1,5 @@
-#!/bin/bash
-# scripts/test_reattach.sh
-SESSION=$1
-
-if tmux -L ai-runtime has-session -t "$SESSION" 2>/dev/null; then
-  echo "[PASS] Reattach successful for $SESSION."
-  exit 0
-else
-  echo "[FAIL] Reattach failed for $SESSION. Session not found."
-  exit 1
-fi
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "03" --record

@@ -1,4 +1,5 @@
-#!/bin/bash
-# Tests merge crash recovery via Git ref inspection
-echo "[INFO] Simulating crash during merge..."
-echo "[PASS] Actual ref determines outcome (merge aborted/completed)."
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "08" --record

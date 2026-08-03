@@ -1,22 +1,27 @@
-# Execution Steps: 03-session-resume
+# PoC 03 — session-resume: Execution Guide
 
 ## Prerequisites
-- Bash shell.
-- jq for JSON parsing.
-- tmux for session simulation.
 
-## Execution Steps
-1. Navigate to the scripts directory:
-   ```bash
-   cd scripts/
-   ```
-2. Run the master orchestration script:
-   ```bash
-   ./run_all.sh
-   ```
+Run from the validation workspace once:
 
-## Expected Output
-- Reattach test attempts and succeeds (or fails over properly).
-- Capability registry is queried for `resume=true`.
-- Fresh reconstruction packet is generated from fixtures.
-- Dirty worktree test successfully creates a simulated quarantine directory.
+```bash
+../../scripts/validate_environment.sh
+```
+
+## Execute
+
+From this PoC directory:
+
+```bash
+./scripts/run_all.sh
+```
+
+Or from the validation workspace:
+
+```bash
+../../run-selected.sh 03
+```
+
+The command exits zero only when every measurable assertion passes. Failures exit non-zero with diagnostics. Each run creates an isolated directory under `artifacts/`, writes JSON and JUnit-compatible evidence, updates `RESULT.md`, and appends `experiment-log.md`.
+
+All other scripts in `scripts/` are compatibility entrypoints into the same complete PoC assertion set; they do not report unconditional success.

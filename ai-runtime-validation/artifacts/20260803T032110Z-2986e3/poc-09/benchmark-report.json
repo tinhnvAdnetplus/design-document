@@ -1,0 +1,45 @@
+{
+  "configuration": {
+    "target_accept_latency_ms": 50,
+    "target_notify_latency_ms": 100
+  },
+  "environment": {
+    "cpu_count": 8,
+    "model_usage": "deterministic mock; no vendor model invoked",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "python": "3.14.4"
+  },
+  "statistics": {
+    "cache_rebuild_ms": 41.952102,
+    "concurrent_features": {
+      "count": 10,
+      "duration_ms": 12.628701
+    },
+    "event_accept_ms": {
+      "p50": 34.991752000000005,
+      "p95": 427.021412,
+      "p99": 657.666418
+    },
+    "event_store": {
+      "accept_throughput_per_second": 9.782739827537519,
+      "bytes_per_event": 157.26666666666668
+    },
+    "notify_ms": {
+      "p50": 0.0026,
+      "p95": 0.0044,
+      "p99": 0.0057
+    },
+    "peak_rss_kib": 113372,
+    "recovery_ms": 34.042902,
+    "session_modes": {
+      "cold_median_ms": 19.473801,
+      "persistent_median_ms": 0.12719999999999998,
+      "ratio": 0.006531852718429236
+    }
+  },
+  "workload": {
+    "concurrent_features": 10,
+    "events": 150,
+    "history_commits": 100
+  }
+}

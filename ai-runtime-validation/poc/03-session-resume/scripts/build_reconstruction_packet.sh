@@ -1,12 +1,5 @@
-#!/bin/bash
-# scripts/build_reconstruction_packet.sh
-TYPE=$1
-
-if [ "$TYPE" == "root" ]; then
-  cat ../fixtures/root_reconstruction_packet.json
-elif [ "$TYPE" == "feature" ]; then
-  cat ../fixtures/feature_reconstruction_packet.json
-else
-  echo "Unknown type"
-  exit 1
-fi
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "03" --record

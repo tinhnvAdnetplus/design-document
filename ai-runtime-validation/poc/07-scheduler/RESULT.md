@@ -1,16 +1,19 @@
-# PoC 07 Results
+# PoC 07 — scheduler: Executed Result
 
-## Execution Summary
-- Date: YYYY-MM-DD
-- Status: PENDING
+- Status: **PASS**
+- Assertions: **6/6**
+- Score: **100.0%**
+- Executed at: `2026-08-03T03:21:10.493027Z`
+- Git revision: `3cfe3261b7169b96d98dc416aa92f93aa93c8863`
+- Evidence: [`artifacts/20260803T032110Z-2986e3/poc-07/report.json`](../../artifacts/20260803T032110Z-2986e3/poc-07/report.json)
 
-## Script Results
-- simulate_delivery_queue.sh: PENDING
-- test_priority_dispatch.sh: PENDING
-- test_retry_backoff.sh: PENDING
-- test_non_blocking.sh: PENDING
-- test_session_registry.sh: PENDING
-- test_fairness.sh: PENDING
+## Assertion evidence
 
-## Architecture Validation
-- INV-07 (Non-blocking): PENDING
+| ID | Status | Expected | Observed |
+| --- | --- | --- | --- |
+| SCH-01 | PASS | serialized queue equals in-memory queue | {"count": 3, "path": "/home/tinhnv/project/docs/design-document/ai-runtime-validation/artifacts/20260803T032110Z-2986e3/poc-07/delivery-queue.json"} |
+| SCH-02 | PASS | critical-new, high, normal-old | ["critical-new", "high", "normal-old"] |
+| SCH-03 | PASS | 2,4,8,16 seconds and visible after threshold | {"escalation": "visible", "seconds": [2, 4, 8, 16]} |
+| SCH-04 | PASS | ready selected; all-busy queue remains pending | {"assigned": "ready", "pending_when_full": true} |
+| SCH-05 | PASS | SLA-aged normal event dispatches before fresh critical | ["normal-aged", "critical-fresh"] |
+| SCH-06 | PASS | 1000-item tick <100 ms with no consumer wait | {"duration_ms": 0.33, "eligible": 1000} |

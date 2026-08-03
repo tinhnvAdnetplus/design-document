@@ -1,46 +1,26 @@
 # Phase 10 Report — End-to-End Integration
 
-## Overview
+## Executed Result
 
-This report documents the results of the complete V2.2 workflow validation from feature request through merge completion and knowledge synchronization.
+- Status: **PASS**
+- Assertions: **10/10**
+- Executed: `2026-08-03T03:21:10.493027Z`
+- Git revision: `3cfe3261b7169b96d98dc416aa92f93aa93c8863`
+- Assertion report: [PoC RESULT](../poc/10-end-to-end/RESULT.md)
+- Machine evidence: [report.json](../artifacts/20260803T032110Z-2986e3/poc-10/report.json)
 
-**PoC:** [`poc/10-end-to-end`](../poc/10-end-to-end/README.md)
-**Spec Reference:** All chapters — Complete architecture integration
-**Invariants Tested:** INV-01 through INV-10 (all)
+## Validated Scope
 
-## Experiments Executed
-
-| ID | Experiment | Result |
-| --- | --- | --- |
-| EXP-001 | Complete lifecycle traversal | ☐ Pending |
-| EXP-002 | All invariants hold throughout | ☐ Pending |
-| EXP-003 | Event correlation chain | ☐ Pending |
-| EXP-004 | Session Lineage Graph | ☐ Pending |
-| EXP-005 | Knowledge Evolution post-merge | ☐ Pending |
-| EXP-006 | Feature session cleanup | ☐ Pending |
-| EXP-007 | Git canonical throughout | ☐ Pending |
-| EXP-008 | Capability Registry consulted | ☐ Pending |
-
-## Evidence Collected
-
-_To be filled after experiment execution._
-
-## Successes
-
-_To be filled after experiment execution._
+Complete event lifecycle, audit chain, approval, Git merge, post-merge sync, cleanup, all invariants were exercised through observable assertions. Failure paths returned explicit diagnostics instead of unconditional success output.
 
 ## Failures
 
-_To be filled after experiment execution._
+No assertion failures were observed in the authoritative run.
 
-## Known Limitations
+## Limitations
 
-_To be filled after experiment execution._
-
-## Recommendations
-
-_To be filled after experiment execution._
+This is deterministic local architecture validation. Live Claude/Codex vendor CLI compatibility remains a Phase 3 integration activity.
 
 ## Specification Impact
 
-_Does this phase reveal anything that should be noted for V2.2 clarification or future revision?_
+No V2.2 architecture defect or documentation correction was required.

@@ -1,22 +1,27 @@
-# Running PoC 09
+# PoC 09 — performance: Execution Guide
 
 ## Prerequisites
-- Bash 4.4+
-- `jq` for JSON processing
-- standard Unix utilities (`time`, `dd`, `awk`)
 
-## Execution Steps
-Run the complete benchmark suite:
+Run from the validation workspace once:
+
 ```bash
-cd scripts/
-./run_all.sh
+../../scripts/validate_environment.sh
 ```
 
-To run individual tests:
+## Execute
+
+From this PoC directory:
+
 ```bash
-./scripts/measure_event_latency.sh
-./scripts/test_packet_budget.sh
+./scripts/run_all.sh
 ```
 
-## Expected Output
-A formatted benchmark report detailing latency, throughput, token budget enforcement results, and session mode comparisons.
+Or from the validation workspace:
+
+```bash
+../../run-selected.sh 09
+```
+
+The command exits zero only when every measurable assertion passes. Failures exit non-zero with diagnostics. Each run creates an isolated directory under `artifacts/`, writes JSON and JUnit-compatible evidence, updates `RESULT.md`, and appends `experiment-log.md`.
+
+All other scripts in `scripts/` are compatibility entrypoints into the same complete PoC assertion set; they do not report unconditional success.

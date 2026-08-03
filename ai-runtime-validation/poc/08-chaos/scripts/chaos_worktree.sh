@@ -1,5 +1,5 @@
-#!/bin/bash
-# Tests worktree recovery scenarios
-echo "[INFO] Simulating dirty worktree crash..."
-cat ../fixtures/dirty_worktree_state.json
-echo "[PASS] Orphan detected and safely quarantined."
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "08" --record

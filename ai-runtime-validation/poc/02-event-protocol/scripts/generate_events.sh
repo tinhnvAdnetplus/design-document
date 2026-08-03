@@ -1,4 +1,5 @@
-#!/bin/bash
-# scripts/generate_events.sh
-# Dummy script for regenerating events if needed (PoC uses static fixtures mostly)
-echo "[INFO] Event generation uses static fixtures in this PoC."
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "02" --record

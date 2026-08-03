@@ -7,7 +7,7 @@
 - **Session Registry**: Tracks session state, capacity, and role (e.g., Claude Planner, Codex Implementer).
 
 ## Runtime Topology
-- Simulated Orchestrator loop (runs periodically, non-blocking).
+- Deterministic Orchestrator tick over a file-backed delivery queue (bounded and non-blocking).
 - Event Store -> Durable Delivery Queue -> Dispatcher -> Session (tmux).
 
 ## Expected Behavior

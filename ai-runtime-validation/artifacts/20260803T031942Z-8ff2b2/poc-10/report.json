@@ -1,0 +1,104 @@
+{
+  "assertions": [
+    {
+      "diagnostic": "",
+      "duration_ms": 0.002,
+      "expected": "exact ten-event lifecycle",
+      "id": "E2E-01",
+      "observed": "[\"feature.requested\", \"plan.ready\", \"plan.approved\", \"implementation.ready\", \"review.requested\", \"merge.approved\", \"merge.started\", \"merge.completed\", \"knowledge.sync.requested\", \"knowledge.synchronized\"]",
+      "status": "PASS",
+      "title": "complete lifecycle reaches knowledge.synchronized"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.002,
+      "expected": "sequence 1..10; one correlation; each causation points to predecessor",
+      "id": "E2E-02",
+      "observed": "{\"causes_match\": true, \"correlations\": [\"cor-e2e-validation\"], \"sequences\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}",
+      "status": "PASS",
+      "title": "event audit chain is contiguous and correlated"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "Claude reviewer signature matches implementation head",
+      "id": "E2E-03",
+      "observed": "{\"head\": \"ad122486f59de1582502354b0b2c1b6b819c3b81\", \"role\": \"claude_reviewer\", \"signature_valid\": true}",
+      "status": "PASS",
+      "title": "merge approval authority and binding verify"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.002,
+      "expected": "feature head reachable and merge event matches main",
+      "id": "E2E-04",
+      "observed": "{\"feature_reachable\": true, \"integration_head\": \"f58118580a20188fc8f1e34e322267d23ecdca16\"}",
+      "status": "PASS",
+      "title": "Git integration state proves merge outcome"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "knowledge.sync.requested index follows merge.completed",
+      "id": "E2E-05",
+      "observed": "{\"knowledge_index\": 8, \"merge_index\": 7}",
+      "status": "PASS",
+      "title": "knowledge synchronization occurs only after merge"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.002,
+      "expected": "feature absent; root alive",
+      "id": "E2E-06",
+      "observed": "{\"feature_absent\": true, \"root_alive\": true}",
+      "status": "PASS",
+      "title": "feature session is disposable without affecting root"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.002,
+      "expected": "10/10 invariant predicates true",
+      "id": "E2E-07",
+      "observed": "{\"INV-01\": true, \"INV-02\": true, \"INV-03\": true, \"INV-04\": true, \"INV-05\": true, \"INV-06\": true, \"INV-07\": true, \"INV-08\": true, \"INV-09\": true, \"INV-10\": true}",
+      "status": "PASS",
+      "title": "all ten architectural invariants have observed evidence"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "feature cleaned; deliberately persistent root remains managed",
+      "id": "E2E-08",
+      "observed": "{\"feature_absent\": true, \"managed_roots\": 1}",
+      "status": "PASS",
+      "title": "cleanup leaves no feature or orphan sessions"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "isolated tmux socket has no server",
+      "id": "E2E-09",
+      "observed": "true",
+      "status": "PASS",
+      "title": "laboratory teardown removes tmux server"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.034,
+      "expected": "fsync-backed non-empty store; zero schema errors",
+      "id": "E2E-10",
+      "observed": "{\"bytes\": 7228, \"events\": 10}",
+      "status": "PASS",
+      "title": "event store is durable and schema-valid"
+    }
+  ],
+  "dependencies": [
+    "Real vendor Claude/Codex CLI compatibility remains a Phase 3 integration dependency; this run uses deterministic contract adapters."
+  ],
+  "failed": 0,
+  "name": "end-to-end",
+  "passed": 10,
+  "poc": "10",
+  "score_percent": 100.0,
+  "status": "PASS",
+  "total": 10
+}

@@ -1,0 +1,872 @@
+{
+  "completion_percent": 100.0,
+  "failed": 0,
+  "git_revision": "3cfe3261b7169b96d98dc416aa92f93aa93c8863",
+  "passed": 82,
+  "pocs": [
+    {
+      "assertions": [
+        {
+          "diagnostic": "",
+          "duration_ms": 0.002,
+          "expected": "exactly four V2.2-named sessions",
+          "id": "TMUX-01",
+          "observed": "[\"claude-feature-f123-plan-1\", \"claude-root\", \"codex-feature-f123-1\", \"codex-root\"]",
+          "status": "PASS",
+          "title": "named sessions exist"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.002,
+          "expected": "one pane per session",
+          "id": "TMUX-02",
+          "observed": "{\"claude-feature-f123-plan-1\": [\"%2\"], \"claude-root\": [\"%0\"], \"codex-feature-f123-1\": [\"%3\"], \"codex-root\": [\"%1\"]}",
+          "status": "PASS",
+          "title": "each session owns a pane"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "each pane cwd equals assigned isolated directory",
+          "id": "TMUX-03",
+          "observed": "{\"claude-feature-f123-plan-1\": \"/home/tinhnv/project/docs/design-document/ai-runtime-validation/artifacts/20260803T031639Z-6855e2/poc-01/workspace/claude-feature\", \"claude-root\": \"/home/tinhnv/project/docs/design-document/ai-runtime-validation/artifacts/20260803T031639Z-6855e2/poc-01/workspace/claude-root\", \"codex-feature-f123-1\": \"/home/tinhnv/project/docs/design-document/ai-runtime-validation/artifacts/20260803T031639Z-6855e2/poc-01/workspace/codex-feature\", \"codex-root\": \"/home/tinhnv/project/docs/design-document/ai-runtime-validation/artifacts/20260803T031639Z-6855e2/poc-01/workspace/codex-root\"}",
+          "status": "PASS",
+          "title": "working directories are assigned"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.002,
+          "expected": "target marker contains unique command token",
+          "id": "TMUX-04",
+          "observed": "event-815cd0002e974f6682e26195c99a0cfb",
+          "status": "PASS",
+          "title": "event command is received and executed"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "captured pane includes execution token",
+          "id": "TMUX-05",
+          "observed": "bash-5.3$ printf '%s' 'event-815cd0002e974f6682e26195c99a0cfb' > received.txt; p\nrintf 'EXECUTED:event-815cd0002e974f6682e26195c99a0cfb\\n'\nEXECUTED:event-815cd0002e974f6682e26195c99a0cfb\nbash-5.3$\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+          "status": "PASS",
+          "title": "pane output is capturable"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "only target workspace receives marker",
+          "id": "TMUX-06",
+          "observed": "{\"claude-feature-f123-plan-1\": false, \"claude-root\": true, \"codex-feature-f123-1\": false, \"codex-root\": false}",
+          "status": "PASS",
+          "title": "session files are isolated"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "tmux send-keys returns in <100 ms",
+          "id": "TMUX-07",
+          "observed": "5.339",
+          "status": "PASS",
+          "title": "notification submission is non-blocking"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "has-session fails for all created sessions",
+          "id": "TMUX-08",
+          "observed": "true",
+          "status": "PASS",
+          "title": "cleanup removes every session"
+        }
+      ],
+      "dependencies": [],
+      "failed": 0,
+      "name": "tmux-runtime",
+      "passed": 8,
+      "poc": "01",
+      "score_percent": 100.0,
+      "status": "PASS",
+      "total": 8
+    },
+    {
+      "assertions": [
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "zero schema errors",
+          "id": "EVT-01",
+          "observed": "[[], [], []]",
+          "status": "PASS",
+          "title": "valid fixtures satisfy Draft-07 schema"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.002,
+          "expected": "every invalid fixture has schema diagnostics",
+          "id": "EVT-02",
+          "observed": "{\"missing_fields.json\": [\"'occurred_at' is a required property\", \"'producer' is a required property\", \"'aggregate' is a required property\", \"'correlation_id' is a required property\", \"'idempotency_key' is a required property\", \"'policy_revision' is a required property\", \"'payload' is a required property\", \"'integrity' is a required property\", \"Additional properties are not allowed ('_test_note' was unexpected)\"], \"wrong_protocol.json\": [\"'policy_revision' is a required property\", \"'integrity' is a required property\", \"'ai-runtime.events/v1' was expected\", \"'user' is not of type 'object'\", \"'feature_id' is a required property\", \"'stream' is a required property\"]}",
+          "status": "PASS",
+          "title": "malformed fixtures are rejected"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "v2 rejected by v1 schema",
+          "id": "EVT-03",
+          "observed": "[\"'ai-runtime.events/v1' was expected\"]",
+          "status": "PASS",
+          "title": "unsupported schema version is rejected"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "three fsync-backed appends",
+          "id": "EVT-04",
+          "observed": "[\"APPENDED\", \"APPENDED\", \"APPENDED\"]",
+          "status": "PASS",
+          "title": "events append durably in aggregate order"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "duplicate ignored and store remains three events",
+          "id": "EVT-05",
+          "observed": "{\"count\": 3, \"result\": \"DUPLICATE_IGNORED\"}",
+          "status": "PASS",
+          "title": "exact duplicates are idempotent"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "IDEMPOTENCY_CONFLICT",
+          "id": "EVT-06",
+          "observed": "IDEMPOTENCY_CONFLICT",
+          "status": "PASS",
+          "title": "idempotency-key content conflicts are rejected"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "sequence gap rejected",
+          "id": "EVT-07",
+          "observed": "AGGREGATE_SEQUENCE_CONFLICT expected=4",
+          "status": "PASS",
+          "title": "aggregate ordering is enforced"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "three events project final state plan.approved",
+          "id": "EVT-08",
+          "observed": "{\"event_count\": 3, \"side_effects_replayed\": 0, \"streams\": {\"feature/feat-validation\": {\"last_event_id\": \"evt-validation-003\", \"sequence\": 3, \"state\": \"plan.approved\"}}}",
+          "status": "PASS",
+          "title": "replay reconstructs projection"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "byte-identical projections; zero blind side effects",
+          "id": "EVT-09",
+          "observed": "4d6877e5fd4dd38d8bb45a0f781537756b4a06b54fd035cba4a686f588369d6c",
+          "status": "PASS",
+          "title": "replay is deterministic and side-effect safe"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.0,
+          "expected": "modified payload fails digest",
+          "id": "EVT-10",
+          "observed": "{\"computed\": \"c3c8fb6e3d7f319b581a1b0320b4cb7da9235cd6d80caba0b7f9ec16252dc6af\", \"stored\": \"e5c7d12798546ba1cb41129ebda040b8e1fad7b26a6f5d0aa6b23b1c47b85f76\"}",
+          "status": "PASS",
+          "title": "tampering is detected by SHA-256"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "INVALID_SIGNATURE",
+          "id": "EVT-11",
+          "observed": "INVALID_SIGNATURE",
+          "status": "PASS",
+          "title": "invalid signatures are rejected"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "corruption names exact line",
+          "id": "EVT-12",
+          "observed": "CORRUPT_EVENT_STORE line 4: Expecting property name enclosed in double quotes",
+          "status": "PASS",
+          "title": "store corruption fails closed"
+        }
+      ],
+      "dependencies": [],
+      "failed": 0,
+      "name": "event-protocol",
+      "passed": 12,
+      "poc": "02",
+      "score_percent": 100.0,
+      "status": "PASS",
+      "total": 12
+    },
+    {
+      "assertions": [
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "session name and live pane PID verified",
+          "id": "RES-01",
+          "observed": "{\"identity\": \"codex-feature-resume-1:%0\", \"pane_pid\": \"32735\"}",
+          "status": "PASS",
+          "title": "live session reattaches with identity evidence"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.0,
+          "expected": "all eight exceptional-resume gates true",
+          "id": "RES-02",
+          "observed": "{\"abnormal_loss\": true, \"capability_resume\": true, \"config_enabled\": true, \"exclusive_resource_free\": true, \"git_valid\": true, \"readiness_evidence\": true, \"resume_ref\": true, \"role_valid\": true}",
+          "status": "PASS",
+          "title": "resume eligibility requires every precondition"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.0,
+          "expected": "resume=false prevents resume attempt",
+          "id": "RES-03",
+          "observed": "fresh_reconstruction",
+          "status": "PASS",
+          "title": "capability gate selects fresh reconstruction"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "tmux session absent after kill",
+          "id": "RES-04",
+          "observed": "true",
+          "status": "PASS",
+          "title": "abnormal session loss is observable"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "required fields present and <=128 KiB",
+          "id": "RES-05",
+          "observed": "{\"bytes\": 1011, \"missing\": []}",
+          "status": "PASS",
+          "title": "fresh reconstruction packet is complete and bounded"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "packet HEAD equals clean repository HEAD",
+          "id": "RES-06",
+          "observed": "{\"git\": \"da17f672a4df3da5165b8e9c943926099d601597\", \"packet\": \"da17f672a4df3da5165b8e9c943926099d601597\"}",
+          "status": "PASS",
+          "title": "packet Git state matches repository"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "dirty file preserved in quarantine",
+          "id": "RES-07",
+          "observed": "{\"content\": \"preserve me\\n\", \"dirty\": true, \"quarantine\": \"/home/tinhnv/project/docs/design-document/ai-runtime-validation/artifacts/20260803T031639Z-6855e2/poc-03/quarantine/feature-repo\"}",
+          "status": "PASS",
+          "title": "dirty worktree is quarantined without deletion"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "no resume ID and a verifiable packet digest",
+          "id": "RES-08",
+          "observed": "{\"packet_sha256\": \"6107500843e1828ef7d8df4d3298260d7d416fe03c3e3903ada2334455d4a153\", \"resume_id\": null, \"source\": \"git_reconstruction\"}",
+          "status": "PASS",
+          "title": "workflow reconstruction does not depend on resume IDs"
+        }
+      ],
+      "dependencies": [],
+      "failed": 0,
+      "name": "session-resume",
+      "passed": 8,
+      "poc": "03",
+      "score_percent": 100.0,
+      "status": "PASS",
+      "total": 8
+    },
+    {
+      "assertions": [
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "two current documents and one capabilities() call each",
+          "id": "CAP-01",
+          "observed": "{\"calls\": {\"claude\": 1, \"codex\": 1}, \"entries\": [\"claude\", \"codex\"]}",
+          "status": "PASS",
+          "title": "registry loads documents from adapter capabilities()"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.0,
+          "expected": "claude native; codex synthetic",
+          "id": "CAP-02",
+          "observed": "{\"claude\": \"native\", \"codex\": \"synthetic\"}",
+          "status": "PASS",
+          "title": "fork selection is declaration-gated"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.0,
+          "expected": "undeclared resume becomes reconstruction",
+          "id": "CAP-03",
+          "observed": "{\"claude\": \"resume\", \"codex\": \"fresh_reconstruction\"}",
+          "status": "PASS",
+          "title": "resume selection is declaration-gated"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.0,
+          "expected": "fresh capabilities() call per trigger and adapter",
+          "id": "CAP-04",
+          "observed": "{\"audit\": [{\"active\": [\"claude\", \"codex\"], \"trigger\": \"startup\"}, {\"active\": [\"claude\", \"codex\"], \"trigger\": \"restart\"}, {\"active\": [\"claude\", \"codex\"], \"trigger\": \"adapter_upgrade\"}, {\"active\": [\"claude\", \"codex\"], \"trigger\": \"manual_cli_upgrade\"}], \"call_delta\": {\"claude\": 4, \"codex\": 4}}",
+          "status": "PASS",
+          "title": "required triggers force revalidation"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "older/equal document rejected",
+          "id": "CAP-05",
+          "observed": "{\"candidate\": \"0.1\", \"current\": \"1.0\"}",
+          "status": "PASS",
+          "title": "stale capability document cannot overwrite current"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.0,
+          "expected": "ADAPTER_UNAVAILABLE",
+          "id": "CAP-06",
+          "observed": "ADAPTER_UNAVAILABLE",
+          "status": "PASS",
+          "title": "declaration/observation mismatch fences adapter"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.0,
+          "expected": "missing adapter is unavailable",
+          "id": "CAP-07",
+          "observed": "ADAPTER_UNAVAILABLE",
+          "status": "PASS",
+          "title": "operations require a current registry entry"
+        }
+      ],
+      "dependencies": [],
+      "failed": 0,
+      "name": "capability-registry",
+      "passed": 7,
+      "poc": "04",
+      "score_percent": 100.0,
+      "status": "PASS",
+      "total": 7
+    },
+    {
+      "assertions": [
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "six named, populated domains",
+          "id": "KR-01",
+          "observed": "{\"architecture\": 1, \"business\": 1, \"convention\": 1, \"dependency\": 1, \"project\": 1, \"workspace\": 1}",
+          "status": "PASS",
+          "title": "snapshot contains all six domains"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.0,
+          "expected": "confirmed, inferred, open, transient",
+          "id": "KR-02",
+          "observed": "[\"confirmed\", \"inferred\", \"open\", \"transient\"]",
+          "status": "PASS",
+          "title": "fact taxonomy recognizes all classifications"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "every commit and path resolves",
+          "id": "KR-03",
+          "observed": "{\"commit\": \"a09fe70ab8d211d942041a5982ca9fb6fa9f5b20\", \"path\": \"architecture.txt\"}",
+          "status": "PASS",
+          "title": "confirmed facts resolve to Git provenance"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.0,
+          "expected": "missing provenance rejected",
+          "id": "KR-04",
+          "observed": "rejected",
+          "status": "PASS",
+          "title": "unproven confirmed fact is rejected"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.002,
+          "expected": ">128 KiB input, <128 KiB output, confirmed fact retained",
+          "id": "KR-05",
+          "observed": "{\"after_bytes\": 246, \"before_bytes\": 164155}",
+          "status": "PASS",
+          "title": "compression bounds oversized context and retains proven facts"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "131073-byte packet rejected",
+          "id": "KR-06",
+          "observed": "{\"bytes\": 131073, \"result\": \"SCHEMA_INVALID:PACKET_BUDGET_EXCEEDED\"}",
+          "status": "PASS",
+          "title": "packet budget is enforced at byte boundary"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "merged commit reachable before evolution",
+          "id": "KR-07",
+          "observed": "{\"events\": [\"merge.completed\", \"knowledge.evolution.started\", \"knowledge.snapshot.published\"], \"reachable\": true}",
+          "status": "PASS",
+          "title": "knowledge evolution starts only from integrated Git evidence"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "independent layer values; no conversation directory",
+          "id": "KR-08",
+          "observed": "{\"conversation_enabled\": false, \"layers\": [\"knowledge\", \"prompt\", \"resume\"]}",
+          "status": "PASS",
+          "title": "cache taxonomy is isolated with Conversation Cache disabled"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "snapshot <=128 KiB",
+          "id": "KR-09",
+          "observed": "2337",
+          "status": "PASS",
+          "title": "published snapshot is bounded"
+        }
+      ],
+      "dependencies": [],
+      "failed": 0,
+      "name": "knowledge-runtime",
+      "passed": 9,
+      "poc": "05",
+      "score_percent": 100.0,
+      "status": "PASS",
+      "total": 9
+    },
+    {
+      "assertions": [
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "normal chain completes; requested->implementation denied",
+          "id": "RL-01",
+          "observed": "{\"final\": \"merge.completed\", \"invalid_jump_allowed\": false}",
+          "status": "PASS",
+          "title": "lifecycle accepts valid traversal and rejects jumps"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.002,
+          "expected": "HMAC validates head/base/plan/policy/role",
+          "id": "RL-02",
+          "observed": "{\"binding_sha256\": \"96704407440576cd4e696afc0a6a6b41f60b37d7fe96cf0809a3482e19a46077\", \"signature\": \"d5461383c6f4f735cb108c0a872674640f8b05d27ef479a0d87a0fab8e7e1b8e\"}",
+          "status": "PASS",
+          "title": "approval binding verifies exact immutable facts"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "changed head fails binding signature",
+          "id": "RL-03",
+          "observed": "false",
+          "status": "PASS",
+          "title": "post-approval code change invalidates approval"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "AUTHORIZATION_DENIED",
+          "id": "RL-04",
+          "observed": "AUTHORIZATION_DENIED",
+          "status": "PASS",
+          "title": "forged implementer approval is rejected"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "third changes.requested escalates",
+          "id": "RL-05",
+          "observed": "[\"redispatch\", \"redispatch\", \"escalate_and_block\"]",
+          "status": "PASS",
+          "title": "review-cycle limit escalates and blocks dispatch"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "one holder; recovery token increases",
+          "id": "RL-06",
+          "observed": "{\"collision\": [false, 1], \"first\": [true, 1], \"lease\": {\"fencing_token\": 2, \"holder\": \"codex_recovery\"}, \"recovery\": [true, 2]}",
+          "status": "PASS",
+          "title": "writer lease is exclusive and stale tokens are fenced"
+        }
+      ],
+      "dependencies": [],
+      "failed": 0,
+      "name": "review-loop",
+      "passed": 6,
+      "poc": "06",
+      "score_percent": 100.0,
+      "status": "PASS",
+      "total": 6
+    },
+    {
+      "assertions": [
+        {
+          "diagnostic": "",
+          "duration_ms": 0.002,
+          "expected": "serialized queue equals in-memory queue",
+          "id": "SCH-01",
+          "observed": "{\"count\": 3, \"path\": \"/home/tinhnv/project/docs/design-document/ai-runtime-validation/artifacts/20260803T031639Z-6855e2/poc-07/delivery-queue.json\"}",
+          "status": "PASS",
+          "title": "delivery queue survives reload"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "critical-new, high, normal-old",
+          "id": "SCH-02",
+          "observed": "[\"critical-new\", \"high\", \"normal-old\"]",
+          "status": "PASS",
+          "title": "priority dispatcher orders critical, high, normal"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "2,4,8,16 seconds and visible after threshold",
+          "id": "SCH-03",
+          "observed": "{\"escalation\": \"visible\", \"seconds\": [2, 4, 8, 16]}",
+          "status": "PASS",
+          "title": "retry uses exponential backoff with escalation"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "ready selected; all-busy queue remains pending",
+          "id": "SCH-04",
+          "observed": "{\"assigned\": \"ready\", \"pending_when_full\": true}",
+          "status": "PASS",
+          "title": "dispatcher respects session capacity"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "SLA-aged normal event dispatches before fresh critical",
+          "id": "SCH-05",
+          "observed": "[\"normal-aged\", \"critical-fresh\"]",
+          "status": "PASS",
+          "title": "aging prevents lower-priority starvation"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "1000-item tick <100 ms with no consumer wait",
+          "id": "SCH-06",
+          "observed": "{\"duration_ms\": 0.593, \"eligible\": 1000}",
+          "status": "PASS",
+          "title": "scheduler tick is non-blocking"
+        }
+      ],
+      "dependencies": [],
+      "failed": 0,
+      "name": "scheduler",
+      "passed": 6,
+      "poc": "07",
+      "score_percent": 100.0,
+      "status": "PASS",
+      "total": 6
+    },
+    {
+      "assertions": [
+        {
+          "diagnostic": "",
+          "duration_ms": 0.002,
+          "expected": "victim absent; survivor present",
+          "id": "CHAOS-01",
+          "observed": "{\"survivor_alive\": true, \"victim_dead\": true}",
+          "status": "PASS",
+          "title": "killed session is detected while peers continue"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "durable event projects after restart",
+          "id": "CHAOS-02",
+          "observed": "{\"projection_was_absent\": true, \"replayed\": {\"event_count\": 1, \"side_effects_replayed\": 0, \"streams\": {\"feature/feat-validation\": {\"last_event_id\": \"evt-validation-001\", \"sequence\": 1, \"state\": \"feature.requested\"}}}}",
+          "status": "PASS",
+          "title": "crash after append is recovered by replay"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "dirty file preserved under quarantine",
+          "id": "CHAOS-03",
+          "observed": "{\"git_status\": \"?? dirty.txt\", \"quarantine\": \"/home/tinhnv/project/docs/design-document/ai-runtime-validation/artifacts/20260803T031639Z-6855e2/poc-08/quarantine/dirty-repo\"}",
+          "status": "PASS",
+          "title": "dirty crash worktree is quarantined"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "feature reachable from actual integration ref",
+          "id": "CHAOS-04",
+          "observed": "{\"actual_ref\": \"a01685b99c7d47cb6e13daee66777208d27b3aff\", \"base\": \"da17f672a4df3da5165b8e9c943926099d601597\", \"feature\": \"893db725bbccac1c67e8d9290689430d9712e1c1\"}",
+          "status": "PASS",
+          "title": "merge outcome is reconciled from Git refs"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "old cache digest unchanged; fallback selected",
+          "id": "CHAOS-05",
+          "observed": "{\"after\": \"e098559c16e514920412857c5ea4dd9b3f0d94c5a1270c6fc4b66e6da591cc1c\", \"before\": \"e098559c16e514920412857c5ea4dd9b3f0d94c5a1270c6fc4b66e6da591cc1c\", \"result\": \"fallback_without_cache\"}",
+          "status": "PASS",
+          "title": "ENOSPC preserves prior cache and degrades safely"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "both safe-time and token checks deny",
+          "id": "CHAOS-06",
+          "observed": "{\"clock_check\": \"AUTHORIZATION_DENIED\", \"token_check\": \"AUTHORIZATION_DENIED\"}",
+          "status": "PASS",
+          "title": "clock jump and newer fencing token reject stale writes"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "exact Chapter 23 ordering",
+          "id": "CHAOS-07",
+          "observed": "[\"stop_side_effects\", \"validate_config_and_repo\", \"rebuild_projection\", \"inspect_git_and_worktrees\", \"reconcile_leases\", \"reconcile_sessions\", \"revalidate_capabilities\", \"select_recovery\", \"confirm_pending_intents\", \"resume_deliveries\", \"publish_report\"]",
+          "status": "PASS",
+          "title": "recovery procedure executes all 11 steps in order"
+        }
+      ],
+      "dependencies": [],
+      "failed": 0,
+      "name": "chaos",
+      "passed": 7,
+      "poc": "08",
+      "score_percent": 100.0,
+      "status": "PASS",
+      "total": 7
+    },
+    {
+      "assertions": [
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "p99 < 50 ms",
+          "id": "PERF-01",
+          "observed": "{\"p50\": 6.8941005, \"p95\": 8.1805, \"p99\": 10.2338}",
+          "status": "PASS",
+          "title": "event acceptance p99 meets target"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "p99 < 100 ms",
+          "id": "PERF-02",
+          "observed": "{\"p50\": 0.003, \"p95\": 0.0053, \"p99\": 0.0066}",
+          "status": "PASS",
+          "title": "notification p99 meets target"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "ready evidence in <2000 ms",
+          "id": "PERF-03",
+          "observed": "{\"duration_ms\": 34.91, \"ready\": true}",
+          "status": "PASS",
+          "title": "fresh process recovery reaches readiness target"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "100 commits materialized in <5000 ms",
+          "id": "PERF-04",
+          "observed": "{\"bytes\": 4902, \"commits\": 100, \"duration_ms\": 9.757}",
+          "status": "PASS",
+          "title": "100-commit cache rebuild meets target"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "131072 accepted; 131073 rejected",
+          "id": "PERF-05",
+          "observed": "{\"131071\": \"accepted\", \"131072\": \"accepted\", \"131073\": \"SCHEMA_INVALID:PACKET_BUDGET_EXCEEDED\"}",
+          "status": "PASS",
+          "title": "packet byte budget accepts boundary and rejects overflow"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "10 distinct completed artifacts",
+          "id": "PERF-06",
+          "observed": "{\"duration_ms\": 12.556, \"flows\": 10, \"unique_digests\": 10}",
+          "status": "PASS",
+          "title": "ten non-conflicting feature flows complete concurrently"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "average <2048 bytes/event",
+          "id": "PERF-07",
+          "observed": "{\"accept_throughput_per_second\": 143.44203924753782, \"bytes_per_event\": 157.26666666666668}",
+          "status": "PASS",
+          "title": "event-store growth remains below 2 KiB/event"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.002,
+          "expected": "persistent median / cold median <0.20",
+          "id": "PERF-08",
+          "observed": "{\"cold_median_ms\": 22.708651, \"persistent_median_ms\": 0.10375000000000001, \"ratio\": 0.004568743427339652}",
+          "status": "PASS",
+          "title": "persistent dispatch is under 20% of cold startup"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "positive peak RSS and declared workload/model mode",
+          "id": "PERF-09",
+          "observed": "{\"environment\": {\"cpu_count\": 8, \"model_usage\": \"deterministic mock; no vendor model invoked\", \"platform\": \"Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43\", \"python\": \"3.14.4\"}, \"peak_rss_kib\": 105928, \"workload\": {\"concurrent_features\": 10, \"events\": 150, \"history_commits\": 100}}",
+          "status": "PASS",
+          "title": "benchmark records memory, workload, and environment"
+        }
+      ],
+      "dependencies": [],
+      "failed": 0,
+      "name": "performance",
+      "passed": 9,
+      "poc": "09",
+      "score_percent": 100.0,
+      "status": "PASS",
+      "total": 9
+    },
+    {
+      "assertions": [
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "exact ten-event lifecycle",
+          "id": "E2E-01",
+          "observed": "[\"feature.requested\", \"plan.ready\", \"plan.approved\", \"implementation.ready\", \"review.requested\", \"merge.approved\", \"merge.started\", \"merge.completed\", \"knowledge.sync.requested\", \"knowledge.synchronized\"]",
+          "status": "PASS",
+          "title": "complete lifecycle reaches knowledge.synchronized"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "sequence 1..10; one correlation; each causation points to predecessor",
+          "id": "E2E-02",
+          "observed": "{\"causes_match\": true, \"correlations\": [\"cor-e2e-validation\"], \"sequences\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}",
+          "status": "PASS",
+          "title": "event audit chain is contiguous and correlated"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "Claude reviewer signature matches implementation head",
+          "id": "E2E-03",
+          "observed": "{\"head\": \"f496869097925cdccbbcf41681365a3be631f6a8\", \"role\": \"claude_reviewer\", \"signature_valid\": true}",
+          "status": "PASS",
+          "title": "merge approval authority and binding verify"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "feature head reachable and merge event matches main",
+          "id": "E2E-04",
+          "observed": "{\"feature_reachable\": true, \"integration_head\": \"74a6de5067b950265ab43055095b38e6db9b7d7a\"}",
+          "status": "PASS",
+          "title": "Git integration state proves merge outcome"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "knowledge.sync.requested index follows merge.completed",
+          "id": "E2E-05",
+          "observed": "{\"knowledge_index\": 8, \"merge_index\": 7}",
+          "status": "PASS",
+          "title": "knowledge synchronization occurs only after merge"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "feature absent; root alive",
+          "id": "E2E-06",
+          "observed": "{\"feature_absent\": true, \"root_alive\": true}",
+          "status": "PASS",
+          "title": "feature session is disposable without affecting root"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.002,
+          "expected": "10/10 invariant predicates true",
+          "id": "E2E-07",
+          "observed": "{\"INV-01\": true, \"INV-02\": true, \"INV-03\": true, \"INV-04\": true, \"INV-05\": true, \"INV-06\": true, \"INV-07\": true, \"INV-08\": true, \"INV-09\": true, \"INV-10\": true}",
+          "status": "PASS",
+          "title": "all ten architectural invariants have observed evidence"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "feature cleaned; deliberately persistent root remains managed",
+          "id": "E2E-08",
+          "observed": "{\"feature_absent\": true, \"managed_roots\": 1}",
+          "status": "PASS",
+          "title": "cleanup leaves no feature or orphan sessions"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "isolated tmux socket has no server",
+          "id": "E2E-09",
+          "observed": "true",
+          "status": "PASS",
+          "title": "laboratory teardown removes tmux server"
+        },
+        {
+          "diagnostic": "",
+          "duration_ms": 0.001,
+          "expected": "fsync-backed non-empty store; zero schema errors",
+          "id": "E2E-10",
+          "observed": "{\"bytes\": 7228, \"events\": 10}",
+          "status": "PASS",
+          "title": "event store is durable and schema-valid"
+        }
+      ],
+      "dependencies": [
+        "Real vendor Claude/Codex CLI compatibility remains a Phase 3 integration dependency; this run uses deterministic contract adapters."
+      ],
+      "failed": 0,
+      "name": "end-to-end",
+      "passed": 10,
+      "poc": "10",
+      "score_percent": 100.0,
+      "status": "PASS",
+      "total": 10
+    }
+  ],
+  "run_id": "20260803T031639Z-6855e2",
+  "started_or_recorded_at": "2026-08-03T03:16:39.993797Z",
+  "status": "PASS",
+  "total": 82
+}

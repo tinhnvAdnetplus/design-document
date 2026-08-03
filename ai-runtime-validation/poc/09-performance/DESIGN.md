@@ -1,12 +1,12 @@
 # PoC 09 Design: Performance & Budget Validation
 
 ## Experiment Design
-This PoC creates synthetic loads against simulated V2.2 core components to measure performance characteristics and resource constraints. It uses mock Event Store, Cache Registry, and Session Manager interfaces that mimic expected I/O and compute boundaries.
+This PoC creates deterministic local loads against executable V2.2 contract boundaries. It measures actual file append/fsync, in-process notification, Git history traversal, process readiness, concurrency, packet-size enforcement, storage growth, and persistent-process dispatch.
 
 ## Architecture Mapping
-- **Event Store**: Simulated via a local append-only log with configurable I/O latency.
-- **Cache Registry**: Simulated file-based cache to test Cache rebuild time.
-- **Session Registry**: Tracks session creation for cold vs. persistent tests.
+- **Event Store**: Local append-only log with real writes, flushes, and `fsync` timing.
+- **Cache Registry**: File-based cache rebuilt from an actual 100-commit disposable Git history.
+- **Session Registry**: Compares actual process startup with a persistent worker dispatch.
 - **Durable Delivery Queue**: Validates notify latency targets.
 
 ## Runtime Topology

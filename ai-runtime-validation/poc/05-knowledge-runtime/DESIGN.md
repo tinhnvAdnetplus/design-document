@@ -4,12 +4,12 @@
 Validate the Knowledge Runtime architecture, specifically the creation, validation, compression, and evolution of the Knowledge Snapshot and its integration with the V2 Cache Taxonomy.
 
 ## Experiment Design
-- Simulate Git context containing various fact states.
+- Create a disposable Git repository containing versioned evidence for fact states.
 - Emit a `knowledge.sync.requested` event to trigger Snapshot creation.
 - Validate that the Snapshot populates 6 distinct domains.
 - Inject facts without provenance to test rejection/demotion mechanisms.
-- Feed a synthetic 200 KiB context to trigger the Knowledge Compression pipeline.
-- Simulate a `merge.completed` event to test the Knowledge Evolution lifecycle.
+- Feed a generated context larger than 128 KiB to trigger the Knowledge Compression pipeline.
+- Create and merge a real disposable Git branch before testing the Knowledge Evolution lifecycle.
 
 ## Architecture Mapping
 - **Knowledge Runtime**: Central processing unit for facts and snapshots.

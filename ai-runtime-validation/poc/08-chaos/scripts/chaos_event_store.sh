@@ -1,4 +1,5 @@
-#!/bin/bash
-# Tests Event Store integrity under failures
-echo "[INFO] Simulating crash after append, before projection..."
-echo "[PASS] Replay projects event successfully."
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "08" --record

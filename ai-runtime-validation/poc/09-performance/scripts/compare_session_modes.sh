@@ -1,5 +1,5 @@
-#!/bin/bash
-echo "Comparing cold/persistent/reconstruction performance..."
-echo "Cold session: 4500ms"
-echo "Persistent root + fork: 350ms"
-echo "Reconstruction after resume loss: 1200ms"
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "09" --record

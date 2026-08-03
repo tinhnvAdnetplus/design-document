@@ -1,45 +1,26 @@
 # Phase 09 Report — Performance and Token Budgets
 
-## Overview
+## Executed Result
 
-This report documents baseline performance measurements and token budget enforcement validation per V2.2 benchmark dimensions.
+- Status: **FAIL**
+- Assertions: **8/9**
+- Executed: `2026-08-03T03:21:10.493027Z`
+- Git revision: `3cfe3261b7169b96d98dc416aa92f93aa93c8863`
+- Assertion report: [PoC RESULT](../poc/09-performance/RESULT.md)
+- Machine evidence: [report.json](../artifacts/20260803T032110Z-2986e3/poc-09/report.json)
 
-**PoC:** [`poc/09-performance`](../poc/09-performance/README.md)
-**Spec Reference:** Chapters 9, 20, 22 — Cache Strategy, Testing, Performance
-**Invariants Tested:** INV-10 (privacy-safe telemetry)
+## Validated Scope
 
-## Experiments Executed
+Notification, recovery, 100-commit rebuild, packet boundaries, ten concurrent flows, event-store growth, persistent dispatch, and memory/environment reporting passed executable assertions.
 
-| ID | Experiment | Result |
-| --- | --- | --- |
-| EXP-001 | Event accept latency | ☐ Pending |
-| EXP-002 | Notify latency | ☐ Pending |
-| EXP-003 | Recovery time | ☐ Pending |
-| EXP-004 | Token budget enforcement | ☐ Pending |
-| EXP-005 | Concurrent feature capacity | ☐ Pending |
-| EXP-006 | Event Store growth rate | ☐ Pending |
-| EXP-007 | Session mode comparison | ☐ Pending |
+## Failure
 
-## Evidence Collected
+`PERF-01` measured fsync-backed event acceptance at **657.666 ms p99**, above the frozen **50 ms** target. A follow-up isolated run measured **77.994 ms p99**, confirming that the target is not repeatably met on this host.
 
-_To be filled after experiment execution._
+## Dependency
 
-## Successes
-
-_To be filled after experiment execution._
-
-## Failures
-
-_To be filled after experiment execution._
-
-## Known Limitations
-
-_To be filled after experiment execution._
-
-## Recommendations
-
-_To be filled after experiment execution._
+The validation harness must not implement runtime storage. Closing this result requires the Phase 3 Event Store implementation or an approved durable-storage strategy, followed by the same benchmark.
 
 ## Specification Impact
 
-_Does this phase reveal anything that should be noted for V2.2 clarification or future revision?_
+No specification change is proposed. The existing SLO remains an open validation gate.

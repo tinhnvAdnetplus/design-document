@@ -1,0 +1,10 @@
+{
+  "binding": {
+    "base": "cae662172fd450bb0cd710a769079c05bfc5d8e35efa6576edc7d0377afdd4a2",
+    "head": "da31012c40330e7e21538e7dd57503b16e8a0839159e96137090cccc9910b171",
+    "plan": "64879f7d6b960a01909762d911a32d4582c20010c5641ee90278b644a9e3b525",
+    "policy": "policy-validation-1",
+    "role": "claude_reviewer"
+  },
+  "signature": "d5461383c6f4f735cb108c0a872674640f8b05d27ef479a0d87a0fab8e7e1b8e"
+}

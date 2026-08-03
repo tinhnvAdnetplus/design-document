@@ -1,44 +1,26 @@
 # Phase 03 Report — Session Resume and Recovery
 
-## Overview
+## Executed Result
 
-This report documents the results of validating persistent session recovery through vendor resume and fresh Git-derived reconstruction.
+- Status: **PASS**
+- Assertions: **8/8**
+- Executed: `2026-08-03T03:21:10.493027Z`
+- Git revision: `3cfe3261b7169b96d98dc416aa92f93aa93c8863`
+- Assertion report: [PoC RESULT](../poc/03-session-resume/RESULT.md)
+- Machine evidence: [report.json](../artifacts/20260803T032110Z-2986e3/poc-03/report.json)
 
-**PoC:** [`poc/03-session-resume`](../poc/03-session-resume/README.md)
-**Spec Reference:** Chapters 7, 8, 23 — Sessions, Lifecycle, Recovery
-**Invariants Tested:** INV-06 (exceptional resume only)
+## Validated Scope
 
-## Experiments Executed
-
-| ID | Experiment | Result |
-| --- | --- | --- |
-| EXP-001 | Reattach to existing session | ☐ Pending |
-| EXP-002 | Resume gated by Capability Registry | ☐ Pending |
-| EXP-003 | Fresh reconstruction packet generation | ☐ Pending |
-| EXP-004 | Recovery decision tree traversal | ☐ Pending |
-| EXP-005 | Dirty worktree quarantine | ☐ Pending |
-| EXP-006 | Full workflow without resume IDs | ☐ Pending |
-
-## Evidence Collected
-
-_To be filled after experiment execution._
-
-## Successes
-
-_To be filled after experiment execution._
+Reattach, eligibility gates, loss, Git reconstruction, quarantine, cache packet were exercised through observable assertions. Failure paths returned explicit diagnostics instead of unconditional success output.
 
 ## Failures
 
-_To be filled after experiment execution._
+No assertion failures were observed in the authoritative run.
 
-## Known Limitations
+## Limitations
 
-_To be filled after experiment execution._
-
-## Recommendations
-
-_To be filled after experiment execution._
+This is deterministic local architecture validation. Live Claude/Codex vendor CLI compatibility remains a Phase 3 integration activity.
 
 ## Specification Impact
 
-_Does this phase reveal anything that should be noted for V2.2 clarification or future revision?_
+No V2.2 architecture defect or documentation correction was required.

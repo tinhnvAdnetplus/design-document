@@ -1,5 +1,5 @@
-#!/bin/bash
-# Simulates clock skew for lease testing
-echo "[INFO] Simulating clock jump past lease expiration..."
-cat ../fixtures/stale_lease.json
-echo "[PASS] Operations rejected with stale fencing token."
+#!/usr/bin/env bash
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../../lib/common.sh"
+run_poc "08" --record
