@@ -1,0 +1,113 @@
+{
+  "branch": "phase-3/persistent-session-supervisor",
+  "captured_at": "2026-08-03T10:07:45.300118Z",
+  "format": "ai-runtime-evidence/v2",
+  "format_version": 2,
+  "limitations": [
+    "The integrated transport supervises persistent tmux workers but still invokes each model turn non-interactively.",
+    "Persistent interactive model context and production Claude authority have not been live-validated in this increment.",
+    "Antigravity 1.1.10 remains temporary, advisory-only, and synthetic-reconstruction-only."
+  ],
+  "model_calls": {
+    "agy": 0,
+    "claude": 0,
+    "codex": 0
+  },
+  "privacy_checks": {
+    "absolute_home_absent": true,
+    "absolute_repository_absent": true,
+    "credential_pattern_absent": true,
+    "email_absent": true,
+    "raw_model_marker_absent": true,
+    "raw_pane_marker_absent": true
+  },
+  "privacy_contract": {
+    "raw_model_transcript_retained": false,
+    "raw_pane_retained": false,
+    "retained_output_fields": [
+      "sha256",
+      "byte_count",
+      "duration_ms",
+      "exit_code",
+      "bounded_redacted_diagnostic"
+    ],
+    "structured_results_validated_before_event_append": true
+  },
+  "status": "PASS",
+  "subject": "persistent-tmux-session-supervisor",
+  "tested_revision": "37c36a2335f3c202a8bba1ab139e9ae641fa1962",
+  "tool_discovery": {
+    "agy": {
+      "available": true,
+      "version": "1.1.10",
+      "version_exit_code": 0
+    },
+    "claude": {
+      "available": true,
+      "version": "2.1.197 (Claude Code)",
+      "version_exit_code": 0
+    },
+    "codex": {
+      "available": true,
+      "version": "codex-cli 0.146.0",
+      "version_exit_code": 0
+    },
+    "git": {
+      "available": true,
+      "version": "git version 2.53.0",
+      "version_exit_code": 0
+    },
+    "python3": {
+      "available": true,
+      "version": "Python 3.14.4",
+      "version_exit_code": 0
+    },
+    "tmux": {
+      "available": true,
+      "version": "tmux 3.6",
+      "version_exit_code": 0
+    }
+  },
+  "transport_mode": "tmux_supervised_noninteractive_v1",
+  "verification": {
+    "clean_clone_contract_assertions": {
+      "assertions_passed": 82,
+      "assertions_total": 82,
+      "diagnostic_redacted": "",
+      "duration_ms": 2985.642,
+      "exit_code": 0,
+      "passed": true,
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 5912,
+      "stdout_sha256": "3176c83768c37cd8b636a8266f12853939b08d6f011dd27bf0e0b4feb2e9ab63",
+      "timed_out": false
+    },
+    "clean_clone_runtime_tests": {
+      "diagnostic_redacted": "",
+      "duration_ms": 16734.538,
+      "exit_code": 0,
+      "passed": true,
+      "stderr_bytes": 5652,
+      "stderr_sha256": "1faf87f5ed043e7ed7047f82c8bb9007c2eb5c3ddb6226e6a534511e14b24d3e",
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests_run": 32,
+      "timed_out": false
+    },
+    "clean_clone_started_clean": true,
+    "normative_docs_unchanged": true,
+    "runtime_tests": {
+      "diagnostic_redacted": "",
+      "duration_ms": 16794.06,
+      "exit_code": 0,
+      "passed": true,
+      "stderr_bytes": 5652,
+      "stderr_sha256": "f521076ddda5d57682262af474e732f1e3c95c3f12f8bfda28ff2e058ba9fb74",
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests_run": 32,
+      "timed_out": false
+    }
+  }
+}
