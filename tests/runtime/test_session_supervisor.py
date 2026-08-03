@@ -175,10 +175,18 @@ class SessionSupervisorTests(unittest.TestCase):
         self.supervisor.start(spec)
         record = self.supervisor.read(spec.session_id)
         self.supervisor._tmux(["kill-session", "-t", record.tmux_name], check=True)
+        resume_command = (
+            sys.executable,
+            str(WORKER),
+            "--identity",
+            "{session_identity}",
+            "--spool",
+            str(self.supervisor.spool_dir / spec.session_id),
+        )
         resumed = self.supervisor.resume_or_reconstruct(
             spec,
             worktree_clean=True,
-            resume_command=spec.launch_command,
+            resume_command=resume_command,
         )
         self.assertTrue(resumed.ready)
         self.assertEqual("resume", self.supervisor.read(spec.session_id).recovery_kind)

@@ -616,6 +616,18 @@ class SessionSupervisor:
             raise SessionRecoveryRequiredError("adapter version drift blocks recovery")
         kind = "resume" if spec.resume and resume_command else "synthetic_reconstruction"
         recovered_spec = dataclasses.replace(spec, launch_command=resume_command or spec.launch_command)
+        recovered_launch_sha = _sha_text(
+            _canonical(list(recovered_spec.launch_command))
+        )
+        if recovered_launch_sha != record.launch_sha256:
+            record = self._write(
+                dataclasses.replace(
+                    record,
+                    launch_sha256=recovered_launch_sha,
+                    updated_at=_utc_now(),
+                    recovery_kind=kind,
+                )
+            )
         self._transition(record, SessionState.STARTING, recovery_kind=kind)
         return self.start(recovered_spec, readiness_timeout=readiness_timeout)
 
