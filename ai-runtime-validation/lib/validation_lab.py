@@ -1197,6 +1197,21 @@ def redact_local_text(value: str) -> str:
     return redacted
 
 
+def redact_evidence_files(run_dir: Path) -> None:
+    """Redact local paths from every UTF-8 evidence payload before manifesting."""
+    for path in sorted(item for item in run_dir.rglob("*") if item.is_file()):
+        if path.name == "manifest.sha256":
+            continue
+        try:
+            value = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            # Git bundles and any future binary evidence retain byte integrity.
+            continue
+        redacted = redact_local_text(value)
+        if redacted != value:
+            path.write_text(redacted, encoding="utf-8")
+
+
 def environment_report() -> dict[str, Any]:
     version_arguments = {
         "bash": ["--version"],
@@ -1358,6 +1373,7 @@ def write_summary(run_dir: Path, reports: list[dict[str, Any]], environment: dic
                                           f"- Diagnostic: {item['diagnostic']}", ""])
     (run_dir / "failures.md").write_text("\n".join(failure_lines) + "\n", encoding="utf-8")
     write_junit(run_dir, reports)
+    redact_evidence_files(run_dir)
     manifest_lines = []
     for path in sorted(item for item in run_dir.rglob("*") if item.is_file() and item.name != "manifest.sha256"):
         manifest_lines.append(f"{sha256(path.read_bytes())}  {path.relative_to(run_dir)}")
