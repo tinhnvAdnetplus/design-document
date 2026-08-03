@@ -1,0 +1,84 @@
+{
+  "assertions": [
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "exactly four V2.2-named sessions",
+      "id": "TMUX-01",
+      "observed": "[\"claude-feature-f123-plan-1\", \"claude-root\", \"codex-feature-f123-1\", \"codex-root\"]",
+      "status": "PASS",
+      "title": "named sessions exist"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "one pane per session",
+      "id": "TMUX-02",
+      "observed": "{\"claude-feature-f123-plan-1\": [\"%2\"], \"claude-root\": [\"%0\"], \"codex-feature-f123-1\": [\"%3\"], \"codex-root\": [\"%1\"]}",
+      "status": "PASS",
+      "title": "each session owns a pane"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "each pane cwd equals assigned isolated directory",
+      "id": "TMUX-03",
+      "observed": "{\"claude-feature-f123-plan-1\": \"$VALIDATION_ROOT/artifacts/20260803T092428Z-013808/poc-01/workspace/claude-feature\", \"claude-root\": \"$VALIDATION_ROOT/artifacts/20260803T092428Z-013808/poc-01/workspace/claude-root\", \"codex-feature-f123-1\": \"$VALIDATION_ROOT/artifacts/20260803T092428Z-013808/poc-01/workspace/codex-feature\", \"codex-root\": \"$VALIDATION_ROOT/artifacts/20260803T092428Z-013808/poc-01/workspace/codex-root\"}",
+      "status": "PASS",
+      "title": "working directories are assigned"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "target marker contains unique command token",
+      "id": "TMUX-04",
+      "observed": "event-ccb52716faae4049b2122164b944775d",
+      "status": "PASS",
+      "title": "event command is received and executed"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "captured pane includes execution token",
+      "id": "TMUX-05",
+      "observed": "bash-5.3$ printf '%s' 'event-ccb52716faae4049b2122164b944775d' > received.txt; p\nrintf 'EXECUTED:event-ccb52716faae4049b2122164b944775d\\n'\nEXECUTED:event-ccb52716faae4049b2122164b944775d\nbash-5.3$\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+      "status": "PASS",
+      "title": "pane output is capturable"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "only target workspace receives marker",
+      "id": "TMUX-06",
+      "observed": "{\"claude-feature-f123-plan-1\": false, \"claude-root\": true, \"codex-feature-f123-1\": false, \"codex-root\": false}",
+      "status": "PASS",
+      "title": "session files are isolated"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "tmux send-keys returns in <100 ms",
+      "id": "TMUX-07",
+      "observed": "5.721",
+      "status": "PASS",
+      "title": "notification submission is non-blocking"
+    },
+    {
+      "diagnostic": "",
+      "duration_ms": 0.001,
+      "expected": "has-session fails for all created sessions",
+      "id": "TMUX-08",
+      "observed": "true",
+      "status": "PASS",
+      "title": "cleanup removes every session"
+    }
+  ],
+  "dependencies": [],
+  "failed": 0,
+  "name": "tmux-runtime",
+  "passed": 8,
+  "poc": "01",
+  "score_percent": 100.0,
+  "status": "PASS",
+  "total": 8
+}

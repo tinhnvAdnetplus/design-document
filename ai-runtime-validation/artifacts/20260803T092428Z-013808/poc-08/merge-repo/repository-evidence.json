@@ -1,0 +1,19 @@
+{
+  "bundle": "poc-08/merge-repo/repository.git.bundle",
+  "bundle_sha256": "5daa95af5d962d62ce5cf1e4afb72ae47311f791888854e4b48b992edacf77b8",
+  "bundle_verified": true,
+  "format_version": 1,
+  "head": "0ac84eacffbe5a3a4f5654287f1f874e4bccb4d6",
+  "refs": [
+    {
+      "object": "f58a2bcdc190e7144ca41810216a5f25a5bb6581",
+      "ref": "refs/heads/feature"
+    },
+    {
+      "object": "0ac84eacffbe5a3a4f5654287f1f874e4bccb4d6",
+      "ref": "refs/heads/main"
+    }
+  ],
+  "repository": "poc-08/merge-repo",
+  "status_porcelain": []
+}
