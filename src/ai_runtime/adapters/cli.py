@@ -44,6 +44,16 @@ LIVE_PERSISTENT_CONTRACT_PROVENANCE_SHA256 = (
     "db6a6b4febf6b671e9773125f1c2dba50c162ed1c3c0a41b42b592fcff585dd5"
 )
 
+# SHA-256 of
+# ai-runtime-validation/poc/12-live-persistent-contract/artifacts/
+# consolidated-claude-detector-rebind/manifest.sha256.
+# A separate package: the digest above is already pinned, so regenerating it to
+# add iterations would invalidate that pin.  See
+# reports/phase-4/claude-detector-rebind.md.
+CLAUDE_DETECTOR_REBIND_PROVENANCE_SHA256 = (
+    "9281bf459ab9f5e4631c3f7984795f4426cfc5861b5eb014ea6714c38b337f6b"
+)
+
 
 def _digest(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
@@ -502,9 +512,22 @@ class ClaudeCLIAdapter(_SubprocessAdapter):
         self._session_contract = AdapterSessionContract(
             launch_command=tuple(interactive),
             readiness=ReadinessDetector(
-                # U+276F is the literal prompt glyph Claude's TUI draws; not an ASCII '>'.
-                r"(?:^|\n).*?[❯>]\s*$",  # noqa: RUF001
-                trust_pattern=r"Do you trust the contents",
+                # Both patterns are bound to 2.1.222 by recorded pane trials, not
+                # by reading the vendor's rendering.  U+276F is the literal prompt
+                # glyph the TUI draws, not an ASCII '>'.  The idle prompt box
+                # always draws a rotating placeholder hint after the glyph, so the
+                # previous end-of-line anchor could never match.  The negative
+                # lookahead is load-bearing: the trust dialog draws that same
+                # glyph as a selection cursor on `1. Yes, I trust this folder`,
+                # and `_wait_ready` evaluates readiness against the same capture
+                # in which it just answered a trust prompt, so a pattern matching
+                # there would report READY with the dialog still up.
+                r"^\s*[❯>]\s+(?!\d+\.)\S",  # noqa: RUF001
+                # The previous value was never observed on any Claude version.
+                # 2.1.222 offers `1. Yes, I trust this folder` / `2. No, exit`
+                # and the words "do you trust" appear nowhere in that dialog, so
+                # the supervisor saw no trust prompt to act on and timed out.
+                trust_pattern=r"Yes, I trust this folder",
             ),
             trust_prompt=TrustPromptBehavior.REJECT,
             resume=True,
@@ -522,20 +545,39 @@ class ClaudeCLIAdapter(_SubprocessAdapter):
             synthetic_launch_command=self._session_contract.launch_command,
             native_fork_command=None,
             resume_command=None,
-            # Every field stays fail-closed on 2.1.222 despite the vendor
-            # primitives being live-validated.  `--print --resume <id>
-            # --fork-session` produced distinct children while leaving the root
-            # transcript byte-identical, resume recalled root context, and the
-            # child read the root's cached prefix.  What blocks promotion is the
-            # runtime's side of the contract: neither declared detector below
-            # matches this version, so a promoted field would route the runtime
-            # into a session it cannot verify, which is strictly worse than the
-            # declared synthetic path it uses today.
-            persistent_root=CapabilityValidation.FAIL_CLOSED,
+            # Live-validated on 2.1.222 against a disposable fixture once the
+            # detectors above were rebound to what the CLI actually renders: the
+            # declared production path reached READY on the observed prompt line,
+            # runtime identity held across six samples over twelve seconds, and
+            # the root stayed READY after a child session terminated.  Trust
+            # stays an operational precondition — the declaration rejects the
+            # prompt rather than answering it — but it is now a prompt the
+            # supervisor can see, so an untrusted directory fails closed with a
+            # trust diagnostic instead of an uninformative readiness timeout.
+            persistent_root=CapabilityValidation.VALIDATED,
+            # Native fork and resume are live-validated at the vendor boundary
+            # (`--print --resume <id> --fork-session` produced distinct children
+            # while leaving the root transcript byte-identical, resume recalled
+            # root context, and the child read the root's cached prefix), but
+            # neither field can be promoted while both command mappings are None.
+            # Rendering them needs the vendor session identifier bound into the
+            # fork/resume templates, which is the next increment.
             native_fork=CapabilityValidation.FAIL_CLOSED,
             resume=CapabilityValidation.FAIL_CLOSED,
+            # The channel works end to end against the live CLI, but the declared
+            # feature-readiness marker is carried inside the launch prompt that
+            # asks for it, so no detector can tell the model's reply from the
+            # echoed instruction.  That is a marker-design problem, not a vendor
+            # limitation, and it keeps this field fail-closed for every adapter.
             structured_terminal_events=CapabilityValidation.FAIL_CLOSED,
-            validation_provenance_sha256=authority_validation_sha256,
+            # This field is the provenance of the CapabilityValidation fields
+            # above, so it must be the persistent-capability evidence and not the
+            # merge-authority digest that used to sit here.  The two are separate
+            # claims sharing one field: while every field was fail-closed the
+            # value was unconstrained, but a validated persistent_root pins it.
+            # Carrying an authority digest as well needs its own field; see
+            # reports/phase-4/claude-detector-rebind.md.
+            validation_provenance_sha256=CLAUDE_DETECTOR_REBIND_PROVENANCE_SHA256,
             writes_workspace=False,
             merge_authority=merge_authority,
             temporary=False,

@@ -1,0 +1,19 @@
+{
+  "bundle": "poc-05/repo/repository.git.bundle",
+  "bundle_sha256": "96fd01122740e38e50c8112c206ddd39e9f06a5733e04ea73b41a32f258b1287",
+  "bundle_verified": true,
+  "format_version": 1,
+  "head": "6d79835602a976462367aa35fb68aec6c1de247a",
+  "refs": [
+    {
+      "object": "6d5aee2b1d44d132cacefae9654dddaf61c38b99",
+      "ref": "refs/heads/feature"
+    },
+    {
+      "object": "6d79835602a976462367aa35fb68aec6c1de247a",
+      "ref": "refs/heads/main"
+    }
+  ],
+  "repository": "poc-05/repo",
+  "status_porcelain": []
+}

@@ -130,6 +130,28 @@ fresh fixture correctly fails closed at a trust dialog; the readiness measuremen
 then runs on the disposable-authorized path. Trust is an operational
 precondition, not something the declaration may answer for itself.
 
+## Candidate-pattern trials
+
+Recording *why* a detector failed is not enough to choose a replacement, and the
+wrong way to choose one is to read the vendor's rendering and write a regex that
+looks right. Each candidate is instead evaluated against two live panes and
+recorded as match/no-match with the redacted line that matched:
+
+- the **settled idle pane**, which a readiness pattern must match;
+- the **trust-dialog pane**, which it must **not** match.
+
+The second requirement is not hypothetical. `_wait_ready` evaluates readiness
+against the same capture in which it has just answered a trust prompt, so a
+pattern that fires on the dialog reports `READY` while the dialog is still up. The
+trials rejected the most obvious Claude candidate on exactly that basis:
+`^\s*[❯>](?:\s|$)` matched the idle prompt *and* `❯ 1. Yes, I trust this folder`.
+
+`READY_PATTERN_TRIALS` is keyed by adapter and `TRUST_PATTERN_TRIALS` is shared.
+Trials are recorded in three places: on the pane that still shows a one-time gate,
+on the settled pane after every known gate is cleared, and on any pane where a
+declared detector timed out. A declaration change then cites a recorded match
+rather than a reading.
+
 ## Negative evidence
 
 Every failed attempt is retained through `record_iteration` with its correction,

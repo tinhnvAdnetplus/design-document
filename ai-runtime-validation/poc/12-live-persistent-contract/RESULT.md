@@ -17,7 +17,8 @@
 | --- | --- | --- | --- |
 | G1 | structured result under the exact adapter argv | **pass** | `20260805T160420Z-3af6a8` |
 | G2 | persistent root readiness/identity/survival — Codex | **pass** | `20260805T162330Z-c84384` |
-| G2 | persistent root readiness — Claude | **fail** | `20260805T162330Z-c84384` |
+| G2 | persistent root readiness — Claude, declared detectors | **fail** | `20260805T162330Z-c84384` |
+| G2 | persistent root readiness/identity/survival — Claude, rebound detectors | **pass** | `20260805T172349Z-34303d` |
 | G3 | native fork, root unmutated — Claude | **pass** | `20260805T160420Z-3af6a8` |
 | G3 | native fork, parent unmutated — Codex | **pass** | `20260805T163624Z-d5cd00` |
 | G4 | resume recalls root context — Claude | **pass** | `20260805T160420Z-3af6a8` |
@@ -41,13 +42,35 @@ Claude `haiku`, identical downstream prompt on every compared turn:
 Fork A's cache read equals the root seed's cache write exactly. The forked child
 read the prefix the root paid to write, and the second fork wrote nothing at all.
 
+## Detector rebind — follow-up increment, 0 live calls
+
+Two further iterations rebound the Claude detectors to what 2.1.222 actually
+renders, chosen by candidate-pattern trials against both the live trust dialog and
+the live idle prompt rather than by reading the rendering:
+
+- `ready_pattern`: `(?:^|\n).*?[❯>]\s*$` → `^\s*[❯>]\s+(?!\d+\.)\S`
+- `trust_pattern`: `Do you trust the contents` → `Yes, I trust this folder`
+
+The negative lookahead is load-bearing: the trust dialog draws the same glyph as a
+selection cursor, and a pattern matching there would report `READY` with the
+dialog still up.
+
+- Consolidated evidence:
+  [`artifacts/consolidated-claude-detector-rebind/`](artifacts/consolidated-claude-detector-rebind/)
+- `validation_provenance_sha256`:
+  `9281bf459ab9f5e4631c3f7984795f4426cfc5861b5eb014ea6714c38b337f6b`
+- Live calls: **0 / 30** — both iterations are readiness measurements
+
 ## Promotion
 
-Only `codex.persistent_root` was promoted to `VALIDATED`. Every other field on
-every adapter stays `FAIL_CLOSED`, each for a stated reason. Antigravity was not
-touched. See `reports/phase-4/live-persistent-adapter-contract.md`.
+`codex.persistent_root` and `claude.persistent_root` are `VALIDATED`, each against
+the package that earned it. Every other field on every adapter stays
+`FAIL_CLOSED`, each for a stated reason. Antigravity was not touched. See
+`reports/phase-4/live-persistent-adapter-contract.md` and
+`reports/phase-4/claude-detector-rebind.md`.
 
 Raw prompts, pane captures, stdout, and model transcripts were not retained. Pane
-data is limited to redacted detector-matching and diagnostic lines capped at 200
-characters. Nine iterations are preserved, including four failures and their
-corrections, in [ISSUES.md](ISSUES.md).
+data is limited to redacted detector-matching and allowlisted diagnostic lines,
+capped at 200 characters each and 16 lines per session. Eleven iterations are
+preserved, including five failures and their corrections, in
+[ISSUES.md](ISSUES.md).

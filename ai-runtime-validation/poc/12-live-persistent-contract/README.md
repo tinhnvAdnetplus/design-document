@@ -38,4 +38,11 @@ Two open questions are answered by behaviour, not by help text:
 Help and version output is discovery, never Capability Registry evidence. A gate
 that fails keeps its own declaration field fail-closed and blocks nothing else.
 
+G2 also serves a second purpose after the first live run: it is the gate that
+rebinds a declared `ReadinessDetector` to a new CLI version. Candidate patterns are
+trialled against both the live trust dialog and the live idle prompt, and a pattern
+that matches the dialog is unusable no matter how well it matches the prompt —
+`_wait_ready` checks readiness on the same capture in which it just answered a
+trust prompt. Because G2 sends no turn, that rebinding costs no model quota.
+
 Run only after reading [RUN.md](RUN.md).

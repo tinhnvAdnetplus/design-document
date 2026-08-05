@@ -1,0 +1,10 @@
+{
+  "base_revision": "951b78e272750c62f2eb9f8107f491b5a4a393ec",
+  "branch": "live-persistent-adapter-contract",
+  "decision": "LIVE_CONTRACT_NOT_ESTABLISHED",
+  "live_calls": {
+    "total": 0
+  },
+  "run_id": "20260805T171837Z-bc92cc",
+  "tested_revision": "951b78e272750c62f2eb9f8107f491b5a4a393ec"
+}

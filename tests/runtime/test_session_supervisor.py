@@ -3,6 +3,7 @@ from __future__ import annotations
 import dataclasses
 import hashlib
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -120,6 +121,34 @@ class SessionSupervisorTests(unittest.TestCase):
         self.assertEqual([], list(self.supervisor._turn_dir(spec.session_id).iterdir()))
         record = self.supervisor.terminate(spec.session_id)
         self.assertEqual(SessionState.TERMINATED, record.state)
+
+    def test_turn_child_never_inherits_the_worker_pane_stdin(self):
+        spec = self.spec("child-stdin-isolated")
+        self.supervisor.start(spec, readiness_timeout=5)
+        code = (
+            "import json,sys; data=sys.stdin.read(); "
+            "print(json.dumps({'stdin_bytes': len(data), 'stdin_isatty': sys.stdin.isatty()}))"
+        )
+        isolated = TurnRequest(
+            turn_id="turn-stdin-isolated",
+            command=(sys.executable, "-c", code),
+            cwd=self.cwd,
+            timeout_seconds=5,
+            prompt_sha256=hashlib.sha256(b"stdin isolation").hexdigest(),
+            task="fixture",
+        )
+        observation = self.supervisor.send_turn(spec, isolated)
+        # The worker reads its TURN notices from the tmux pane. A child that
+        # inherited that pane would block on a tty which never sends EOF, and
+        # would race the worker for the next notice.
+        self.assertFalse(observation.timed_out)
+        self.assertEqual(0, observation.exit_code)
+        self.assertEqual({"stdin_bytes": 0, "stdin_isatty": False}, json.loads(observation.stdout))
+        self.supervisor.acknowledge_turn(spec.session_id, isolated.turn_id)
+        follow = self.request("turn-after-stdin-isolated")
+        recovered = self.supervisor.send_turn(spec, follow)
+        self.assertFalse(recovered.timed_out)
+        self.assertFalse(recovered.evidence["reconciled_completed_turn"])
 
     def test_runtime_restart_reattaches_live_identity(self):
         spec = self.spec("restart-live")
@@ -292,6 +321,65 @@ class SessionSupervisorTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(SessionRecoveryRequiredError, "readiness timed out"):
             self.supervisor.start(timeout_spec, readiness_timeout=0.2)
+
+    def test_trust_prompt_is_answered_only_for_an_authorized_disposable_fixture(self):
+        # Rebinding Claude's trust pattern to its real dialog makes this branch
+        # reachable for the first time, so it gets its own coverage.
+        launch = (
+            sys.executable,
+            "-c",
+            "import sys,time; print('❯ 1. Yes, I trust this folder', flush=True); "  # noqa: RUF001
+            "sys.stdin.readline(); print('FIXTURE_READY', flush=True); time.sleep(30)",
+        )
+        detector = ReadinessDetector(r"^FIXTURE_READY$", trust_pattern=r"Yes, I trust this folder")
+
+        def trust_spec(session_id, *, disposable):
+            self.sessions.add(session_id)
+            return SessionSpec(
+                session_id=session_id,
+                adapter="fixture",
+                adapter_version="1",
+                role="plan",
+                cwd=self.cwd,
+                launch_command=launch,
+                readiness=detector,
+                trust_prompt=TrustPromptBehavior.ACCEPT_DISPOSABLE_ONLY,
+                disposable=disposable,
+            )
+
+        authorized = self.supervisor.start(
+            trust_spec("trust-disposable", disposable=True), readiness_timeout=15
+        )
+        self.assertEqual(SessionState.READY, authorized.state)
+        with self.assertRaisesRegex(SessionRecoveryRequiredError, "authorized disposable fixture"):
+            self.supervisor.start(
+                trust_spec("trust-not-disposable", disposable=False), readiness_timeout=5
+            )
+
+    def test_claude_readiness_pattern_cannot_fire_on_its_own_trust_dialog(self):
+        # Panes recorded verbatim from Claude 2.1.222 in a disposable fixture.
+        # `_wait_ready` checks readiness against the same capture in which it
+        # just answered a trust prompt, so a ready pattern that matched the
+        # dialog would report READY while the dialog was still up.
+        trust_pane = (
+            "╭─── Claude Code v2.1.222 ───╮\n"
+            "❯ 1. Yes, I trust this folder\n"  # noqa: RUF001
+            "  2. No, exit\n"
+        )
+        idle_pane = (
+            "╭─── Claude Code v2.1.222 ───╮\n"
+            '❯ Try "how do I log an error?"\n'  # noqa: RUF001
+            "⏸ plan mode on (shift+tab to cycle) · ← for agents\n"
+        )
+        version = subprocess.CompletedProcess(["claude", "--version"], 0, "2.1.222\n", "")
+        with (
+            mock.patch("ai_runtime.adapters.cli.shutil.which", return_value="/bin/true"),
+            mock.patch("ai_runtime.adapters.cli.subprocess.run", return_value=version),
+        ):
+            detector = ClaudeCLIAdapter().session_contract.readiness
+        self.assertTrue(re.search(detector.trust_pattern, trust_pane, re.MULTILINE))
+        self.assertFalse(re.search(detector.ready_pattern, trust_pane, re.MULTILINE))
+        self.assertTrue(re.search(detector.ready_pattern, idle_pane, re.MULTILINE))
 
     def test_termination_acknowledgement_loss_is_idempotent(self):
         spec = self.spec("terminate-ack-loss")

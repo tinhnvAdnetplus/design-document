@@ -27,6 +27,14 @@ A single gate, for a bounded retry after a recorded failure:
 ./scripts/run_all.sh --live --gates G5
 ```
 
+G2 alone costs **no model quota**: it launches the vendor CLIs, watches their
+panes, and never sends a turn. It is the gate to re-run whenever a declared
+`ReadinessDetector` needs rebinding to a new CLI version.
+
+```bash
+./scripts/run_all.sh --live --gates G2
+```
+
 ## Controls
 
 | Variable | Default | Purpose |
@@ -57,6 +65,18 @@ the package can recompute it:
 ```bash
 sha256sum artifacts/<run-id>/manifest.sha256
 ```
+
+Claims that span several iterations are provenanced against a consolidated
+package instead:
+
+```bash
+./scripts/consolidate_evidence.py --name consolidated-claude-detector-rebind
+```
+
+The script refuses to overwrite an existing package. A package digest may already
+be pinned in `adapters/cli.py` as a `validation_provenance_sha256`, and
+regenerating it would invalidate that pin, so a new promotion gets a new package
+that names the earlier one in `depends_on`.
 
 ## Residue
 

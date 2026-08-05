@@ -363,12 +363,47 @@ MARKER_PATTERNS = (
     r"(?i)trust th(is|e) (files|folder|contents|directory)",
     r"(?i)^[0-9]?\s*[.)]?\s*(yes|no)\b",
     r"(?i)press (enter|esc|tab)",
-    r"[❯>]\s*$",  # noqa: RUF001
+    # The prompt glyph was anchored to end-of-line, which is the very assumption
+    # the declared Claude detector got wrong, so the idle prompt line was never
+    # captured and the detector could not be rebound from evidence.
+    r"[❯>]",  # noqa: RUF001
     r"(?i)model:\s*\S+",
     r"(?i)welcome to",
     r"(?i)(error|not found|unknown|invalid|failed|no such)",
     r"(?i)(session|thread|conversation|fork|resume)",
     r"(?i)usage:",
+    r"(?i)(for shortcuts|for help|esc to|ctrl\+|shift\+tab)",
+    r"[╭╮╰╯]",
+)
+
+
+# Candidate readiness patterns evaluated against the live pane so a declaration
+# change is bound to a recorded match rather than to a reading of the vendor's
+# rendering.  Every candidate is also evaluated against the trust-dialog pane:
+# one that matches there is unusable, because `_wait_ready` checks readiness on
+# the same capture in which it just answered a trust prompt, and would report
+# READY while the dialog is still up.
+READY_PATTERN_TRIALS: dict[str, tuple[tuple[str, str], ...]] = {
+    "claude": (
+        ("declared_glyph_at_line_end", r"(?:^|\n).*?[❯>]\s*$"),  # noqa: RUF001
+        ("glyph_line_start_any", r"^\s*[❯>](?:\s|$)"),  # noqa: RUF001
+        ("glyph_not_numbered_option", r"^\s*[❯>]\s+(?!\d+\.)\S"),  # noqa: RUF001
+        ("glyph_placeholder_hint", r"^\s*[❯>]\s+Try\s"),  # noqa: RUF001
+        ("footer_shift_tab_cycle", r"(?i)\(shift\+tab to cycle\)"),
+        ("footer_plan_mode_on", r"(?i)plan mode on"),
+    ),
+    "codex": (("declared_model_line", r"model:\s+(?!loading)\S+"),),
+}
+
+
+# Candidate trust patterns.  The declared one was never observed on Claude; it
+# was carried into the declaration without evidence, which is what the first
+# G2 iteration disproved.
+TRUST_PATTERN_TRIALS: tuple[tuple[str, str], ...] = (
+    ("declared_do_you_trust_the_contents", r"Do you trust the contents"),
+    ("broad_do_you_trust", r"(?i)do you trust"),
+    ("yes_i_trust_this_folder", r"Yes, I trust this folder"),
+    ("numbered_first_option_yes", r"^\s*[❯>]?\s*1\.\s*Yes\b"),  # noqa: RUF001
 )
 
 
@@ -382,7 +417,7 @@ INTERACTIVE_GATES = (
 )
 
 
-def candidate_markers(pane: str, redact: Redactor, limit: int = 10) -> list[str]:
+def candidate_markers(pane: str, redact: Redactor, limit: int = 16) -> list[str]:
     lines: list[str] = []
     for line in pane.splitlines():
         stripped = line.strip()
@@ -393,6 +428,21 @@ def candidate_markers(pane: str, redact: Redactor, limit: int = 10) -> list[str]
             if candidate not in lines:
                 lines.append(candidate)
     return lines
+
+
+def pattern_trials(
+    pane: str, trials: Sequence[tuple[str, str]], redact: Redactor
+) -> list[dict[str, Any]]:
+    """Record which candidate patterns the live pane actually satisfies."""
+    return [
+        {
+            "name": name,
+            "pattern": pattern,
+            "matched": bool(re.search(pattern, pane, re.MULTILINE)),
+            "line_redacted": matched_line(pane, pattern, redact),
+        }
+        for name, pattern in trials
+    ]
 
 
 def matched_line(pane: str, pattern: str, redact: Redactor) -> str | None:
@@ -481,12 +531,16 @@ class Probe:
         supervisor: SessionSupervisor,
         session_id: str,
         detector: ReadinessDetector,
+        *,
+        label: str | None = None,
     ) -> dict[str, Any]:
         """Report what the pane actually showed when a detector never matched."""
         record = supervisor.read(session_id)
         pane = supervisor._capture(record, detector.pane_lines) if record is not None else ""
+        trials = READY_PATTERN_TRIALS.get(label or "", ())
         return {
             "candidate_markers_redacted": candidate_markers(pane, self.redact),
+            "ready_pattern_trials": pattern_trials(pane, trials, self.redact) if trials else None,
             "ready_pattern_matched_pane": bool(
                 re.search(
                     detector.ready_pattern.replace("{session_identity}", r"[0-9a-f]{32}"),
@@ -721,7 +775,15 @@ class Probe:
             "ready_pattern_matched_after_clearing": False,
             "ready_line_redacted": None,
             "gate_lines_redacted": [],
+            # Recorded on the pane that still shows a one-time gate, and again on
+            # the settled pane after every known gate is cleared.  The first
+            # proves a candidate readiness pattern cannot fire on a trust dialog;
+            # the second binds the pattern that can replace the declared one.
+            "trust_pane_trials": None,
+            "settled_pane_trials": None,
         }
+        ready_trials = READY_PATTERN_TRIALS.get(label, ())
+        quiet_samples = 0
         supervisor._tmux(
             ["new-session", "-d", "-s", session, "-c", str(cwd), shlex.join(launch_command)],
             check=True,
@@ -745,6 +807,11 @@ class Probe:
                         item["gate"] for item in evidence["gates_dismissed"]
                     ]:
                         line = matched_line(pane, pattern, self.redact)
+                        if evidence["trust_pane_trials"] is None:
+                            evidence["trust_pane_trials"] = {
+                                "trust": pattern_trials(pane, TRUST_PATTERN_TRIALS, self.redact),
+                                "ready": pattern_trials(pane, ready_trials, self.redact),
+                            }
                         evidence["gates_dismissed"].append(
                             {
                                 "gate": name,
@@ -758,10 +825,19 @@ class Probe:
                         )
                         supervisor._tmux(["send-keys", "-t", f"{session}:0.0", "Enter"])
                         dismissed = True
+                        quiet_samples = 0
                         time.sleep(4)
                         break
                 if not dismissed:
-                    evidence["gate_lines_redacted"] = candidate_markers(pane, self.redact, 6)
+                    evidence["gate_lines_redacted"] = candidate_markers(pane, self.redact, 8)
+                    quiet_samples += 1
+                    # Three gate-free samples means the launch has settled, so the
+                    # pane can be trialled without waiting out the full deadline.
+                    if quiet_samples >= 3:
+                        evidence["settled_pane_trials"] = pattern_trials(
+                            pane, ready_trials, self.redact
+                        )
+                        break
                     time.sleep(2)
         finally:
             supervisor._tmux(["kill-session", "-t", session])
@@ -825,7 +901,7 @@ class Probe:
                     "fail_closed": True,
                     "error_redacted": self.redact(str(exc), 256),
                     **self.failure_markers(
-                        supervisor, production.session_id, declaration.root_readiness
+                        supervisor, production.session_id, declaration.root_readiness, label=name
                     ),
                 }
 
@@ -873,6 +949,9 @@ class Probe:
                             )
                         ),
                         "pane_bytes": start.pane_bytes,
+                        "ready_pattern_trials": pattern_trials(
+                            pane, READY_PATTERN_TRIALS.get(name, ()), self.redact
+                        ),
                     }
                 )
                 stability = []
@@ -907,7 +986,7 @@ class Probe:
                         "passed": False,
                         "error_redacted": self.redact(str(exc), 512),
                         **self.failure_markers(
-                            supervisor, spec.session_id, declaration.root_readiness
+                            supervisor, spec.session_id, declaration.root_readiness, label=name
                         ),
                     }
                 )
@@ -1708,7 +1787,13 @@ def build_report(probe: Probe, *, live: bool, revision: str, branch: str) -> dic
             "raw_pane_capture_retained": False,
             "raw_stdout_retained": False,
             "raw_model_transcript_retained": False,
-            "retained_pane_data": "single redacted detector-matching line per session, <=200 chars",
+            # Stated as what is actually retained.  The earlier wording described
+            # only the readiness line and understated the diagnostic allowlist,
+            # which retains up to 16 redacted lines when a detector fails.
+            "retained_pane_data": (
+                "redacted detector-matching and allowlisted diagnostic lines only, "
+                "<=200 chars each, <=16 lines per session"
+            ),
         },
     }
 

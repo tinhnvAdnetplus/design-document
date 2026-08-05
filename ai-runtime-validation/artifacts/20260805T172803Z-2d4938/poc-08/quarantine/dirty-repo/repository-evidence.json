@@ -1,0 +1,17 @@
+{
+  "bundle": "poc-08/quarantine/dirty-repo/repository.git.bundle",
+  "bundle_sha256": "9e2eda3de5abc91a6350f0223f3f1d4a7e8b75ff0970a858dc4a5129821d41da",
+  "bundle_verified": true,
+  "format_version": 1,
+  "head": "c1e228d720c625297f9ce13a0c2ac370e4522b56",
+  "refs": [
+    {
+      "object": "c1e228d720c625297f9ce13a0c2ac370e4522b56",
+      "ref": "refs/heads/main"
+    }
+  ],
+  "repository": "poc-08/quarantine/dirty-repo",
+  "status_porcelain": [
+    "?? dirty.txt"
+  ]
+}

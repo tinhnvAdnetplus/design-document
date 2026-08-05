@@ -36,6 +36,34 @@ AUTHORITATIVE: dict[str, str] = {
     "G4_codex": "20260805T163624Z-d5cd00",
 }
 
+# The Claude detector rebind is packaged separately rather than folded into the
+# package above.  That package's digest is pinned in `adapters/cli.py` as Codex's
+# validation provenance, and regenerating it would invalidate the pin, so a new
+# promotion gets a new package that names the earlier one as a dependency.
+REBIND_AUTHORITATIVE: dict[str, str] = {
+    "G2_claude": "20260805T172349Z-34303d",
+    "G2_codex": "20260805T172349Z-34303d",
+}
+
+REBIND_ITERATIONS: list[dict[str, str]] = [
+    {
+        "run_id": "20260805T171837Z-bc92cc",
+        "role": (
+            "G2 re-run adding live candidate-pattern trials; the declared Claude "
+            "detectors still failed, no model call"
+        ),
+        "gates": "G2",
+    },
+    {
+        "run_id": "20260805T172349Z-34303d",
+        "role": (
+            "G2 authoritative run after rebinding the Claude detectors to 2.1.222; "
+            "both adapters reached READY on the declared production path, no model call"
+        ),
+        "gates": "G2",
+    },
+]
+
 ITERATIONS: list[dict[str, str]] = [
     {
         "run_id": "20260805T155910Z-52067a",
@@ -95,18 +123,59 @@ def write_json(path: Path, value: Any) -> None:
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+PACKAGES: dict[str, dict[str, Any]] = {
+    "consolidated-live-persistent-contract": {
+        "subject": "live-persistent-adapter-contract",
+        "authoritative": AUTHORITATIVE,
+        "iterations": ITERATIONS,
+        "depends_on": None,
+    },
+    "consolidated-claude-detector-rebind": {
+        "subject": "claude-detector-rebind",
+        "authoritative": REBIND_AUTHORITATIVE,
+        "iterations": REBIND_ITERATIONS,
+        "depends_on": {
+            "package": "consolidated-live-persistent-contract",
+            "validation_provenance_sha256": (
+                "db6a6b4febf6b671e9773125f1c2dba50c162ed1c3c0a41b42b592fcff585dd5"
+            ),
+            "why": (
+                "Holds the G2 lineage this rebind corrects: the first failure, the "
+                "bounded diagnostic capture, the disposable gate clearing, and the "
+                "declared-versus-disposable split. Those iterations are referenced "
+                "rather than copied so their live-call totals are not counted twice."
+            ),
+        },
+    },
+}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--name", default="consolidated-live-persistent-contract")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="overwrite an existing package; refused by default because a package "
+        "digest may already be pinned as validation provenance",
+    )
     args = parser.parse_args()
+    if args.name not in PACKAGES:
+        raise SystemExit(f"unknown package: {args.name}; known: {sorted(PACKAGES)}")
+    package = PACKAGES[args.name]
     target = ARTIFACTS / args.name
     if target.exists():
+        if not args.force:
+            raise SystemExit(
+                f"{target} already exists and its digest may be pinned as validation "
+                "provenance; regenerating would invalidate the pin (pass --force to override)"
+            )
         shutil.rmtree(target)
     target.mkdir(parents=True)
 
     calls = 0
     records: list[dict[str, Any]] = []
-    for iteration in ITERATIONS:
+    for iteration in package["iterations"]:
         source = ARTIFACTS / iteration["run_id"] / "live-contract-evidence.json"
         if not source.is_file():
             raise SystemExit(f"missing iteration evidence: {source}")
@@ -129,12 +198,13 @@ def main() -> int:
     index = {
         "format": "ai-runtime-evidence/v2",
         "format_version": 2,
-        "subject": "live-persistent-adapter-contract",
+        "subject": package["subject"],
         "consolidated_at": dt.datetime.now(dt.timezone.utc)
         .isoformat()
         .replace("+00:00", "Z"),
-        "authoritative_iteration_per_gate": AUTHORITATIVE,
+        "authoritative_iteration_per_gate": package["authoritative"],
         "iterations": records,
+        "depends_on": package["depends_on"],
         "cumulative_live_calls": calls,
         "live_call_budget": 30,
         "budget_respected": calls <= 30,

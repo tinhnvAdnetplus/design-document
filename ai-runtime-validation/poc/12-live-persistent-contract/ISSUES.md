@@ -144,9 +144,59 @@ rollout was discovered, and `codex exec resume <forked>` exited 0 and recalled
 the nonce seeded in the parent, proving inherited context. The parent rollout was
 byte-identical before and after, so root immutability holds for Codex too.
 
+## Probe iteration `20260805T171837Z-bc92cc` — candidate-pattern trials, 0 calls
+
+The earlier iterations recorded enough to explain *why* the Claude detectors
+failed, but not enough to choose replacements: the diagnostic allowlist anchored
+the prompt glyph to end of line, which is the very assumption that was wrong, so
+the idle prompt line was only ever captured by accident — both recorded hints
+happened to contain the word "error".
+
+**Correction.** The allowlist dropped the end-of-line anchor and gained
+prompt-box and footer shapes, and the probe gained a candidate-pattern trial
+table evaluated against two live panes: the trust dialog and the settled idle
+prompt. A readiness pattern must match the second and must **not** match the
+first, because `_wait_ready` evaluates readiness against the same capture in
+which it just answered a trust prompt.
+
+The trials decided the design immediately. The most obvious candidate,
+`^\s*[❯>](?:\s|$)`, matched the idle prompt **and** `❯ 1. Yes, I trust this
+folder`, so it would have reported `READY` with the dialog still up. It was
+rejected on recorded evidence rather than on reasoning. `^\s*[❯>]\s+(?!\d+\.)\S`
+matched the idle prompt and not the dialog.
+
+The trust trials were equally decisive: neither `Do you trust the contents` nor
+the broad `(?i)do you trust` matched anything. The declared pattern was not too
+narrow, it described a dialog Claude does not render.
+
+The declared detectors still failed in this run, which is why it is retained: it
+is the negative half of the rebind.
+
+## Probe iteration `20260805T172349Z-34303d` — G2 authoritative after rebind, 0 calls
+
+Both adapters passed on the **declared production path**, and the run recorded
+`LIVE_CONTRACT_ESTABLISHED`.
+
+- Claude reached `READY` on `❯ Try "refactor <filepath>"` — a third distinct
+  placeholder hint, which is itself the evidence that the chosen pattern does not
+  depend on hint text. Identity held across six samples over twelve seconds and
+  the root stayed `READY` after a child session terminated.
+- The declared trust pattern now sees its own dialog
+  (`seen_by_declared_trust_pattern: true`, previously `false`), so an untrusted
+  directory fails closed with a trust diagnostic instead of an uninformative
+  readiness timeout.
+- Codex re-passed unchanged; the rebind introduced no regression.
+- The trust-pane trials in this run re-confirm that the chosen pattern does not
+  fire on the dialog while the rejected candidate does.
+
+This run is authoritative for `claude.persistent_root`. See
+`reports/phase-4/claude-detector-rebind.md`.
+
 ## Quota
 
-17 of 30 authorized live calls: Claude 12, Codex 5. Thirteen remained unspent.
-Every zero-call iteration above was deliberate — pane diagnostics, gate
-clearing, and detector binding cost no quota, which is why three consecutive
-corrections were affordable.
+17 of 30 authorized live calls for the original increment: Claude 12, Codex 5.
+The detector rebind added **0** calls — both of its iterations are readiness
+measurements that launch the CLIs and watch their panes without sending a turn.
+Every zero-call iteration above was deliberate: pane diagnostics, gate clearing,
+and detector binding cost no quota, which is why five consecutive corrections
+were affordable.

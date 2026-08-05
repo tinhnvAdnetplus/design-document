@@ -1,0 +1,376 @@
+{
+  "adapter_versions": {
+    "claude": "2.1.222 (Claude Code)",
+    "codex": "codex-cli 0.146.1"
+  },
+  "branch": "live-persistent-adapter-contract",
+  "budget_exhausted": null,
+  "captured_at": "2026-08-05T17:21:15.878674Z",
+  "decision": "LIVE_CONTRACT_NOT_ESTABLISHED",
+  "fixture": {
+    "clean_after_probe": true,
+    "disposable": true,
+    "git_base_sha256": "35e27976b54cd9ff7eadb5c4982f28ab6ff99dda193b566f4a466ea7c624b9a7",
+    "layout": [
+      "repo/",
+      "runtime-state/",
+      "worktrees/probe/"
+    ]
+  },
+  "format": "ai-runtime-evidence/v2",
+  "format_version": 2,
+  "gate_summary": {
+    "G2": false
+  },
+  "gates": {
+    "G2": {
+      "adapters": {
+        "claude": {
+          "candidate_markers_redacted": [
+            "\u256d\u2500\u2500\u2500 Claude Code v2.1.222 \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e",
+            "\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f",
+            "\u276f\u00a0Try \"how do I log an error?\"",
+            "\u23f8 plan mode on (shift+tab to cycle) \u00b7 \u2190 for agents"
+          ],
+          "declared_production_path": {
+            "candidate_markers_redacted": [
+              "\u256d\u2500\u2500\u2500 Claude Code v2.1.222 \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e",
+              "\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f",
+              "\u276f\u00a0Try \"how do I log an error?\"",
+              "\u23f8 plan mode on (shift+tab to cycle) \u00b7 \u2190 for agents"
+            ],
+            "error_redacted": "session readiness timed out",
+            "fail_closed": true,
+            "pane_bytes": 1900,
+            "pane_dead": "0",
+            "pane_sha256": "58916d83bb46e36f7a3ec6e475992e8113912edd1f775854d99a16888379bfe3",
+            "ready": false,
+            "ready_pattern_matched_pane": false,
+            "ready_pattern_trials": [
+              {
+                "line_redacted": null,
+                "matched": false,
+                "name": "declared_glyph_at_line_end",
+                "pattern": "(?:^|\\n).*?[\u276f>]\\s*$"
+              },
+              {
+                "line_redacted": "\u276f\u00a0Try \"how do I log an error?\"",
+                "matched": true,
+                "name": "glyph_line_start_any",
+                "pattern": "^\\s*[\u276f>](?:\\s|$)"
+              },
+              {
+                "line_redacted": "\u276f\u00a0Try \"how do I log an error?\"",
+                "matched": true,
+                "name": "glyph_not_numbered_option",
+                "pattern": "^\\s*[\u276f>]\\s+(?!\\d+\\.)\\S"
+              },
+              {
+                "line_redacted": "\u276f\u00a0Try \"how do I log an error?\"",
+                "matched": true,
+                "name": "glyph_placeholder_hint",
+                "pattern": "^\\s*[\u276f>]\\s+Try\\s"
+              }
+            ],
+            "trust_pattern_matched_pane": false
+          },
+          "declared_ready_pattern": "(?:^|\\n).*?[\u276f>]\\s*$",
+          "declared_root_launch_redacted": [
+            "$HOME/.local/bin/claude",
+            "--permission-mode",
+            "plan",
+            "--disable-slash-commands",
+            "--model",
+            "haiku"
+          ],
+          "declared_trust_behavior": "reject",
+          "declared_trust_pattern": "Do you trust the contents",
+          "error_redacted": "session readiness timed out",
+          "interactive_gate_clearing": {
+            "declared_trust_pattern_matched": false,
+            "gate_lines_redacted": [
+              "\u256d\u2500\u2500\u2500 Claude Code v2.1.222 \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e",
+              "\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f",
+              "\u276f\u00a0Try \"edit <filepath> to...\"",
+              "\u23f8 plan mode on (shift+tab to cycle) \u00b7 \u2190 for agents"
+            ],
+            "gates_dismissed": [
+              {
+                "gate": "claude_workspace_trust",
+                "line_redacted": "\u276f 1. Yes, I trust this folder",
+                "pattern": "(?i)yes, I trust this folder",
+                "seen_by_declared_trust_pattern": false
+              }
+            ],
+            "ready_line_redacted": null,
+            "ready_pattern_matched_after_clearing": false,
+            "settled_pane_trials": [
+              {
+                "line_redacted": null,
+                "matched": false,
+                "name": "declared_glyph_at_line_end",
+                "pattern": "(?:^|\\n).*?[\u276f>]\\s*$"
+              },
+              {
+                "line_redacted": "\u276f\u00a0Try \"edit <filepath> to...\"",
+                "matched": true,
+                "name": "glyph_line_start_any",
+                "pattern": "^\\s*[\u276f>](?:\\s|$)"
+              },
+              {
+                "line_redacted": "\u276f\u00a0Try \"edit <filepath> to...\"",
+                "matched": true,
+                "name": "glyph_not_numbered_option",
+                "pattern": "^\\s*[\u276f>]\\s+(?!\\d+\\.)\\S"
+              },
+              {
+                "line_redacted": "\u276f\u00a0Try \"edit <filepath> to...\"",
+                "matched": true,
+                "name": "glyph_placeholder_hint",
+                "pattern": "^\\s*[\u276f>]\\s+Try\\s"
+              }
+            ],
+            "trust_pane_trials": {
+              "ready": [
+                {
+                  "line_redacted": null,
+                  "matched": false,
+                  "name": "declared_glyph_at_line_end",
+                  "pattern": "(?:^|\\n).*?[\u276f>]\\s*$"
+                },
+                {
+                  "line_redacted": "\u276f 1. Yes, I trust this folder",
+                  "matched": true,
+                  "name": "glyph_line_start_any",
+                  "pattern": "^\\s*[\u276f>](?:\\s|$)"
+                },
+                {
+                  "line_redacted": null,
+                  "matched": false,
+                  "name": "glyph_not_numbered_option",
+                  "pattern": "^\\s*[\u276f>]\\s+(?!\\d+\\.)\\S"
+                },
+                {
+                  "line_redacted": null,
+                  "matched": false,
+                  "name": "glyph_placeholder_hint",
+                  "pattern": "^\\s*[\u276f>]\\s+Try\\s"
+                }
+              ],
+              "trust": [
+                {
+                  "line_redacted": null,
+                  "matched": false,
+                  "name": "declared_do_you_trust_the_contents",
+                  "pattern": "Do you trust the contents"
+                },
+                {
+                  "line_redacted": null,
+                  "matched": false,
+                  "name": "broad_do_you_trust",
+                  "pattern": "(?i)do you trust"
+                },
+                {
+                  "line_redacted": "\u276f 1. Yes, I trust this folder",
+                  "matched": true,
+                  "name": "yes_i_trust_this_folder",
+                  "pattern": "Yes, I trust this folder"
+                },
+                {
+                  "line_redacted": "\u276f 1. Yes, I trust this folder",
+                  "matched": true,
+                  "name": "numbered_first_option_yes",
+                  "pattern": "^\\s*[\u276f>]?\\s*1\\.\\s*Yes\\b"
+                }
+              ]
+            }
+          },
+          "pane_bytes": 1900,
+          "pane_dead": "0",
+          "pane_sha256": "58916d83bb46e36f7a3ec6e475992e8113912edd1f775854d99a16888379bfe3",
+          "passed": false,
+          "readiness_reached": false,
+          "ready_pattern_matched_pane": false,
+          "ready_pattern_trials": [
+            {
+              "line_redacted": null,
+              "matched": false,
+              "name": "declared_glyph_at_line_end",
+              "pattern": "(?:^|\\n).*?[\u276f>]\\s*$"
+            },
+            {
+              "line_redacted": "\u276f\u00a0Try \"how do I log an error?\"",
+              "matched": true,
+              "name": "glyph_line_start_any",
+              "pattern": "^\\s*[\u276f>](?:\\s|$)"
+            },
+            {
+              "line_redacted": "\u276f\u00a0Try \"how do I log an error?\"",
+              "matched": true,
+              "name": "glyph_not_numbered_option",
+              "pattern": "^\\s*[\u276f>]\\s+(?!\\d+\\.)\\S"
+            },
+            {
+              "line_redacted": "\u276f\u00a0Try \"how do I log an error?\"",
+              "matched": true,
+              "name": "glyph_placeholder_hint",
+              "pattern": "^\\s*[\u276f>]\\s+Try\\s"
+            }
+          ],
+          "trust_pattern_matched_pane": false
+        },
+        "codex": {
+          "child_termination": {
+            "child_kind": "runtime_event_worker",
+            "child_ready": true,
+            "child_terminated": true,
+            "root_state_after": "READY",
+            "root_survived": true
+          },
+          "declared_production_path": {
+            "fail_closed": false,
+            "ready": true,
+            "state": "READY"
+          },
+          "declared_ready_pattern": "model:\\s+(?!loading)\\S+",
+          "declared_root_launch_redacted": [
+            "$HOME/.nvm/versions/node/v26.2.0/bin/codex",
+            "--sandbox",
+            "read-only",
+            "--ask-for-approval",
+            "never",
+            "--no-alt-screen",
+            "--model",
+            "gpt-5.4-mini"
+          ],
+          "declared_trust_behavior": "reject",
+          "declared_trust_pattern": "Do you trust the contents",
+          "identity_observation_window": {
+            "all_identity_stable": true,
+            "all_ready": true,
+            "samples": 6,
+            "states": [
+              "READY"
+            ],
+            "window_seconds": 12
+          },
+          "interactive_gate_clearing": {
+            "declared_trust_pattern_matched": true,
+            "gate_lines_redacted": [],
+            "gates_dismissed": [
+              {
+                "gate": "codex_startup_notice",
+                "line_redacted": "Press enter to continue",
+                "pattern": "(?i)press enter to continue",
+                "seen_by_declared_trust_pattern": false
+              }
+            ],
+            "ready_line_redacted": "\u2502 model:     gpt-5.4-mini medium   /model to change  \u2502",
+            "ready_pattern_matched_after_clearing": true,
+            "settled_pane_trials": null,
+            "trust_pane_trials": {
+              "ready": [
+                {
+                  "line_redacted": null,
+                  "matched": false,
+                  "name": "declared_model_line",
+                  "pattern": "model:\\s+(?!loading)\\S+"
+                }
+              ],
+              "trust": [
+                {
+                  "line_redacted": "Do you trust the contents of this directory? Working with untrusted contents",
+                  "matched": true,
+                  "name": "declared_do_you_trust_the_contents",
+                  "pattern": "Do you trust the contents"
+                },
+                {
+                  "line_redacted": "Do you trust the contents of this directory? Working with untrusted contents",
+                  "matched": true,
+                  "name": "broad_do_you_trust",
+                  "pattern": "(?i)do you trust"
+                },
+                {
+                  "line_redacted": null,
+                  "matched": false,
+                  "name": "yes_i_trust_this_folder",
+                  "pattern": "Yes, I trust this folder"
+                },
+                {
+                  "line_redacted": null,
+                  "matched": false,
+                  "name": "numbered_first_option_yes",
+                  "pattern": "^\\s*[\u276f>]?\\s*1\\.\\s*Yes\\b"
+                }
+              ]
+            }
+          },
+          "pane_bytes": 1688,
+          "passed": true,
+          "readiness_line_redacted": "\u2502 model:     gpt-5.4-mini medium   /model to change  \u2502",
+          "readiness_reached": true,
+          "ready_pattern_trials": [
+            {
+              "line_redacted": "\u2502 model:     gpt-5.4-mini medium   /model to change  \u2502",
+              "matched": true,
+              "name": "declared_model_line",
+              "pattern": "model:\\s+(?!loading)\\S+"
+            }
+          ],
+          "state": "READY",
+          "trust_line_redacted": null,
+          "trust_prompt_observed": false
+        }
+      },
+      "passed": false
+    }
+  },
+  "iterations": [
+    {
+      "at": "2026-08-05T17:20:49.229048Z",
+      "correction": "recorded verbatim readiness/trust markers for detector binding",
+      "gate": "G2",
+      "outcome": "claude root did not reach declared readiness"
+    }
+  ],
+  "limits": {
+    "max_live_calls": 30,
+    "readiness_timeout_seconds": 60.0,
+    "turn_timeout_seconds": 180.0
+  },
+  "live_call_log": [],
+  "live_calls": {
+    "total": 0
+  },
+  "mode": "live",
+  "models": {
+    "claude": "haiku",
+    "codex": "gpt-5.4-mini",
+    "codex_reasoning_effort": "low"
+  },
+  "privacy_checks": {
+    "fixture_email_absent": true,
+    "home_path_absent": true,
+    "nonce_absent": true,
+    "raw_pane_field_absent": true,
+    "raw_stdout_field_absent": true,
+    "repository_path_absent": true
+  },
+  "privacy_contract": {
+    "raw_model_transcript_retained": false,
+    "raw_pane_capture_retained": false,
+    "raw_prompt_retained": false,
+    "raw_stdout_retained": false,
+    "retained_pane_data": "redacted detector-matching and allowlisted diagnostic lines only, <=200 chars each, <=16 lines per session"
+  },
+  "run_id": "20260805T171837Z-bc92cc",
+  "session_residue": {
+    "claude_project_dir_created_by_probe": true,
+    "claude_transcript_files_removed": 0,
+    "codex_known_session_count": 0,
+    "codex_rollout_files_removed": 0,
+    "retained_workspace_trust_entry": "Claude records fixture-path workspace trust outside the fixture; the path is deleted with the fixture and no probe content remains."
+  },
+  "subject": "live-persistent-adapter-contract",
+  "tested_revision": "951b78e272750c62f2eb9f8107f491b5a4a393ec"
+}

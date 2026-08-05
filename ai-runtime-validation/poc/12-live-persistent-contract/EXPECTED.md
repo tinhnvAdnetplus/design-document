@@ -21,6 +21,8 @@ field fail-closed and does not block the others.
 | LPC-14 | Q2 | a runtime-assigned root identifier renders the fork/resume template, or the absence of that surface is established per adapter |
 | LPC-15 | — | the fixture is clean, every tmux server is removed, and no raw prompt, pane, home path, email, or credential text appears in the evidence |
 | LPC-16 | — | the live call count is recorded and within the 30-call cap |
+| LPC-17 | G2 | every candidate readiness pattern is trialled against both the live trust dialog and the live idle prompt, and a candidate that matches the dialog is recorded as unusable |
+| LPC-18 | G2 | every candidate trust pattern is trialled against the live dialog, so a declared pattern that describes a dialog the CLI does not render is caught |
 
 ## Decisions
 

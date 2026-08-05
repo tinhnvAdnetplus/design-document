@@ -122,6 +122,13 @@ def main(argv: list[str] | None = None) -> int:
                 capture_output=True,
                 timeout=float(request["timeout_seconds"]) + 5,
                 check=False,
+                # This worker reads its TURN notices from the tmux pane on
+                # sys.stdin.  An inherited stdin hands that same pane to the
+                # model child, which then blocks on a tty that never sends EOF
+                # and races the worker for the next notice.  A live probe
+                # observed `codex exec` print "Reading additional input from
+                # stdin..." and hang for 210 seconds on exactly this.
+                stdin=subprocess.DEVNULL,
             )
             stdout, stderr, exit_code = result.stdout, result.stderr, result.returncode
         except subprocess.TimeoutExpired as exc:
