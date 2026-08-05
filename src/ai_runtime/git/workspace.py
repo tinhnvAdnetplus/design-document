@@ -95,6 +95,24 @@ class LeaseManager:
     def _path(self, feature_id: str) -> Path:
         return self.root / f"{_safe_feature_id(feature_id)}.json"
 
+    def _token_path(self, feature_id: str) -> Path:
+        """High-water fencing token; it outlives the lease file itself.
+
+        A fix cycle revokes and re-grants the same feature's writer lease. If the
+        token restarted at 1 on every grant, a paused writer from an earlier cycle
+        would present a token the worktree gateway still accepts.
+        """
+        return self.root / f"{_safe_feature_id(feature_id)}.token"
+
+    def _next_token(self, feature_id: str, current: Lease | None) -> int:
+        path = self._token_path(feature_id)
+        issued = int(path.read_text(encoding="utf-8")) if path.exists() else 0
+        token = max(issued, current.fencing_token if current is not None else 0) + 1
+        temporary = path.with_suffix(".token.tmp")
+        temporary.write_text(str(token), encoding="utf-8")
+        os.replace(temporary, path)
+        return token
+
     @staticmethod
     def _now() -> dt.datetime:
         return dt.datetime.now(dt.UTC)
@@ -133,7 +151,7 @@ class LeaseManager:
                 raise LeaseConflictError(
                     f"active writer lease belongs to {current.owner} (token {current.fencing_token})"
                 )
-            token = 1 if current is None else current.fencing_token + 1
+            token = self._next_token(feature_id, current)
             lease = Lease(
                 feature_id=feature_id,
                 owner=owner,
