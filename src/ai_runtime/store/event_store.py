@@ -30,6 +30,8 @@ EVENT_TYPES = frozenset(
         "implementation.ready",
         "review.requested",
         "changes.requested",
+        "feature.blocked",
+        "feature.unblocked",
         "merge.approved",
         "merge.started",
         "merge.completed",

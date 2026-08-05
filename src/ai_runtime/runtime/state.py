@@ -37,6 +37,13 @@ class FeatureState:
     review: Mapping[str, Any] | None = None
     approval: Mapping[str, Any] | None = None
     merge: Mapping[str, Any] | None = None
+    # One implementer/reviewer round per implementation.ready; one fix cycle per
+    # changes.requested. The limit is compared against fix_cycles because the
+    # nth changes.requested is what would dispatch round n+1.
+    dispatch_rounds: int = 0
+    fix_cycles: int = 0
+    cycle_allowance: int | None = None
+    blocked: Mapping[str, Any] | None = None
 
 
 def project_feature(state: FeatureState, event: Mapping[str, Any]) -> FeatureState:
@@ -60,11 +67,23 @@ def project_feature(state: FeatureState, event: Mapping[str, Any]) -> FeatureSta
     elif event_type == "lease.granted":
         values.update(phase=FeaturePhase.IMPLEMENTING, workspace=payload)
     elif event_type == "implementation.ready":
-        values.update(phase=FeaturePhase.IMPLEMENTATION_READY, implementation=payload)
+        values.update(
+            phase=FeaturePhase.IMPLEMENTATION_READY,
+            implementation=payload,
+            dispatch_rounds=state.dispatch_rounds + 1,
+        )
     elif event_type == "review.requested":
         values.update(phase=FeaturePhase.REVIEWING)
     elif event_type == "changes.requested":
-        values.update(phase=FeaturePhase.CHANGES_REQUESTED, review=payload)
+        values.update(
+            phase=FeaturePhase.CHANGES_REQUESTED,
+            review=payload,
+            fix_cycles=state.fix_cycles + 1,
+        )
+    elif event_type == "feature.blocked":
+        values.update(blocked=payload)
+    elif event_type == "feature.unblocked":
+        values.update(blocked=None, cycle_allowance=payload.get("max_fix_cycles"))
     elif (
         event_type == "implementation.progress" and payload.get("stage") == "review.recommendation"
     ):

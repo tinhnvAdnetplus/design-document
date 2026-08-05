@@ -31,6 +31,7 @@ class ScriptedAdapter:
         temporary: bool = False,
         action=None,
         version: str = "test-1",
+        values: list[dict] | None = None,
     ):
         self._capability = AdapterCapability(
             name=name,
@@ -43,9 +44,12 @@ class ScriptedAdapter:
             merge_authority=merge_authority,
             temporary=temporary,
         )
-        self.value = value
+        # The last entry repeats, so a scripted adapter can answer an unbounded
+        # loop while the runtime is what stops it.
+        self.values = [dict(item) for item in (values or [value])]
         self.action = action
         self.calls = 0
+        self.prompts: list[str] = []
 
     @property
     def capability(self):
@@ -53,14 +57,19 @@ class ScriptedAdapter:
 
     def invoke(self, task, *, prompt, cwd, schema, timeout_seconds, feature_id=None):
         self.calls += 1
+        self.prompts.append(prompt)
         if self.action is not None:
-            self.action(Path(cwd))
-        value = dict(self.value)
+            self.action(Path(cwd), self.calls)
+        value = dict(self.values[min(self.calls, len(self.values)) - 1])
         if task == StructuredTask.IMPLEMENT and value.get("commit") == "HEAD":
             value["commit"] = git(Path(cwd), "rev-parse", "HEAD")
         return AdapterResult(
             value=value,
-            evidence={"adapter": self.capability.name, "call": self.calls},
+            evidence={
+                "adapter": self.capability.name,
+                "call": self.calls,
+                "turn_id": f"turn-{self.capability.name}-{self.calls}",
+            },
         )
 
 
@@ -84,12 +93,18 @@ class VerticalSliceTests(unittest.TestCase):
         self.temporary.cleanup()
 
     def adapters(
-        self, *, authoritative=False, implementation_action=None, implementer_version="test-1"
+        self,
+        *,
+        authoritative=False,
+        implementation_action=None,
+        implementer_version="test-1",
+        review_verdicts=None,
     ):
-        def default_implementation(cwd: Path):
-            (cwd / "hello.txt").write_text("hello from runtime\n", encoding="utf-8")
-            git(cwd, "add", "hello.txt")
-            git(cwd, "commit", "-q", "-m", "implement feature")
+        def default_implementation(cwd: Path, call: int):
+            name = "hello.txt" if call == 1 else f"fix-{call}.txt"
+            (cwd / name).write_text("hello from runtime\n", encoding="utf-8")
+            git(cwd, "add", name)
+            git(cwd, "commit", "-q", "-m", f"implement feature attempt {call}")
 
         planner = ScriptedAdapter(
             "antigravity" if not authoritative else "claude",
@@ -109,22 +124,36 @@ class VerticalSliceTests(unittest.TestCase):
             action=implementation_action or default_implementation,
             version=implementer_version,
         )
+        approval = {"verdict": "approve", "summary": "Change is scoped", "findings": []}
         reviewer = ScriptedAdapter(
             "claude" if authoritative else "antigravity",
             StructuredTask.REVIEW,
-            {"verdict": "approve", "summary": "Change is scoped", "findings": []},
+            approval,
+            values=(
+                [
+                    {
+                        "verdict": verdict,
+                        "summary": f"round verdict {verdict}",
+                        "findings": [] if verdict == "approve" else ["fix the fixture content"],
+                    }
+                    for verdict in review_verdicts
+                ]
+                if review_verdicts
+                else None
+            ),
             merge_authority=authoritative,
             temporary=not authoritative,
         )
         return planner, implementer, reviewer
 
-    def coordinator(self, adapters, *, allow_override=True):
+    def coordinator(self, adapters, *, allow_override=True, max_fix_cycles=5):
         return RuntimeCoordinator(
             RuntimeConfig(
                 repository=self.repo,
                 state_dir=self.state_dir,
                 worktree_root=self.worktrees,
                 allow_temporary_human_review_override=allow_override,
+                max_fix_cycles=max_fix_cycles,
             ),
             planner=adapters[0],
             implementer=adapters[1],
@@ -208,7 +237,7 @@ class VerticalSliceTests(unittest.TestCase):
             self.coordinator(tuple(adapters))
 
     def test_committed_head_without_event_is_fenced_until_reconciled(self):
-        def commit_then_fail(cwd: Path):
+        def commit_then_fail(cwd: Path, call: int):
             (cwd / "recovered.txt").write_text("recover me\n", encoding="utf-8")
             git(cwd, "add", "recovered.txt")
             git(cwd, "commit", "-q", "-m", "commit before acknowledgement loss")
@@ -237,7 +266,7 @@ class VerticalSliceTests(unittest.TestCase):
             self.assertEqual(FeaturePhase.AWAITING_HUMAN_APPROVAL, state.phase)
 
     def test_dirty_worktree_is_preserved_for_recovery(self):
-        def leave_dirty(cwd: Path):
+        def leave_dirty(cwd: Path, call: int):
             (cwd / "dirty.txt").write_text("uncommitted\n", encoding="utf-8")
 
         adapters = self.adapters(implementation_action=leave_dirty)
@@ -261,7 +290,7 @@ class VerticalSliceTests(unittest.TestCase):
 
     def test_git_head_remains_authoritative_when_model_declares_wrong_hash(self):
         adapters = self.adapters()
-        adapters[1].value["commit"] = "f" * 40
+        adapters[1].values[0]["commit"] = "f" * 40
         with self.coordinator(adapters) as runtime:
             runtime.request_feature("feat-git-truth", "Add hello fixture")
             state = runtime.run_until_gate("feat-git-truth", auto_approve_plan=True)
@@ -275,7 +304,7 @@ class VerticalSliceTests(unittest.TestCase):
             )
 
     def test_git_configuration_change_is_fenced(self):
-        def change_config_and_commit(cwd: Path):
+        def change_config_and_commit(cwd: Path, call: int):
             (cwd / "hello.txt").write_text("hello\n", encoding="utf-8")
             git(cwd, "add", "hello.txt")
             git(cwd, "commit", "-q", "-m", "implement feature")
@@ -386,6 +415,141 @@ class VerticalSliceTests(unittest.TestCase):
             state = runtime.merge("feat-cleanup-recover")
             self.assertEqual(FeaturePhase.COMPLETED, state.phase)
             self.assertFalse((self.worktrees / "feat-cleanup-recover").exists())
+
+    def test_changes_requested_redispatches_and_merges_after_the_fix(self):
+        adapters = self.adapters(
+            authoritative=True, review_verdicts=["changes_requested", "approve"]
+        )
+        with self.coordinator(adapters, allow_override=False) as runtime:
+            runtime.request_feature("feat-fix", "Add hello fixture")
+            state = runtime.run_until_gate("feat-fix", auto_approve_plan=True)
+
+            self.assertEqual(FeaturePhase.APPROVED, state.phase)
+            self.assertEqual(1, state.fix_cycles)
+            self.assertEqual(2, state.dispatch_rounds)
+            self.assertEqual(2, adapters[1].calls)
+            self.assertEqual(2, adapters[2].calls)
+            self.assertEqual(1, adapters[0].calls)
+            # The second implementation packet carries the reviewer findings and
+            # the head they were written against.
+            rework = adapters[1].prompts[1]
+            self.assertIn("This is fix cycle 1", rework)
+            self.assertIn("fix the fixture content", rework)
+            state = runtime.merge("feat-fix")
+            self.assertEqual(FeaturePhase.COMPLETED, state.phase)
+            self.assertTrue((self.repo / "hello.txt").exists())
+            self.assertTrue((self.repo / "fix-2.txt").exists())
+
+            granted = [
+                event for event in runtime.writer.iter_events() if event["type"] == "lease.granted"
+            ]
+            self.assertEqual(2, len(granted))
+            self.assertEqual([1, 2], [event["payload"]["fencing_token"] for event in granted])
+
+    def test_fix_cycle_limit_blocks_dispatch_and_escalates_to_a_maintainer(self):
+        adapters = self.adapters(authoritative=True, review_verdicts=["changes_requested"])
+        with self.coordinator(adapters, allow_override=False, max_fix_cycles=5) as runtime:
+            runtime.request_feature("feat-loop", "Add hello fixture")
+            state = runtime.run_until_gate("feat-loop", auto_approve_plan=True)
+
+            self.assertEqual(FeaturePhase.CHANGES_REQUESTED, state.phase)
+            self.assertEqual(5, state.fix_cycles)
+            self.assertEqual(5, state.dispatch_rounds)
+            self.assertEqual(5, adapters[1].calls)
+            self.assertEqual(5, adapters[2].calls)
+            self.assertIsNotNone(state.blocked)
+            self.assertEqual("review_fix_cycle_limit", state.blocked["reason"])
+            self.assertEqual(5, state.blocked["max_fix_cycles"])
+            self.assertEqual(str(FeaturePhase.CHANGES_REQUESTED), state.blocked["blocked_stage"])
+            self.assertEqual(["fix the fixture content"], state.blocked["findings"])
+
+            # A blocked feature stops automatic dispatch without touching Git.
+            self.assertEqual(self.base, git(self.repo, "rev-parse", "HEAD"))
+            self.assertTrue((self.worktrees / "feat-loop").exists())
+            self.assertIsNone(runtime.leases.read("feat-loop"))
+            state = runtime.run_until_gate("feat-loop")
+            self.assertEqual(5, adapters[1].calls)
+            with self.assertRaisesRegex(RuntimePolicyError, "feature is blocked"):
+                runtime.merge("feat-loop")
+
+    def test_fix_cycle_limit_is_configurable(self):
+        adapters = self.adapters(authoritative=True, review_verdicts=["changes_requested"])
+        with self.coordinator(adapters, allow_override=False, max_fix_cycles=2) as runtime:
+            runtime.request_feature("feat-two", "Add hello fixture")
+            state = runtime.run_until_gate("feat-two", auto_approve_plan=True)
+            self.assertEqual(2, state.fix_cycles)
+            self.assertEqual(2, adapters[1].calls)
+            self.assertIsNotNone(state.blocked)
+
+    def test_maintainer_override_grants_one_bounded_extra_allowance(self):
+        adapters = self.adapters(
+            authoritative=True,
+            review_verdicts=["changes_requested", "changes_requested", "approve"],
+        )
+        with self.coordinator(adapters, allow_override=False, max_fix_cycles=2) as runtime:
+            runtime.request_feature("feat-override", "Add hello fixture")
+            state = runtime.run_until_gate("feat-override", auto_approve_plan=True)
+            self.assertIsNotNone(state.blocked)
+
+            with self.assertRaisesRegex(RuntimePolicyError, "between 1 and 2"):
+                runtime.override_fix_cycle_limit(
+                    "feat-override",
+                    additional_cycles=9,
+                    approved_by="maintainer",
+                    justification="too many",
+                )
+            with self.assertRaisesRegex(RuntimePolicyError, "recorded justification"):
+                runtime.override_fix_cycle_limit(
+                    "feat-override",
+                    additional_cycles=1,
+                    approved_by="maintainer",
+                    justification="  ",
+                )
+
+            state = runtime.override_fix_cycle_limit(
+                "feat-override",
+                additional_cycles=1,
+                approved_by="maintainer",
+                justification="findings are cosmetic; one more cycle is authorised",
+            )
+            self.assertIsNone(state.blocked)
+            self.assertEqual(3, state.cycle_allowance)
+            state = runtime.run_until_gate("feat-override")
+            self.assertEqual(FeaturePhase.APPROVED, state.phase)
+            self.assertEqual(3, state.dispatch_rounds)
+            self.assertEqual(FeaturePhase.COMPLETED, runtime.merge("feat-override").phase)
+
+    def test_a_fix_cycle_without_a_new_commit_is_fenced(self):
+        def commit_only_once(cwd: Path, call: int):
+            if call > 1:
+                return
+            (cwd / "hello.txt").write_text("hello\n", encoding="utf-8")
+            git(cwd, "add", "hello.txt")
+            git(cwd, "commit", "-q", "-m", "implement feature")
+
+        adapters = self.adapters(
+            authoritative=True,
+            implementation_action=commit_only_once,
+            review_verdicts=["changes_requested"],
+        )
+        with self.coordinator(adapters, allow_override=False) as runtime:
+            runtime.request_feature("feat-noop", "Add hello fixture")
+            with self.assertRaisesRegex(RecoveryRequiredError, "no new commit"):
+                runtime.run_until_gate("feat-noop", auto_approve_plan=True)
+            self.assertEqual(FeaturePhase.IMPLEMENTING, runtime.state("feat-noop").phase)
+
+    def test_model_packets_exclude_transport_evidence_and_stay_bounded(self):
+        adapters = self.adapters(authoritative=True)
+        with self.coordinator(adapters, allow_override=False) as runtime:
+            runtime.request_feature("feat-packet", "Add hello fixture")
+            runtime.run_until_gate("feat-packet", auto_approve_plan=True)
+            budget = runtime.config.feature_packet_bytes
+            for adapter in (adapters[1], adapters[2]):
+                for prompt in adapter.prompts:
+                    self.assertNotIn("adapter_evidence", prompt)
+                    self.assertNotIn("turn_id", prompt)
+                    self.assertLessEqual(len(prompt.encode("utf-8")), budget)
+            self.assertIn("Approved plan (sha256 ", adapters[1].prompts[0])
 
     def test_writer_lease_conflict_and_fencing(self):
         manager = LeaseManager(self.state_dir)

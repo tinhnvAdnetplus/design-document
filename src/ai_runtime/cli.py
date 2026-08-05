@@ -39,6 +39,12 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--codex-model")
     parser.add_argument("--timeout", type=float, default=120.0)
     parser.add_argument(
+        "--max-fix-cycles",
+        type=int,
+        default=5,
+        help="implementer/reviewer rounds allowed for one request before escalation",
+    )
+    parser.add_argument(
         "--allow-temporary-reviewer",
         action="store_true",
         help="allow an explicit human to override advisory agy review",
@@ -79,6 +85,16 @@ def _parser() -> argparse.ArgumentParser:
     reconcile.add_argument("--test", action="append", default=[])
     reconcile.add_argument("--reconciled-by", required=True)
 
+    override = commands.add_parser(
+        "override-fix-cycles",
+        help="record a bounded maintainer override for a fix-cycle-limit block",
+    )
+    override.add_argument("--feature-id", required=True)
+    override.add_argument("--additional-cycles", type=int, required=True)
+    override.add_argument("--approved-by", required=True)
+    override.add_argument("--justification", required=True)
+    override.add_argument("--yes", action="store_true", help="confirm the recorded override")
+
     status = commands.add_parser("status", help="replay and print one feature projection")
     status.add_argument("--feature-id", required=True)
     return parser
@@ -101,6 +117,7 @@ def _coordinator(args: argparse.Namespace) -> RuntimeCoordinator:
         worktree_root=(args.worktree_root or default_worktrees),
         adapter_timeout_seconds=args.timeout,
         allow_temporary_human_review_override=args.allow_temporary_reviewer,
+        max_fix_cycles=args.max_fix_cycles,
     )
     planner = (
         ClaudeCLIAdapter(model=args.claude_model)
@@ -125,6 +142,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "approve-merge" and not args.yes:
         parser.error("approve-merge requires --yes and an exact --expected-head")
+    if args.command == "override-fix-cycles" and not args.yes:
+        parser.error("override-fix-cycles requires --yes and a recorded --justification")
     try:
         with _coordinator(args) as runtime:
             if args.command == "request":
@@ -151,6 +170,13 @@ def main(argv: list[str] | None = None) -> int:
                 )
             elif args.command == "merge":
                 state = runtime.merge(args.feature_id)
+            elif args.command == "override-fix-cycles":
+                state = runtime.override_fix_cycle_limit(
+                    args.feature_id,
+                    additional_cycles=args.additional_cycles,
+                    approved_by=args.approved_by,
+                    justification=args.justification,
+                )
             elif args.command == "reconcile-implementation":
                 state = runtime.reconcile_implementation(
                     args.feature_id,
