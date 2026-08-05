@@ -259,17 +259,19 @@ def main() -> int:
         ],
     }
     write_json(artifact_dir / "evidence-v2.json", evidence)
+    # portable-git-evidence.json is the Git bundle index that verify-evidence.sh
+    # checksums. This increment exports no nested repository, so it stays empty
+    # and the revision summary gets its own file.
+    write_json(artifact_dir / "portable-git-evidence.json", [])
     write_json(
-        artifact_dir / "portable-git-evidence.json",
-        [
-            {
-                "base_revision": BASE_REVISION,
-                "tested_revision": revision,
-                "normative_docs_changed": False,
-                "runtime_test_count": RUNTIME_TEST_COUNT,
-                "contract_assertion_count": CONTRACT_ASSERTION_COUNT,
-            }
-        ],
+        artifact_dir / "revision-evidence.json",
+        {
+            "base_revision": BASE_REVISION,
+            "tested_revision": revision,
+            "normative_docs_changed": False,
+            "runtime_test_count": RUNTIME_TEST_COUNT,
+            "contract_assertion_count": CONTRACT_ASSERTION_COUNT,
+        },
     )
 
     payload = "\n".join(path.read_text(encoding="utf-8") for path in artifact_dir.glob("*.json"))

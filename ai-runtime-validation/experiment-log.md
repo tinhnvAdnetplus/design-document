@@ -928,3 +928,21 @@ Executed entries are appended below in run order. Evidence links are relative to
 **Architecture impact:** No specification change; executable evidence collected.
 
 ---
+
+### EXP-20260805T033246Z-ab38bb-POC-09 — Executable performance validation
+
+| Field | Value |
+| --- | --- |
+| **Date** | 2026-08-05T03:32:47.076508Z |
+| **Phase** | Phase 9 |
+| **PoC** | poc/09-performance |
+| **Git revision** | `b72d2c36c026f89f521e9a0ab17f9c28ace27df2` |
+| **Evidence** | `artifacts/20260805T033246Z-ab38bb/poc-09/report.json` |
+
+**Command:** `./scripts/run-selected.sh 09`
+
+**Conclusion:** FAIL — 8/9 measurable assertions passed.
+
+**Architecture impact:** No specification change; executable evidence collected.
+
+---
