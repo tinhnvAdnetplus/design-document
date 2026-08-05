@@ -61,7 +61,7 @@ policy:
     merge_role: claude_reviewer
     expiration_minutes: 60
   review:
-    max_fix_cycles: 3
+    max_fix_cycles: 5
     escalation: require_human
   protected_paths:
     - migrations/**
@@ -218,12 +218,19 @@ configuration revision. The orchestrator logs its digest and uses it for event
 authorization. Revoking a capability applies immediately to new side effects;
 existing sessions become unable to renew denied leases.
 
-The review escalation policy bounds review/fix cycles per feature. When the
-configured maximum is reached, the Runtime applies the configured
-`require_human` action: it blocks automatic further implementation/review
-dispatch and records the cycle count and evidence. A maintainer may abandon,
-replan, or issue an auditable policy override; the setting never turns a review
-finding into approval.
+The review escalation policy bounds review/fix cycles per feature. A cycle is
+one accepted `changes.requested`; because the nth such event is what would
+dispatch round n+1, `max_fix_cycles: 5` permits at most five implementer/reviewer
+rounds for one human request. When the configured maximum is reached, the
+Runtime applies the configured `require_human` action: it blocks automatic
+further implementation/review dispatch and records the cycle count and evidence.
+A maintainer may abandon, replan, or issue an auditable policy override; the
+setting never turns a review finding into approval.
+
+The limit is deployment policy and may be retuned. It bounds operating cost
+directly: worst-case model spend for one human request is `max_fix_cycles`
+multiplied by `limits.feature_packet_bytes`, so raising either raises the
+ceiling. The loader MUST reject a non-positive or unbounded fix-cycle setting.
 
 Model inference egress is separate from adapter-update and MCP egress. Each
 enabled networked model adapter requires an explicit `model_inference` allow

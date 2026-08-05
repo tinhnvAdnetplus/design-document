@@ -75,6 +75,8 @@ as attachments with content digest and access-controlled URI.
 | implementation.ready | Codex implementer | head, base, tests, diff digest | implementation to review |
 | review.requested | orchestrator | review packet digest | notify reviewer |
 | changes.requested | Claude reviewer | findings, reviewed head, severity | review to implementation |
+| feature.blocked | orchestrator | reason, blocked stage, cycle/round counts, heads, evidence | blocked overlay; dispatch stops |
+| feature.unblocked | authorized maintainer | reason, justification, new bounded allowance | overlay cleared; stage unchanged |
 | merge.approved | Claude reviewer | immutable approval binding | review to approved |
 | merge.started | merger | integration lock, candidate | approved to merging |
 | merge.completed | merger | result, integration commit, checks | merging to merged/failed |

@@ -201,6 +201,34 @@ opt-in retention with access control and redaction.
 **Consequences.** Some incidents need a deliberately enabled diagnostic mode.
 The default has lower privacy risk and less storage cost.
 
+## ADR-012 — Bounded implementer/reviewer loop with cost-bound packets
+
+**Status:** Accepted
+
+**Context.** One human request can produce an unbounded implementer/reviewer
+exchange. Every turn is a fresh non-interactive model process, so each round
+pays the full prompt cost again. An unbounded loop therefore has unbounded
+operating cost and can never report failure to the human who asked for the work.
+
+**Decision.** A human task is bounded by `policy.review.max_fix_cycles`
+implementer/reviewer rounds, default 5. The Runtime counts `changes.requested`
+events on the feature stream. When the count reaches the limit, the Runtime
+appends `feature.blocked` and stops automatic dispatch. Every packet sent to a
+model is assembled from bounded artifacts: the plan is sent as a digest-labelled
+artifact view with adapter transport evidence removed, prior findings and path
+lists are individually capped, and the assembled packet is rejected if it exceeds
+`limits.feature_packet_bytes`.
+
+**Alternatives.** Unbounded retry until approval; wall-clock timeout only;
+per-turn token cap without a round cap; discarding prior findings each round.
+
+**Consequences.** Worst-case cost for one human request becomes
+`max_fix_cycles x bounded packet`, which is computable before the work starts. A
+genuinely hard feature reaches a human instead of looping. The maintainer needs
+an explicit, recorded action to continue past the limit; `feature.unblocked`
+records that override with its justification and a new bounded allowance. The
+limit is policy, not architecture, and can be retuned without an ADR revision.
+
 ## Decision rationale summary
 
 | Decision | Primary advantage | Principal limitation | Revisit trigger |
@@ -213,6 +241,7 @@ The default has lower privacy risk and less storage cost.
 | tmux | inspectable local runtime | single-host limit | remote scheduler |
 | leases | safe concurrency | fencing integration | filesystem-level isolation |
 | root caches | concise continuity | cache drift | verified semantic index |
+| bounded loop | computable cost ceiling | hard features need a human | measured approval-rate data |
 
 ## Decision amendment procedure
 

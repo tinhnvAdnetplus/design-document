@@ -97,14 +97,49 @@ head.
 
 ### Review/fix escalation
 
-The Runtime counts completed `changes.requested` to implementation cycles for
-the feature. Before the configured maximum, the normal fix cycle remains
-unchanged. At the configured limit, it applies the configured escalation policy:
-the feature receives a blocked overlay, automatic review/fix dispatch stops,
-and a maintainer receives the findings, heads, plan, and cycle evidence. The
-maintainer may abandon the feature, request a replan, or make an auditable
-policy override. Escalation never converts repeated findings into approval or
-permits the reviewer to edit source.
+One human request buys a bounded number of implementer/reviewer rounds. The
+counting rule is exact:
+
+| Term | Definition |
+| --- | --- |
+| dispatch round | one `implementation.ready` and the review verdict that judges it |
+| fix cycle | one accepted `changes.requested` event on the feature stream |
+| limit | `policy.review.max_fix_cycles`, default 5 |
+
+The nth `changes.requested` is what would dispatch round n+1, so a limit of N
+permits at most N rounds. Below the limit the normal fix cycle is unchanged. At
+the limit the Runtime appends `feature.blocked` with reason
+`review_fix_cycle_limit` and stops automatic dispatch. The block is an overlay:
+the feature keeps its business stage, Git is untouched, the feature worktree is
+preserved for inspection, and no writer lease is held.
+
+The block payload carries the evidence a maintainer needs to decide: cycle and
+round counts, the effective limit, base and reviewed heads, branch, the last
+review summary and findings, and the permitted maintainer actions. The
+maintainer may abandon the feature, request a replan, or record an auditable
+policy override. An override appends `feature.unblocked` with its justification
+and a new bounded allowance; it never approves the change, never clears the
+findings, and never permits the reviewer to edit source.
+
+A fix cycle that produces no new commit is not a cycle. The Runtime rejects an
+unchanged head rather than recording a round in which nothing was addressed.
+
+### Fix-cycle cost control
+
+Each round is a fresh non-interactive model process, so every round pays for its
+packet again. Worst-case cost for one human request is therefore
+`max_fix_cycles x bounded packet`, and both factors are configuration:
+
+- the plan travels as a digest-labelled artifact view. Adapter transport
+  evidence (turn IDs, output digests, byte counts) is durable in the Event Store
+  and MUST NOT be re-sent to a model;
+- prior findings, changed-path lists, and reported tests are individually
+  capped, and a truncation is stated in the packet rather than hidden;
+- the assembled packet is rejected when it exceeds `limits.feature_packet_bytes`.
+
+A rework packet carries the reviewer's findings and the exact head they were
+written against. Findings whose reviewed head no longer matches the worktree are
+omitted, because they describe code that no longer exists.
 
 ## Approval
 

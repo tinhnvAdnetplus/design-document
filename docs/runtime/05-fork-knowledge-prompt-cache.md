@@ -237,6 +237,76 @@ Budgets are byte-oriented at the transport boundary and token-estimated at
 adapter boundaries. The runtime records observed model token usage if the
 adapter provides it, but never relies on a vendor estimate for correctness.
 
+Adapter transport evidence — turn identifiers, output digests, byte counts,
+timings, exit status — is durable Event Store evidence and MUST NOT be included
+in a packet sent to a model. It has no effect on the model's task and is paid
+for on every turn that carries it.
+
+## Cost of one human request
+
+A human request is not one model call. It is one plan turn plus up to
+`policy.review.max_fix_cycles` implementer/reviewer rounds, and under the
+supervised non-interactive transport each of those turns is a fresh process that
+pays for its packet again. The worst-case cost of one request is therefore:
+
+~~~text
+plan packet + max_fix_cycles x (implementation packet + review packet)
+~~~
+
+Both factors are configuration, so the ceiling is computable before the work
+starts. This is why the round limit is a cost control and not only a liveness
+control: without it the second factor is unbounded, and a feature the reviewer
+never accepts spends without limit and still reports nothing to the human.
+
+The Runtime therefore MUST bound both factors:
+
+1. cap rounds with `policy.review.max_fix_cycles` and block at the limit with
+   evidence, rather than retrying until something changes;
+2. cap every packet component, reject an assembled packet above
+   `limits.feature_packet_bytes`, and state any truncation inside the packet.
+
+## Fork mode and prompt-cache economics
+
+The two fork modes differ in cost, not only in mechanism. This distinction
+decides whether a persistent root actually saves anything.
+
+| Fork mode | What the child starts from | Prompt-cache effect |
+| --- | --- | --- |
+| synthetic | fresh session plus a bounded packet | none; the packet is new input every time |
+| native | a branch of the root's conversation prefix | the shared prefix is a cache read |
+
+A synthetic fork is cheaper than making the child re-derive project orientation,
+because the packet is bounded and curated. It is not a prompt-cache reuse: the
+child has no shared prefix with the root, so nothing is read from cache. Only a
+native fork reuses the root's cached prefix, and only while that cache is live.
+
+Cache pricing follows the vendor's published multipliers rather than any runtime
+assumption. On the Anthropic API a cache write costs about 1.25x base input at
+the five-minute TTL and about 2x at the one-hour TTL, while a cache read costs
+about 0.1x. A root prefix therefore pays for itself after roughly two reads at
+the short TTL and three at the long one, and each later fork saves close to 90%
+of the prefix. Three properties constrain the design:
+
+- caches are prefix-matched, so any byte changed early invalidates everything
+  after it. A root prefix must be stable across features to be reusable;
+- caches expire. A root idle beyond its TTL pays the write again on the next
+  fork, so features benefit from being dispatched in bursts;
+- caches are model-scoped. A root and its forks must run the same model.
+
+This is also why fork context is never merged back into the root. Merging a
+feature's context into the root would grow the shared prefix after every
+feature: each later fork would read a larger prefix, and every TTL expiry would
+rewrite a larger prefix. The root instead re-derives a bounded Knowledge
+Snapshot from the merged Git range, so per-feature cost stays flat over time
+instead of growing with project age. Git changes merge; conversation context
+does not.
+
+Native fork remains selectable only from validated Capability Registry
+provenance. Until an adapter has that provenance, the runtime uses the declared
+synthetic fork and the savings above are not available for that adapter. The
+runtime MUST NOT claim the native-fork economics while its declaration is
+fail-closed.
+
 ## Knowledge Evolution pseudocode
 
 ~~~text

@@ -91,12 +91,20 @@ verified Git observations rather than terminal conversation summaries.
 
 ### Review/fix escalation procedure
 
-When the configured review/fix limit is reached, the maintainer inspects the
-approved plan, consecutive findings, current head/base, tests, and any scope
-change. The maintainer then records one of: abandon, replan, or an authorized
-policy override that permits another bounded cycle. The runtime does not clear
-the block because a terminal appears idle, and no override can reuse a stale
-approval.
+When the configured review/fix limit is reached, the runtime appends
+`feature.blocked` with reason `review_fix_cycle_limit`. That event carries the
+cycle and round counts, the effective limit, base and reviewed heads, branch,
+and the last review summary and findings. Automatic dispatch stops, no writer
+lease is held, Git is untouched, and the feature worktree is preserved.
+
+The maintainer inspects the approved plan, consecutive findings, current
+head/base, tests, and any scope change, then records one of: abandon, replan, or
+an authorized policy override that permits another bounded cycle. An override is
+a `feature.unblocked` event carrying the operator identity, justification, and
+the new bounded allowance; it is rejected without a justification, and it may
+not grant an unbounded allowance. The runtime does not clear the block because a
+terminal appears idle, and no override can reuse a stale approval or convert a
+finding into an approval.
 
 ### Knowledge Evolution exception
 

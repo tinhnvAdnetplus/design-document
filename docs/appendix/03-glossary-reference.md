@@ -77,6 +77,8 @@
 | GIT_PRECONDITION_FAILED | refs/worktree differ from evidence | inspect/rebase |
 | APPROVAL_STALE | head/base/policy/check changed | re-review |
 | WORKTREE_DIRTY | cleanup/recovery cannot proceed | human decision |
+| FIX_CYCLE_LIMIT_REACHED | implementer/reviewer rounds hit the configured limit | abandon, replan, or recorded override |
+| PACKET_BUDGET_EXCEEDED | assembled model packet is over the configured limit | reduce or reference the oversize component |
 | CACHE_PROVENANCE_INVALID | derived fact lacks evidence | rebuild cache |
 | SECURITY_VIOLATION | unsafe path/input/secret condition | contain/investigate |
 

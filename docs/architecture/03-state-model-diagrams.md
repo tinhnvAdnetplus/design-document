@@ -63,6 +63,13 @@ business stage. A block includes code, owner, evidence event, and expiry or
 operator action. A block MUST prevent automatic side effects but not forensic
 inspection.
 
+The `AwaitingReview -> Implementing` edge is bounded. The projection counts
+`changes.requested` as fix cycles and `implementation.ready` as dispatch rounds.
+When fix cycles reach `policy.review.max_fix_cycles`, the Runtime appends
+`feature.blocked` instead of traversing that edge again. `feature.unblocked`
+clears the overlay and records a new bounded allowance; neither event changes
+the business stage, and neither may be inferred from an idle terminal.
+
 ## Session state machine
 
 ~~~mermaid

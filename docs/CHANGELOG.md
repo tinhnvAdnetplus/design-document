@@ -3,6 +3,36 @@
 All notable architecture-specification changes are recorded here. This document
 uses semantic intent rather than implementation-release dates.
 
+## Unreleased — Bounded Implementer/Reviewer Loop
+
+### Added
+
+- **ADR-012** binding one human request to `policy.review.max_fix_cycles`
+  implementer/reviewer rounds, default 5, with the exact counting rule: a fix
+  cycle is one accepted `changes.requested`, and the nth such event is what
+  would dispatch round n+1.
+- `feature.blocked` and `feature.unblocked` event types. The block is an
+  overlay that retains the business stage, stops automatic dispatch, and carries
+  the cycle evidence a maintainer needs. The unblock records operator identity,
+  justification, and a new bounded allowance.
+- A cost model for one human request in Chapter 09, and the rule that adapter
+  transport evidence never enters a model packet.
+- An explicit statement that synthetic fork does not reuse a prompt cache and
+  that only native fork does, with the prefix-match, TTL, and model-scope
+  constraints that follow.
+
+### Changed
+
+- `policy.review.max_fix_cycles` default 3 to 5.
+- Fix-cycle escalation is now specified as evidence-carrying and reversible only
+  through a recorded override, rather than as a generic escalation policy.
+
+### Explicit non-changes
+
+- No change to merge authority, approval binding, writer leases, worktree
+  isolation, Git-first truth, or the fork abstraction. A block prevents side
+  effects; it never grants or withdraws authority.
+
 ## Unreleased — Second Architecture Review Board Integration
 
 ### Integrated clarifications
