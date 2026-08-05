@@ -13,6 +13,25 @@ ai-runtime = "ai_runtime.cli:main"
 
 [project.optional-dependencies]
 validation = ["jsonschema>=4.19,<5"]
+dev = ["ruff>=0.16,<0.17", "mypy>=2.3,<3"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+# The validation laboratory is frozen evidence: reports/phase-3 pins the SHA-256
+# of ai-runtime-validation/lib/validation_lab.py, so no formatter may touch it.
+extend-exclude = ["ai-runtime-validation", "phase3-artifacts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+# The formatter owns line width. E501 only fires on strings it cannot split,
+# such as SQL, terminal readiness markers, and test fixtures.
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src/ai_runtime"]
+ignore_missing_imports = true

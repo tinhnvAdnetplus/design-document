@@ -109,7 +109,9 @@ class AdapterSessionContract:
     transport_mode: TransportMode = TransportMode.TMUX_SUPERVISED_NONINTERACTIVE_V1
 
     def __post_init__(self) -> None:
-        if not self.launch_command or any(not isinstance(part, str) or not part for part in self.launch_command):
+        if not self.launch_command or any(
+            not isinstance(part, str) or not part for part in self.launch_command
+        ):
             raise ValueError("launch_command must contain non-empty arguments")
 
 
@@ -264,14 +266,52 @@ class ReconcileReport:
 
 
 _TRANSITIONS: dict[SessionState, frozenset[SessionState]] = {
-    SessionState.STARTING: frozenset({SessionState.READY, SessionState.UNAVAILABLE, SessionState.RECOVERY_REQUIRED, SessionState.TERMINATING}),
-    SessionState.READY: frozenset({SessionState.BUSY, SessionState.UNAVAILABLE, SessionState.RECOVERY_REQUIRED, SessionState.DRAINING, SessionState.TERMINATING}),
-    SessionState.BUSY: frozenset({SessionState.READY, SessionState.UNAVAILABLE, SessionState.RECOVERY_REQUIRED, SessionState.DRAINING, SessionState.TERMINATING}),
-    SessionState.UNAVAILABLE: frozenset({SessionState.STARTING, SessionState.RECOVERY_REQUIRED, SessionState.TERMINATING, SessionState.TERMINATED}),
+    SessionState.STARTING: frozenset(
+        {
+            SessionState.READY,
+            SessionState.UNAVAILABLE,
+            SessionState.RECOVERY_REQUIRED,
+            SessionState.TERMINATING,
+        }
+    ),
+    SessionState.READY: frozenset(
+        {
+            SessionState.BUSY,
+            SessionState.UNAVAILABLE,
+            SessionState.RECOVERY_REQUIRED,
+            SessionState.DRAINING,
+            SessionState.TERMINATING,
+        }
+    ),
+    SessionState.BUSY: frozenset(
+        {
+            SessionState.READY,
+            SessionState.UNAVAILABLE,
+            SessionState.RECOVERY_REQUIRED,
+            SessionState.DRAINING,
+            SessionState.TERMINATING,
+        }
+    ),
+    SessionState.UNAVAILABLE: frozenset(
+        {
+            SessionState.STARTING,
+            SessionState.RECOVERY_REQUIRED,
+            SessionState.TERMINATING,
+            SessionState.TERMINATED,
+        }
+    ),
     SessionState.DRAINING: frozenset({SessionState.TERMINATING, SessionState.RECOVERY_REQUIRED}),
     SessionState.TERMINATING: frozenset({SessionState.TERMINATED, SessionState.RECOVERY_REQUIRED}),
     SessionState.TERMINATED: frozenset(),
-    SessionState.RECOVERY_REQUIRED: frozenset({SessionState.STARTING, SessionState.BUSY, SessionState.READY, SessionState.TERMINATING, SessionState.TERMINATED}),
+    SessionState.RECOVERY_REQUIRED: frozenset(
+        {
+            SessionState.STARTING,
+            SessionState.BUSY,
+            SessionState.READY,
+            SessionState.TERMINATING,
+            SessionState.TERMINATED,
+        }
+    ),
 }
 
 
@@ -282,7 +322,7 @@ def _safe_identifier(value: str, field: str, maximum: int) -> str:
 
 
 def _utc_now() -> str:
-    return dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z")
+    return dt.datetime.now(dt.UTC).isoformat().replace("+00:00", "Z")
 
 
 def _sha_text(value: str) -> str:
@@ -300,7 +340,9 @@ def _redact(value: str, cwd: Path | None = None) -> str:
     for source, target in sorted(replacements.items(), key=lambda item: len(item[0]), reverse=True):
         value = value.replace(source, target)
     value = re.sub(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", "<REDACTED_EMAIL>", value)
-    value = re.sub(r"(?i)(api[_-]?key|token|authorization|bearer)(\s*[=:]\s*)\S+", r"\1\2<REDACTED>", value)
+    value = re.sub(
+        r"(?i)(api[_-]?key|token|authorization|bearer)(\s*[=:]\s*)\S+", r"\1\2<REDACTED>", value
+    )
     return value[:2_048]
 
 
@@ -321,7 +363,9 @@ def repository_identity_sha256(cwd: Path) -> str:
 class SessionSupervisor:
     """Own a dedicated tmux socket and durable lifecycle registry."""
 
-    def __init__(self, state_dir: Path, *, socket_name: str | None = None, tmux_binary: str = "tmux"):
+    def __init__(
+        self, state_dir: Path, *, socket_name: str | None = None, tmux_binary: str = "tmux"
+    ):
         self.state_dir = Path(state_dir).resolve()
         self.registry_dir = self.state_dir / "sessions"
         self.spool_dir = self.state_dir / "session-spool"
@@ -333,7 +377,9 @@ class SessionSupervisor:
         derived = f"air-{os.getuid()}-{_sha_text(str(self.state_dir))[:12]}"
         self.socket_name = _safe_identifier(socket_name or derived, "socket_name", 64)
 
-    def _tmux(self, arguments: Sequence[str], *, timeout: float = 10, check: bool = False) -> subprocess.CompletedProcess[str]:
+    def _tmux(
+        self, arguments: Sequence[str], *, timeout: float = 10, check: bool = False
+    ) -> subprocess.CompletedProcess[str]:
         result = subprocess.run(
             [self.tmux_path, "-L", self.socket_name, *arguments],
             text=True,
@@ -342,7 +388,9 @@ class SessionSupervisor:
             check=False,
         )
         if check and result.returncode != 0:
-            raise SessionError(f"tmux {' '.join(arguments[:2])} failed: {_redact(result.stderr or result.stdout)}")
+            raise SessionError(
+                f"tmux {' '.join(arguments[:2])} failed: {_redact(result.stderr or result.stdout)}"
+            )
         return result
 
     def _path(self, session_id: str) -> Path:
@@ -365,7 +413,11 @@ class SessionSupervisor:
         return SessionRecord(**value)
 
     def records(self) -> list[SessionRecord]:
-        return [record for path in sorted(self.registry_dir.glob("*.json")) if (record := self.read(path.stem)) is not None]
+        return [
+            record
+            for path in sorted(self.registry_dir.glob("*.json"))
+            if (record := self.read(path.stem)) is not None
+        ]
 
     def _write(self, record: SessionRecord) -> SessionRecord:
         target = self._path(record.session_id)
@@ -377,17 +429,26 @@ class SessionSupervisor:
         os.replace(temporary, target)
         return record
 
-    def _transition(self, record: SessionRecord, state: SessionState, *, diagnostic: Mapping[str, Any] | None = None, recovery_kind: str | None = None) -> SessionRecord:
+    def _transition(
+        self,
+        record: SessionRecord,
+        state: SessionState,
+        *,
+        diagnostic: Mapping[str, Any] | None = None,
+        recovery_kind: str | None = None,
+    ) -> SessionRecord:
         if state != record.state and state not in _TRANSITIONS[record.state]:
             raise SessionError(f"invalid session transition {record.state} -> {state}")
-        return self._write(dataclasses.replace(
-            record,
-            state=state,
-            state_revision=record.state_revision + (state != record.state),
-            updated_at=_utc_now(),
-            diagnostic=diagnostic,
-            recovery_kind=recovery_kind if recovery_kind is not None else record.recovery_kind,
-        ))
+        return self._write(
+            dataclasses.replace(
+                record,
+                state=state,
+                state_revision=record.state_revision + (state != record.state),
+                updated_at=_utc_now(),
+                diagnostic=diagnostic,
+                recovery_kind=recovery_kind if recovery_kind is not None else record.recovery_kind,
+            )
+        )
 
     @staticmethod
     def _name(spec: SessionSpec) -> str:
@@ -416,8 +477,14 @@ class SessionSupervisor:
                 and existing.worktree_binding == spec.worktree_binding
             )
             if not binding:
-                self._transition(existing, SessionState.RECOVERY_REQUIRED, diagnostic={"reason": "session_binding_drift"})
-                raise SessionRecoveryRequiredError("stale adapter version, repository, policy, capability, or launch binding")
+                self._transition(
+                    existing,
+                    SessionState.RECOVERY_REQUIRED,
+                    diagnostic={"reason": "session_binding_drift"},
+                )
+                raise SessionRecoveryRequiredError(
+                    "stale adapter version, repository, policy, capability, or launch binding"
+                )
             observation = self.observe(spec)
             existing = self.read(spec.session_id) or existing
             if observation.ready:
@@ -427,7 +494,9 @@ class SessionSupervisor:
                     "existing tmux identity is live but not safely reusable"
                 )
             if existing.state not in {SessionState.UNAVAILABLE, SessionState.RECOVERY_REQUIRED}:
-                raise SessionUnavailableError(f"existing session is not reusable: {observation.state}")
+                raise SessionUnavailableError(
+                    f"existing session is not reusable: {observation.state}"
+                )
         identity = uuid.uuid4().hex
         now = _utc_now()
         record = SessionRecord(
@@ -462,14 +531,22 @@ class SessionSupervisor:
             reconstruction_sha256=spec.reconstruction_sha256,
         )
         self._write(record)
-        command = tuple(part.replace("{session_identity}", identity) for part in spec.launch_command)
+        command = tuple(
+            part.replace("{session_identity}", identity) for part in spec.launch_command
+        )
         result = self._tmux(
             ["new-session", "-d", "-s", record.tmux_name, "-c", str(spec.cwd), shlex.join(command)],
             check=False,
         )
         if result.returncode != 0:
-            self._transition(record, SessionState.UNAVAILABLE, diagnostic={"reason": "launch_failed", "exit_code": result.returncode})
-            raise SessionUnavailableError(f"tmux session launch failed: {_redact(result.stderr, spec.cwd)}")
+            self._transition(
+                record,
+                SessionState.UNAVAILABLE,
+                diagnostic={"reason": "launch_failed", "exit_code": result.returncode},
+            )
+            raise SessionUnavailableError(
+                f"tmux session launch failed: {_redact(result.stderr, spec.cwd)}"
+            )
         self._tmux(["set-option", "-t", record.tmux_name, "remain-on-exit", "on"], check=True)
         self._tmux(
             [
@@ -484,7 +561,9 @@ class SessionSupervisor:
         return self._wait_ready(spec, identity, readiness_timeout)
 
     def _capture(self, record: SessionRecord, lines: int) -> str:
-        result = self._tmux(["capture-pane", "-p", "-S", f"-{lines}", "-t", f"{record.tmux_name}:0.0"])
+        result = self._tmux(
+            ["capture-pane", "-p", "-S", f"-{lines}", "-t", f"{record.tmux_name}:0.0"]
+        )
         return result.stdout if result.returncode == 0 else ""
 
     def _live(self, record: SessionRecord) -> bool:
@@ -524,7 +603,11 @@ class SessionSupervisor:
             record = self.read(spec.session_id)
             assert record is not None
             if not self._live(record):
-                self._transition(record, SessionState.UNAVAILABLE, diagnostic={"reason": "process_exited_before_readiness"})
+                self._transition(
+                    record,
+                    SessionState.UNAVAILABLE,
+                    diagnostic={"reason": "process_exited_before_readiness"},
+                )
                 raise SessionUnavailableError("session exited before readiness")
             if not self._identity_matches(record):
                 self._transition(
@@ -536,22 +619,45 @@ class SessionSupervisor:
                     "tmux session identity does not match the registry"
                 )
             pane = self._capture(record, spec.readiness.pane_lines)
-            if spec.readiness.trust_pattern and re.search(spec.readiness.trust_pattern, pane, re.MULTILINE):
+            if spec.readiness.trust_pattern and re.search(
+                spec.readiness.trust_pattern, pane, re.MULTILINE
+            ):
                 trust_seen = True
-                if spec.trust_prompt == TrustPromptBehavior.ACCEPT_DISPOSABLE_ONLY and spec.disposable:
+                if (
+                    spec.trust_prompt == TrustPromptBehavior.ACCEPT_DISPOSABLE_ONLY
+                    and spec.disposable
+                ):
                     self._tmux(["send-keys", "-t", f"{record.tmux_name}:0.0", "Enter"], check=True)
                 else:
-                    self._transition(record, SessionState.RECOVERY_REQUIRED, diagnostic={"reason": "trust_prompt_blocked"})
-                    raise SessionRecoveryRequiredError("trust prompt requires an authorized disposable fixture")
-            expected = spec.readiness.ready_pattern.replace("{session_identity}", re.escape(identity))
+                    self._transition(
+                        record,
+                        SessionState.RECOVERY_REQUIRED,
+                        diagnostic={"reason": "trust_prompt_blocked"},
+                    )
+                    raise SessionRecoveryRequiredError(
+                        "trust prompt requires an authorized disposable fixture"
+                    )
+            expected = spec.readiness.ready_pattern.replace(
+                "{session_identity}", re.escape(identity)
+            )
             if re.search(expected, pane, re.MULTILINE):
-                self._transition(record, SessionState.READY, diagnostic={"trust_prompt_seen": trust_seen})
+                self._transition(
+                    record, SessionState.READY, diagnostic={"trust_prompt_seen": trust_seen}
+                )
                 return self.observe(spec)
             time.sleep(0.05)
         record = self.read(spec.session_id)
         assert record is not None
         pane = self._capture(record, spec.readiness.pane_lines)
-        self._transition(record, SessionState.RECOVERY_REQUIRED, diagnostic={"reason": "readiness_timeout", "pane_sha256": _sha_text(pane), "pane_bytes": len(pane.encode())})
+        self._transition(
+            record,
+            SessionState.RECOVERY_REQUIRED,
+            diagnostic={
+                "reason": "readiness_timeout",
+                "pane_sha256": _sha_text(pane),
+                "pane_bytes": len(pane.encode()),
+            },
+        )
         raise SessionRecoveryRequiredError("session readiness timed out")
 
     def observe(self, spec: SessionSpec) -> SessionObservation:
@@ -563,23 +669,43 @@ class SessionSupervisor:
         pane = self._capture(record, spec.readiness.pane_lines) if live else ""
         identity_matches = live and self._identity_matches(record)
         cwd_matches = live and self._cwd_matches(record)
-        if live and (not identity_matches or not cwd_matches) and record.state not in {
+        if (
+            live
+            and (not identity_matches or not cwd_matches)
+            and record.state
+            not in {
+                SessionState.TERMINATED,
+                SessionState.TERMINATING,
+                SessionState.RECOVERY_REQUIRED,
+            }
+        ):
+            record = self._transition(
+                record,
+                SessionState.RECOVERY_REQUIRED,
+                diagnostic={
+                    "reason": "stale_session_identity"
+                    if not identity_matches
+                    else "session_cwd_mismatch"
+                },
+            )
+        ready = (
+            identity_matches
+            and cwd_matches
+            and record.state
+            in {
+                SessionState.READY,
+                SessionState.BUSY,
+            }
+        )
+        diagnostic = None
+        if not live and record.state not in {
             SessionState.TERMINATED,
             SessionState.TERMINATING,
             SessionState.RECOVERY_REQUIRED,
         }:
             record = self._transition(
-                record,
-                SessionState.RECOVERY_REQUIRED,
-                diagnostic={"reason": "stale_session_identity" if not identity_matches else "session_cwd_mismatch"},
+                record, SessionState.UNAVAILABLE, diagnostic={"reason": "tmux_session_absent"}
             )
-        ready = identity_matches and cwd_matches and record.state in {
-            SessionState.READY,
-            SessionState.BUSY,
-        }
-        diagnostic = None
-        if not live and record.state not in {SessionState.TERMINATED, SessionState.TERMINATING, SessionState.RECOVERY_REQUIRED}:
-            record = self._transition(record, SessionState.UNAVAILABLE, diagnostic={"reason": "tmux_session_absent"})
             diagnostic = "tmux_session_absent"
         return SessionObservation(
             session_id=spec.session_id,
@@ -602,7 +728,9 @@ class SessionSupervisor:
         if response_path.exists():
             self._sanitize_legacy_response(request_path, response_path)
             if record.state == SessionState.RECOVERY_REQUIRED:
-                record = self._transition(record, SessionState.BUSY, recovery_kind="completed_turn_recovered")
+                record = self._transition(
+                    record, SessionState.BUSY, recovery_kind="completed_turn_recovered"
+                )
             return self._read_turn(record, request, request_path, response_path, reconciled=True)
         if request.cwd != spec.cwd:
             self._transition(
@@ -617,8 +745,14 @@ class SessionSupervisor:
             or not self._identity_matches(record)
         ):
             if record.state not in {SessionState.UNAVAILABLE, SessionState.RECOVERY_REQUIRED}:
-                self._transition(record, SessionState.UNAVAILABLE, diagnostic={"reason": "turn_without_ready_transport"})
-            raise SessionUnavailableError("persistent transport is not ready; no fallback was attempted")
+                self._transition(
+                    record,
+                    SessionState.UNAVAILABLE,
+                    diagnostic={"reason": "turn_without_ready_transport"},
+                )
+            raise SessionUnavailableError(
+                "persistent transport is not ready; no fallback was attempted"
+            )
         payload = {
             "turn_id": request.turn_id,
             "command": list(request.command),
@@ -636,20 +770,43 @@ class SessionSupervisor:
         deadline = time.monotonic() + request.timeout_seconds + 10
         while time.monotonic() < deadline:
             if response_path.exists():
-                return self._read_turn(record, request, request_path, response_path, reconciled=False)
+                return self._read_turn(
+                    record, request, request_path, response_path, reconciled=False
+                )
             if not self._live(record):
                 request_path.unlink(missing_ok=True)
-                self._transition(record, SessionState.UNAVAILABLE, diagnostic={"reason": "agent_died_during_turn"})
+                self._transition(
+                    record,
+                    SessionState.UNAVAILABLE,
+                    diagnostic={"reason": "agent_died_during_turn"},
+                )
                 raise SessionUnavailableError("agent session died during a turn")
             time.sleep(0.05)
         request_path.unlink(missing_ok=True)
-        self._transition(record, SessionState.RECOVERY_REQUIRED, diagnostic={"reason": "turn_deadline_ambiguous"})
-        raise SessionRecoveryRequiredError("turn exceeded its bounded deadline; outcome is ambiguous")
+        self._transition(
+            record, SessionState.RECOVERY_REQUIRED, diagnostic={"reason": "turn_deadline_ambiguous"}
+        )
+        raise SessionRecoveryRequiredError(
+            "turn exceeded its bounded deadline; outcome is ambiguous"
+        )
 
-    def _read_turn(self, record: SessionRecord, request: TurnRequest, request_path: Path, response_path: Path, *, reconciled: bool) -> TurnObservation:
+    def _read_turn(
+        self,
+        record: SessionRecord,
+        request: TurnRequest,
+        request_path: Path,
+        response_path: Path,
+        *,
+        reconciled: bool,
+    ) -> TurnObservation:
         value = json.loads(response_path.read_text(encoding="utf-8"))
-        if value.get("turn_id") != request.turn_id or value.get("prompt_sha256") != request.prompt_sha256:
-            self._transition(record, SessionState.RECOVERY_REQUIRED, diagnostic={"reason": "stale_turn_identity"})
+        if (
+            value.get("turn_id") != request.turn_id
+            or value.get("prompt_sha256") != request.prompt_sha256
+        ):
+            self._transition(
+                record, SessionState.RECOVERY_REQUIRED, diagnostic={"reason": "stale_turn_identity"}
+            )
             raise SessionRecoveryRequiredError("completed response has stale turn identity")
         request_path.unlink(missing_ok=True)
         # v1 responses are read for crash compatibility.  New workers persist
@@ -676,7 +833,15 @@ class SessionSupervisor:
             "reconciled_completed_turn": reconciled,
             "diagnostic_redacted": str(value.get("diagnostic_redacted", ""))[:256],
         }
-        return TurnObservation(record.session_id, request.turn_id, stdout, stderr, value.get("exit_code"), bool(value.get("timed_out")), evidence)
+        return TurnObservation(
+            record.session_id,
+            request.turn_id,
+            stdout,
+            stderr,
+            value.get("exit_code"),
+            bool(value.get("timed_out")),
+            evidence,
+        )
 
     @staticmethod
     def _sanitize_legacy_response(request_path: Path, response_path: Path) -> None:
@@ -717,7 +882,11 @@ class SessionSupervisor:
         (turn_dir / f"{turn_id}.request.json").unlink(missing_ok=True)
         (turn_dir / f"{turn_id}.response.json").unlink(missing_ok=True)
         if record.state in {SessionState.BUSY, SessionState.RECOVERY_REQUIRED}:
-            self._transition(record, SessionState.READY, diagnostic={"turn_acknowledged_sha256": _sha_text(turn_id)})
+            self._transition(
+                record,
+                SessionState.READY,
+                diagnostic={"turn_acknowledged_sha256": _sha_text(turn_id)},
+            )
 
     def reject_turn(
         self,
@@ -755,7 +924,14 @@ class SessionSupervisor:
             diagnostic={"reason": reason[:128], **allowed},
         )
 
-    def resume_or_reconstruct(self, spec: SessionSpec, *, worktree_clean: bool, resume_command: tuple[str, ...] | None = None, readiness_timeout: float = 30) -> SessionObservation:
+    def resume_or_reconstruct(
+        self,
+        spec: SessionSpec,
+        *,
+        worktree_clean: bool,
+        resume_command: tuple[str, ...] | None = None,
+        readiness_timeout: float = 30,
+    ) -> SessionObservation:
         record = self.read(spec.session_id)
         if record is None:
             return self.start(spec, readiness_timeout=readiness_timeout)
@@ -764,16 +940,26 @@ class SessionSupervisor:
         if observation.live and observation.ready:
             return observation
         if not worktree_clean:
-            self._transition(record, SessionState.RECOVERY_REQUIRED, diagnostic={"reason": "dirty_worktree_preserved"})
-            raise SessionRecoveryRequiredError("dirty worktree preserved; recovery requires maintainer action")
+            self._transition(
+                record,
+                SessionState.RECOVERY_REQUIRED,
+                diagnostic={"reason": "dirty_worktree_preserved"},
+            )
+            raise SessionRecoveryRequiredError(
+                "dirty worktree preserved; recovery requires maintainer action"
+            )
         if record.adapter_version != spec.adapter_version:
-            self._transition(record, SessionState.RECOVERY_REQUIRED, diagnostic={"reason": "adapter_version_drift"})
+            self._transition(
+                record,
+                SessionState.RECOVERY_REQUIRED,
+                diagnostic={"reason": "adapter_version_drift"},
+            )
             raise SessionRecoveryRequiredError("adapter version drift blocks recovery")
         kind = "resume" if spec.resume and resume_command else "synthetic_reconstruction"
-        recovered_spec = dataclasses.replace(spec, launch_command=resume_command or spec.launch_command)
-        recovered_launch_sha = _sha_text(
-            _canonical(list(recovered_spec.launch_command))
+        recovered_spec = dataclasses.replace(
+            spec, launch_command=resume_command or spec.launch_command
         )
+        recovered_launch_sha = _sha_text(_canonical(list(recovered_spec.launch_command)))
         if (
             recovered_launch_sha != record.launch_sha256
             or recovered_spec.fork_mode != record.fork_mode
@@ -813,11 +999,15 @@ class SessionSupervisor:
         for path in self._turn_dir(session_id).glob("*"):
             path.unlink(missing_ok=True)
         absent = not self._live(record)
-        record = self._transition(record, SessionState.TERMINATED, diagnostic={"terminal_absent": absent})
-        return self._write(dataclasses.replace(
-            record,
-            cleanup_evidence={"terminal_absent": absent, "completed_at": _utc_now()},
-        ))
+        record = self._transition(
+            record, SessionState.TERMINATED, diagnostic={"terminal_absent": absent}
+        )
+        return self._write(
+            dataclasses.replace(
+                record,
+                cleanup_evidence={"terminal_absent": absent, "completed_at": _utc_now()},
+            )
+        )
 
     def drain(self, session_id: str) -> SessionRecord:
         """Fence new work before controlled root replacement."""
@@ -830,14 +1020,20 @@ class SessionSupervisor:
             return record
         if record.state not in {SessionState.READY, SessionState.BUSY}:
             raise SessionRecoveryRequiredError("root is not eligible for controlled drain")
-        return self._transition(record, SessionState.DRAINING, diagnostic={"reason": "controlled_root_replacement"})
+        return self._transition(
+            record, SessionState.DRAINING, diagnostic={"reason": "controlled_root_replacement"}
+        )
 
     def mark_replaced(self, session_id: str, replacement_session_id: str) -> SessionRecord:
         record = self.read(session_id)
         if record is None or record.state != SessionState.TERMINATED:
-            raise SessionRecoveryRequiredError("root must be terminated before replacement is recorded")
+            raise SessionRecoveryRequiredError(
+                "root must be terminated before replacement is recorded"
+            )
         _safe_identifier(replacement_session_id, "replacement_session_id", 128)
-        return self._write(dataclasses.replace(record, replaced_by=replacement_session_id, updated_at=_utc_now()))
+        return self._write(
+            dataclasses.replace(record, replaced_by=replacement_session_id, updated_at=_utc_now())
+        )
 
     def reconcile(
         self,
@@ -876,12 +1072,17 @@ class SessionSupervisor:
             responses = list(self._turn_dir(record.session_id).glob("*.response.json"))
             if responses:
                 if record.state != SessionState.RECOVERY_REQUIRED:
-                    record = self._transition(record, SessionState.RECOVERY_REQUIRED, diagnostic={"reason": "completed_turn_without_event_ack", "count": len(responses)})
+                    record = self._transition(
+                        record,
+                        SessionState.RECOVERY_REQUIRED,
+                        diagnostic={
+                            "reason": "completed_turn_without_event_ack",
+                            "count": len(responses),
+                        },
+                    )
                 recovery.append(record.session_id)
             elif self._live(record):
-                pending_requests = list(
-                    self._turn_dir(record.session_id).glob("*.request.json")
-                )
+                pending_requests = list(self._turn_dir(record.session_id).glob("*.request.json"))
                 identity_matches = self._identity_matches(record)
                 if (
                     record.state == SessionState.RECOVERY_REQUIRED
@@ -917,6 +1118,12 @@ class SessionSupervisor:
                     SessionState.UNAVAILABLE,
                     SessionState.RECOVERY_REQUIRED,
                 }:
-                    record = self._transition(record, SessionState.UNAVAILABLE, diagnostic={"reason": "tmux_session_absent_on_reconcile"})
+                    record = self._transition(
+                        record,
+                        SessionState.UNAVAILABLE,
+                        diagnostic={"reason": "tmux_session_absent_on_reconcile"},
+                    )
                 unavailable.append(record.session_id)
-        return ReconcileReport(tuple(live), tuple(unavailable), tuple(recovery), tuple(acknowledged))
+        return ReconcileReport(
+            tuple(live), tuple(unavailable), tuple(recovery), tuple(acknowledged)
+        )

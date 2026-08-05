@@ -36,8 +36,9 @@ from ai_runtime.runtime import (
     TurnRequest,
 )
 
-
-WORKER = Path(__file__).resolve().parents[2] / "src" / "ai_runtime" / "runtime" / "_session_worker.py"
+WORKER = (
+    Path(__file__).resolve().parents[2] / "src" / "ai_runtime" / "runtime" / "_session_worker.py"
+)
 
 
 def git(repo: Path, *arguments: str) -> str:
@@ -215,7 +216,9 @@ class SessionSupervisorTests(unittest.TestCase):
         self.supervisor._tmux(["kill-session", "-t", record.tmux_name], check=True)
         with self.assertRaisesRegex(SessionRecoveryRequiredError, "dirty worktree"):
             self.supervisor.resume_or_reconstruct(dirty, worktree_clean=False)
-        self.assertEqual(SessionState.RECOVERY_REQUIRED, self.supervisor.read(dirty.session_id).state)
+        self.assertEqual(
+            SessionState.RECOVERY_REQUIRED, self.supervisor.read(dirty.session_id).state
+        )
 
     def test_declared_resume_path_is_distinct_from_synthetic_reconstruction(self):
         spec = dataclasses.replace(self.spec("native-resume"), resume=True)
@@ -247,7 +250,9 @@ class SessionSupervisorTests(unittest.TestCase):
             check=True,
         )
         self.assertFalse(self.supervisor.observe(spec).ready)
-        self.assertEqual(SessionState.RECOVERY_REQUIRED, self.supervisor.read(spec.session_id).state)
+        self.assertEqual(
+            SessionState.RECOVERY_REQUIRED, self.supervisor.read(spec.session_id).state
+        )
 
         drift = self.spec("version-drift")
         self.supervisor.start(drift)
@@ -299,8 +304,9 @@ class SessionSupervisorTests(unittest.TestCase):
 
     def test_vendor_profiles_declare_lifecycle_transport_contracts(self):
         version = subprocess.CompletedProcess(["tool", "--version"], 0, "fixture 1.0\n", "")
-        with mock.patch("ai_runtime.adapters.cli.shutil.which", return_value="/bin/true"), mock.patch(
-            "ai_runtime.adapters.cli.subprocess.run", return_value=version
+        with (
+            mock.patch("ai_runtime.adapters.cli.shutil.which", return_value="/bin/true"),
+            mock.patch("ai_runtime.adapters.cli.subprocess.run", return_value=version),
         ):
             agy = AntigravityAdapter()
             claude = ClaudeCLIAdapter()
@@ -319,9 +325,7 @@ class SessionSupervisorTests(unittest.TestCase):
         self.assertTrue(codex.capability.writes_workspace)
         self.assertIn("read-only", codex.session_contract.launch_command)
         self.assertFalse(codex.capability.native_fork)
-        self.assertEqual(
-            "fail_closed", claude.persistent_declaration.structured_terminal_events
-        )
+        self.assertEqual("fail_closed", claude.persistent_declaration.structured_terminal_events)
         for adapter in (agy, claude, codex):
             self.assertTrue(adapter.session_contract.resume)
             self.assertTrue(adapter.session_contract.readiness.ready_pattern)
@@ -446,7 +450,10 @@ class SupervisorVerticalSliceTests(unittest.TestCase):
                 self.assertEqual(event_count, len(list(runtime.writer.iter_events())))
                 self.assertEqual(
                     lifecycle_before,
-                    [(item.session_id, item.state_revision) for item in runtime.supervisor.records()],
+                    [
+                        (item.session_id, item.state_revision)
+                        for item in runtime.supervisor.records()
+                    ],
                 )
                 runtime.approve_merge(
                     "supervised-e2e",

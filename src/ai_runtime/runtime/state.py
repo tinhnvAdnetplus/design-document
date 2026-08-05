@@ -65,7 +65,9 @@ def project_feature(state: FeatureState, event: Mapping[str, Any]) -> FeatureSta
         values.update(phase=FeaturePhase.REVIEWING)
     elif event_type == "changes.requested":
         values.update(phase=FeaturePhase.CHANGES_REQUESTED, review=payload)
-    elif event_type == "implementation.progress" and payload.get("stage") == "review.recommendation":
+    elif (
+        event_type == "implementation.progress" and payload.get("stage") == "review.recommendation"
+    ):
         values.update(phase=FeaturePhase.AWAITING_HUMAN_APPROVAL, review=payload)
     elif event_type == "merge.approved":
         values.update(phase=FeaturePhase.APPROVED, approval=payload)

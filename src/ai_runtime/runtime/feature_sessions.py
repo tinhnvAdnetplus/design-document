@@ -144,7 +144,9 @@ class CapabilityRegistry:
         try:
             return self._declarations[adapter]
         except KeyError as exc:
-            raise CapabilityUnavailableError(f"no current capability declaration for {adapter}") from exc
+            raise CapabilityUnavailableError(
+                f"no current capability declaration for {adapter}"
+            ) from exc
 
     def versions(self) -> dict[str, str]:
         return {name: item.adapter_version for name, item in self._declarations.items()}
@@ -221,7 +223,9 @@ class StructuredTerminalEventChannel:
         intent_sha = _sha_text(_canonical(intent_payload))
         if target.exists():
             existing = json.loads(target.read_text(encoding="utf-8"))
-            existing_sha = _sha_text(_canonical({k: v for k, v in existing.items() if k != "intent_sha256"}))
+            existing_sha = _sha_text(
+                _canonical({k: v for k, v in existing.items() if k != "intent_sha256"})
+            )
             if existing.get("intent_sha256") != existing_sha or existing_sha != intent_sha:
                 raise SessionRecoveryRequiredError("terminal intent reference collision")
         else:
@@ -303,7 +307,9 @@ class StructuredTerminalEventChannel:
                     "diagnostic_redacted": f"invalid_result type={type(exc).__name__}"[:256],
                 },
             )
-            raise SessionRecoveryRequiredError("invalid structured terminal result was discarded") from exc
+            raise SessionRecoveryRequiredError(
+                "invalid structured terminal result was discarded"
+            ) from exc
         evidence = {
             "reference_id": intent.reference_id,
             "intent_sha256": intent.intent_sha256,
@@ -313,7 +319,9 @@ class StructuredTerminalEventChannel:
             "structured_terminal_channel": "runtime_reference_v1",
             "raw_output_retained": False,
         }
-        return StructuredTerminalResult(intent.reference_id, intent.session_id, dict(event), evidence)
+        return StructuredTerminalResult(
+            intent.reference_id, intent.session_id, dict(event), evidence
+        )
 
     def acknowledge(self, intent: TerminalEventIntent, *, accepted_event_id: str) -> None:
         _safe_identifier(accepted_event_id, "accepted_event_id", 128)
@@ -328,9 +336,10 @@ class StructuredTerminalEventChannel:
         }
         if ack.exists():
             existing = json.loads(ack.read_text(encoding="utf-8"))
-            if existing.get("intent_sha256") != intent.intent_sha256 or existing.get(
-                "accepted_event_id"
-            ) != accepted_event_id:
+            if (
+                existing.get("intent_sha256") != intent.intent_sha256
+                or existing.get("accepted_event_id") != accepted_event_id
+            ):
                 raise SessionRecoveryRequiredError("terminal result acknowledgement conflict")
         else:
             _atomic_json(ack, payload)
@@ -532,7 +541,9 @@ class FeatureSessionFactory:
     def _feature_id(self, request: FeatureSessionRequest) -> str:
         return f"{request.adapter}-feature-{request.feature_id}-{request.role}-{request.attempt}"
 
-    def _feature_values(self, request: FeatureSessionRequest, root: SessionRecord) -> dict[str, str]:
+    def _feature_values(
+        self, request: FeatureSessionRequest, root: SessionRecord
+    ) -> dict[str, str]:
         return {
             "session_id": self._feature_id(request),
             "parent_session_id": root.session_id,
@@ -585,12 +596,16 @@ class FeatureSessionFactory:
         self, declaration: PersistentAdapterDeclaration, request: FeatureSessionRequest
     ) -> SessionRecord:
         if request.role not in declaration.roles:
-            raise CapabilityUnavailableError(f"{declaration.adapter} does not own role {request.role}")
+            raise CapabilityUnavailableError(
+                f"{declaration.adapter} does not own role {request.role}"
+            )
         if request.role == "implementer":
             if declaration.adapter != "codex" or not declaration.writes_workspace:
                 raise CapabilityUnavailableError("only Codex may own an implementer writer session")
             if request.worktree_binding is None or request.cwd != request.worktree_binding:
-                raise SessionRecoveryRequiredError("Codex writer cwd must equal its generated worktree")
+                raise SessionRecoveryRequiredError(
+                    "Codex writer cwd must equal its generated worktree"
+                )
             if request.cwd == self.repository:
                 raise SessionRecoveryRequiredError("Codex cannot write the integration worktree")
             if (
@@ -602,7 +617,9 @@ class FeatureSessionFactory:
                     "Codex writer must bind the runtime-generated feature worktree"
                 )
         elif request.worktree_binding is not None:
-            raise SessionRecoveryRequiredError("read-only feature roles cannot own a writer worktree")
+            raise SessionRecoveryRequiredError(
+                "read-only feature roles cannot own a writer worktree"
+            )
         root = self.root(declaration.adapter)
         if root.state != SessionState.READY or not self.observe(root.session_id).ready:
             raise CapabilityUnavailableError("parent root is not ready")
@@ -649,7 +666,9 @@ class FeatureSessionFactory:
                     SessionState.RECOVERY_REQUIRED,
                     diagnostic={"reason": "native_fork_readiness_or_identity_failed"},
                 )
-            raise SessionRecoveryRequiredError("native fork did not establish verified readiness") from exc
+            raise SessionRecoveryRequiredError(
+                "native fork did not establish verified readiness"
+            ) from exc
         return observation
 
     def synthetic_fork(
@@ -659,7 +678,9 @@ class FeatureSessionFactory:
         if declaration.synthetic_launch_command is None:
             raise CapabilityUnavailableError("synthetic fork is not declared")
         if declaration.structured_terminal_events != CapabilityValidation.VALIDATED:
-            raise CapabilityUnavailableError("synthetic fork has no validated terminal-event channel")
+            raise CapabilityUnavailableError(
+                "synthetic fork has no validated terminal-event channel"
+            )
         if request.reconstruction_provenance_sha256 is None:
             raise SessionRecoveryRequiredError("synthetic fork requires reconstruction provenance")
         root = self._validate_feature_scope(declaration, request)
@@ -835,7 +856,10 @@ class FeatureSessionFactory:
         except (SessionUnavailableError, SessionRecoveryRequiredError):
             if resume_command is None or not worktree_clean:
                 raise
-            if record.session_kind == str(SessionKind.FEATURE) and declaration.synthetic_launch_command:
+            if (
+                record.session_kind == str(SessionKind.FEATURE)
+                and declaration.synthetic_launch_command
+            ):
                 failed = self.supervisor.read(record.session_id) or record
                 if self.supervisor._live(failed):
                     self.supervisor._tmux(["kill-session", "-t", failed.tmux_name], check=True)
@@ -938,9 +962,7 @@ class FeatureSessionFactory:
                 if parent is None or parent.state == SessionState.TERMINATED:
                     orphaned.append(record.session_id)
                 if acknowledged_event_ids:
-                    self.channel.acknowledge_known_events(
-                        record.session_id, acknowledged_event_ids
-                    )
+                    self.channel.acknowledge_known_events(record.session_id, acknowledged_event_ids)
                 if self.channel.pending_results(record.session_id):
                     unacked.append(record.session_id)
         return FactoryReconcileReport(

@@ -104,7 +104,7 @@ class EventWriter:
         )
         self._reader: SQLiteEventReader | None = None
 
-    def start(self) -> "EventWriter":
+    def start(self) -> EventWriter:
         with self._state_lock:
             if self._closing:
                 raise WriterClosedError("Event Writer is closing")
@@ -252,7 +252,7 @@ class EventWriter:
                 )
             )
 
-    def __enter__(self) -> "EventWriter":
+    def __enter__(self) -> EventWriter:
         return self.start()
 
     def __exit__(self, *_: object) -> None:

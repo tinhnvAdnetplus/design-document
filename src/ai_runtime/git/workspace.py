@@ -26,7 +26,9 @@ class LeaseConflictError(GitInvariantError):
     pass
 
 
-def _run(repo: Path, arguments: list[str], *, check: bool = True) -> subprocess.CompletedProcess[str]:
+def _run(
+    repo: Path, arguments: list[str], *, check: bool = True
+) -> subprocess.CompletedProcess[str]:
     environment = os.environ.copy()
     environment.update(
         {
@@ -95,7 +97,7 @@ class LeaseManager:
 
     @staticmethod
     def _now() -> dt.datetime:
-        return dt.datetime.now(dt.timezone.utc)
+        return dt.datetime.now(dt.UTC)
 
     @staticmethod
     def _parse(value: str) -> dt.datetime:
@@ -138,12 +140,14 @@ class LeaseManager:
                 workspace=str(workspace.resolve()),
                 fencing_token=token,
                 lease_id=uuid.uuid4().hex,
-                expires_at=(now + dt.timedelta(seconds=ttl_seconds)).isoformat().replace(
-                    "+00:00", "Z"
-                ),
+                expires_at=(now + dt.timedelta(seconds=ttl_seconds))
+                .isoformat()
+                .replace("+00:00", "Z"),
             )
             temporary = self._path(feature_id).with_suffix(".tmp")
-            temporary.write_text(json.dumps(dataclasses.asdict(lease), sort_keys=True) + "\n", encoding="utf-8")
+            temporary.write_text(
+                json.dumps(dataclasses.asdict(lease), sort_keys=True) + "\n", encoding="utf-8"
+            )
             os.replace(temporary, self._path(feature_id))
             return lease
 
@@ -171,7 +175,9 @@ class GitWorkspaceManager:
         if _run(self.repository, ["rev-parse", "--is-inside-work-tree"]).stdout.strip() != "true":
             raise GitInvariantError(f"not a Git worktree: {self.repository}")
         if self.worktree_root == self.repository or self.repository in self.worktree_root.parents:
-            raise GitInvariantError("worktree_root must not be the integration repository or its child")
+            raise GitInvariantError(
+                "worktree_root must not be the integration repository or its child"
+            )
         self.worktree_root.mkdir(parents=True, exist_ok=True)
 
     def head(self, repo: Path | None = None) -> str:
@@ -212,15 +218,22 @@ class GitWorkspaceManager:
         if path.parent != self.worktree_root:
             raise GitInvariantError("derived worktree escaped configured root")
         branch = f"ai-runtime/{safe}"
-        base_head = _run(self.repository, ["rev-parse", "--verify", f"{base_ref}^{{commit}}"]).stdout.strip()
+        base_head = _run(
+            self.repository, ["rev-parse", "--verify", f"{base_ref}^{{commit}}"]
+        ).stdout.strip()
         if path.exists():
             actual_branch = _run(path, ["branch", "--show-current"]).stdout.strip()
             if actual_branch != branch:
                 raise GitInvariantError(f"existing worktree has unexpected branch: {actual_branch}")
             return Workspace(safe, path, branch, base_ref, base_head)
-        branch_exists = _run(
-            self.repository, ["show-ref", "--verify", "--quiet", f"refs/heads/{branch}"], check=False
-        ).returncode == 0
+        branch_exists = (
+            _run(
+                self.repository,
+                ["show-ref", "--verify", "--quiet", f"refs/heads/{branch}"],
+                check=False,
+            ).returncode
+            == 0
+        )
         arguments = ["worktree", "add"]
         if branch_exists:
             arguments.extend([str(path), branch])
@@ -273,11 +286,14 @@ class GitWorkspaceManager:
         return patch
 
     def is_ancestor(self, ancestor: str, descendant: str) -> bool:
-        return _run(
-            self.repository,
-            ["merge-base", "--is-ancestor", ancestor, descendant],
-            check=False,
-        ).returncode == 0
+        return (
+            _run(
+                self.repository,
+                ["merge-base", "--is-ancestor", ancestor, descendant],
+                check=False,
+            ).returncode
+            == 0
+        )
 
     def validate_merge(self, binding: MergeBinding) -> None:
         self.require_clean(self.repository)

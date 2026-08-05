@@ -19,7 +19,6 @@ from collections.abc import Callable, Iterator, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
-
 SCHEMA_VERSION = 1
 PROTOCOL_VERSION = "ai-runtime.events/v1"
 EVENT_TYPES = frozenset(
@@ -309,7 +308,9 @@ class SQLiteEventStore:
         return {
             "journal_mode": self._connection.execute("PRAGMA journal_mode").fetchone()[0],
             "synchronous": self._connection.execute("PRAGMA synchronous").fetchone()[0],
-            "wal_autocheckpoint": self._connection.execute("PRAGMA wal_autocheckpoint").fetchone()[0],
+            "wal_autocheckpoint": self._connection.execute("PRAGMA wal_autocheckpoint").fetchone()[
+                0
+            ],
             "busy_timeout": self._connection.execute("PRAGMA busy_timeout").fetchone()[0],
         }
 
@@ -399,7 +400,8 @@ class SQLiteEventStore:
                 return "DUPLICATE_IGNORED", int(duplicate[1])
             raise IdempotencyConflictError("IDEMPOTENCY_CONFLICT")
         same_id = self._connection.execute(
-            "SELECT global_position, payload, headers FROM events WHERE event_id=?", (event.event_id,)
+            "SELECT global_position, payload, headers FROM events WHERE event_id=?",
+            (event.event_id,),
         ).fetchone()
         if same_id is not None:
             if bytes(same_id[1]) == event.payload and bytes(same_id[2]) == event.headers:
@@ -414,9 +416,7 @@ class SQLiteEventStore:
             identity = self._resolve_identity_conflict(event)
             if identity is not None:
                 return identity
-            raise SequenceConflictError(
-                f"AGGREGATE_SEQUENCE_CONFLICT expected={expected_sequence}"
-            )
+            raise SequenceConflictError(f"AGGREGATE_SEQUENCE_CONFLICT expected={expected_sequence}")
         try:
             self._connection.execute(
                 """
@@ -465,7 +465,7 @@ class SQLiteEventStore:
             self._connection.close()
             self._closed = True
 
-    def __enter__(self) -> "SQLiteEventStore":
+    def __enter__(self) -> SQLiteEventStore:
         return self
 
     def __exit__(self, *_: object) -> None:
@@ -565,7 +565,7 @@ class SQLiteEventReader:
                 self._connection.close()
                 self._closed = True
 
-    def __enter__(self) -> "SQLiteEventReader":
+    def __enter__(self) -> SQLiteEventReader:
         return self
 
     def __exit__(self, *_: object) -> None:

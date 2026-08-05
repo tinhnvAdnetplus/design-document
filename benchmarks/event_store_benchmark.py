@@ -37,10 +37,17 @@ def event(sequence: int, stream: str = "benchmark/main") -> dict[str, Any]:
         "protocol": "ai-runtime.events/v1",
         "type": "implementation.progress",
         "occurred_at": "2026-08-03T00:00:00Z",
-        "producer": {"session_id": "benchmark", "role": "runtime_benchmark", "adapter": "benchmark", "adapter_version": "1.0.0"},
+        "producer": {
+            "session_id": "benchmark",
+            "role": "runtime_benchmark",
+            "adapter": "benchmark",
+            "adapter_version": "1.0.0",
+        },
         "aggregate": {"feature_id": stream, "stream": stream, "sequence": sequence},
         "correlation_id": f"cor-{stream}",
-        "causation_id": None if sequence == 1 else f"evt-{stream.replace('/', '-')}-{sequence - 1:08d}",
+        "causation_id": None
+        if sequence == 1
+        else f"evt-{stream.replace('/', '-')}-{sequence - 1:08d}",
         "idempotency_key": f"benchmark/{stream}/{sequence}",
         "policy_revision": "v2.2-frozen",
         "payload": {"sequence": sequence, "data": "x" * 128},
@@ -96,7 +103,9 @@ def phase_breakdown(work: Path, samples: int) -> dict[str, list[float]]:
     connection.execute("CREATE TABLE phase_events(id INTEGER PRIMARY KEY, payload BLOB NOT NULL)")
     for index in range(samples):
         connection.execute("BEGIN IMMEDIATE")
-        connection.execute("INSERT INTO phase_events(id, payload) VALUES (?, ?)", (index, b"x" * 128))
+        connection.execute(
+            "INSERT INTO phase_events(id, payload) VALUES (?, ?)", (index, b"x" * 128)
+        )
         start = time.perf_counter_ns()
         connection.execute("COMMIT")
         phases["commit"].append(elapsed_ms(start))
@@ -192,7 +201,16 @@ def export(output: Path, payload: dict[str, Any], raw: dict[str, list[float]]) -
         json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     with (output / "event-store-benchmark.csv").open("w", newline="", encoding="utf-8") as handle:
-        fieldnames = ["metric", "count", "p50_ms", "p95_ms", "p99_ms", "worst_ms", "mean_ms", "stdev_ms"]
+        fieldnames = [
+            "metric",
+            "count",
+            "p50_ms",
+            "p95_ms",
+            "p99_ms",
+            "worst_ms",
+            "mean_ms",
+            "stdev_ms",
+        ]
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         for metric, values in raw.items():
@@ -202,7 +220,7 @@ def export(output: Path, payload: dict[str, Any], raw: dict[str, list[float]]) -
         "",
         f"- Captured: `{payload['captured_at']}`",
         f"- Workload: **{payload['configuration']['samples']} events**",
-        f"- Durability: `journal_mode=WAL`, `synchronous=FULL`",
+        "- Durability: `journal_mode=WAL`, `synchronous=FULL`",
         f"- PERF-01 equivalent result: **{payload['sla']['status']}** (group-commit p99 {payload['sla']['observed_p99_ms']:.3f} ms; target < {payload['sla']['target_p99_ms']:.3f} ms)",
         "",
         "| Metric | Count | p50 ms | p95 ms | p99 ms | Worst ms | Std dev ms |",
@@ -232,7 +250,7 @@ def main() -> int:
     if args.samples < 100:
         parser.error("--samples must be at least 100 for p99 measurement")
 
-    captured = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    captured = dt.datetime.now(dt.UTC).strftime("%Y%m%dT%H%M%SZ")
     output = args.output or Path("phase3-artifacts") / captured
     output.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix=".benchmark-work-", dir=output) as directory:
@@ -246,7 +264,7 @@ def main() -> int:
         statistics_payload = {name: summarize(values) for name, values in raw.items()}
         observed_p99 = float(statistics_payload["accept_group_commit"]["p99_ms"])
         payload = {
-            "captured_at": dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z"),
+            "captured_at": dt.datetime.now(dt.UTC).isoformat().replace("+00:00", "Z"),
             "configuration": {
                 "samples": args.samples,
                 "batch_size": args.batch_size,

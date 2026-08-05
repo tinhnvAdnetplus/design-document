@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import dataclasses
-import json
 import subprocess
 import sys
 import tempfile
@@ -11,7 +10,6 @@ from pathlib import Path
 from unittest import mock
 
 from ai_runtime.events import new_event
-from ai_runtime.store import EventStoreConfig, EventWriter, GroupCommitConfig, GroupCommitPolicy
 from ai_runtime.runtime import (
     CapabilityRegistry,
     CapabilityUnavailableError,
@@ -24,10 +22,9 @@ from ai_runtime.runtime import (
     SessionRecoveryRequiredError,
     SessionState,
     SessionSupervisor,
-    TerminalEventIntent,
     TrustPromptBehavior,
 )
-
+from ai_runtime.store import EventStoreConfig, EventWriter, GroupCommitConfig, GroupCommitPolicy
 
 WORKER = (
     Path(__file__).resolve().parents[2]
@@ -285,7 +282,9 @@ class FeatureSessionFactoryTests(unittest.TestCase):
             reference_id="ref-event-store",
             packet={"structured_event": event},
         )
-        outbox = self.state / "terminal-events" / session_id / "outbox" / f"{intent.reference_id}.json"
+        outbox = (
+            self.state / "terminal-events" / session_id / "outbox" / f"{intent.reference_id}.json"
+        )
         deadline = time.monotonic() + 5
         while time.monotonic() < deadline and not outbox.exists():
             time.sleep(0.05)
@@ -295,15 +294,17 @@ class FeatureSessionFactoryTests(unittest.TestCase):
             config,
             GroupCommitConfig(policy=GroupCommitPolicy.IMMEDIATE, max_batch_size=1),
         ) as writer:
-            with mock.patch.object(
-                self.factory,
-                "acknowledge_structured_event",
-                side_effect=RuntimeError("simulated event acknowledgement loss"),
+            with (
+                mock.patch.object(
+                    self.factory,
+                    "acknowledge_structured_event",
+                    side_effect=RuntimeError("simulated event acknowledgement loss"),
+                ),
+                self.assertRaisesRegex(RuntimeError, "acknowledgement loss"),
             ):
-                with self.assertRaisesRegex(RuntimeError, "acknowledgement loss"):
-                    self.factory.accept_structured_event(
-                        intent, writer=writer, validator=lambda value: None
-                    )
+                self.factory.accept_structured_event(
+                    intent, writer=writer, validator=lambda value: None
+                )
             self.assertEqual(
                 ["evt-event-store-result"],
                 [item["event_id"] for item in writer.iter_events()],
@@ -325,9 +326,7 @@ class FeatureSessionFactoryTests(unittest.TestCase):
             policy_revision="policy-fixture-1",
             capabilities=self.capabilities,
         )
-        report = replacement.reconcile(
-            acknowledged_event_ids=frozenset({"evt-event-store-result"})
-        )
+        report = replacement.reconcile(acknowledged_event_ids=frozenset({"evt-event-store-result"}))
         self.assertNotIn(session_id, report.completed_unacknowledged)
         self.assertEqual((), replacement.channel.pending_results(session_id))
 
@@ -346,11 +345,7 @@ class FeatureSessionFactoryTests(unittest.TestCase):
             self.factory.collect_structured_event(intent, validator=lambda value: None)
         self.assertFalse(outbox.exists())
         diagnostic = (
-            self.state
-            / "terminal-events"
-            / session_id
-            / "diagnostics"
-            / "ref-invalid.json"
+            self.state / "terminal-events" / session_id / "diagnostics" / "ref-invalid.json"
         ).read_text(encoding="utf-8")
         self.assertNotIn("RAW_MODEL_SENTINEL", diagnostic)
         self.assertIn("raw_sha256", diagnostic)

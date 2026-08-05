@@ -11,7 +11,7 @@ from .store.event_store import PROTOCOL_VERSION, content_sha256
 
 
 def utc_now() -> str:
-    return dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z")
+    return dt.datetime.now(dt.UTC).isoformat().replace("+00:00", "Z")
 
 
 def new_event(

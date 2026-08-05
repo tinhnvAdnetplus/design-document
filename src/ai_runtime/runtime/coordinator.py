@@ -12,7 +12,13 @@ from typing import Any
 
 from ..adapters import AgentAdapter, StructuredTask
 from ..events import new_event
-from ..git import GitInvariantError, GitWorkspaceManager, Lease, LeaseManager, MergeBinding, Workspace
+from ..git import (
+    GitWorkspaceManager,
+    Lease,
+    LeaseManager,
+    MergeBinding,
+    Workspace,
+)
 from ..store import EventStoreConfig, EventWriter, GroupCommitConfig, GroupCommitPolicy
 from .schemas import IMPLEMENTATION_SCHEMA, PLAN_SCHEMA, REVIEW_SCHEMA
 from .sessions import SessionSupervisor
@@ -74,7 +80,9 @@ class RuntimeCoordinator:
         if reviewer.capability.merge_authority and (
             reviewer.capability.name != "claude" or reviewer.capability.temporary
         ):
-            raise RuntimePolicyError("only the non-temporary Claude adapter may declare merge authority")
+            raise RuntimePolicyError(
+                "only the non-temporary Claude adapter may declare merge authority"
+            )
         self.config.state_dir.mkdir(parents=True, exist_ok=True)
         self.git = GitWorkspaceManager(config.repository, config.worktree_root)
         self.leases = LeaseManager(config.state_dir)
@@ -92,14 +100,12 @@ class RuntimeCoordinator:
             adapter.bind_supervisor(self.supervisor)
         self._started = False
 
-    def __enter__(self) -> "RuntimeCoordinator":
+    def __enter__(self) -> RuntimeCoordinator:
         self.writer.start()
         self._started = True
         if self.supervisor is not None:
             acknowledged = frozenset(
-                value
-                for event in self.writer.iter_events()
-                for value in self._turn_ids(event)
+                value for event in self.writer.iter_events() for value in self._turn_ids(event)
             )
             self.supervisor.reconcile(
                 acknowledged_turn_ids=acknowledged,

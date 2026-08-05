@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import hashlib
 import json
 import os
@@ -68,10 +69,8 @@ def _valid(task: str, value: Mapping) -> bool:
 
 def _structured(output: str, task: str) -> dict | None:
     roots = []
-    try:
+    with contextlib.suppress(json.JSONDecodeError):
         roots.append(json.loads(output.strip()))
-    except json.JSONDecodeError:
-        pass
     for line in output.splitlines():
         try:
             roots.append(json.loads(line))
@@ -130,21 +129,24 @@ def main(argv: list[str] | None = None) -> int:
             stdout = exc.stdout.decode() if isinstance(exc.stdout, bytes) else (exc.stdout or "")
             stderr = exc.stderr.decode() if isinstance(exc.stderr, bytes) else (exc.stderr or "")
             exit_code = None
-        _write(response_path, {
-            "turn_id": turn_id,
-            "prompt_sha256": request["prompt_sha256"],
-            "structured_result": _structured(stdout, str(request.get("task", ""))),
-            "stdout_sha256": hashlib.sha256(stdout.encode()).hexdigest(),
-            "stderr_sha256": hashlib.sha256(stderr.encode()).hexdigest(),
-            "stdout_bytes": len(stdout.encode("utf-8")),
-            "stderr_bytes": len(stderr.encode("utf-8")),
-            "diagnostic_redacted": (
-                f"stderr_present bytes={len(stderr.encode('utf-8'))}" if stderr else ""
-            ),
-            "exit_code": exit_code,
-            "timed_out": timed_out,
-            "duration_ms": round((time.perf_counter_ns() - started) / 1_000_000, 3),
-        })
+        _write(
+            response_path,
+            {
+                "turn_id": turn_id,
+                "prompt_sha256": request["prompt_sha256"],
+                "structured_result": _structured(stdout, str(request.get("task", ""))),
+                "stdout_sha256": hashlib.sha256(stdout.encode()).hexdigest(),
+                "stderr_sha256": hashlib.sha256(stderr.encode()).hexdigest(),
+                "stdout_bytes": len(stdout.encode("utf-8")),
+                "stderr_bytes": len(stderr.encode("utf-8")),
+                "diagnostic_redacted": (
+                    f"stderr_present bytes={len(stderr.encode('utf-8'))}" if stderr else ""
+                ),
+                "exit_code": exit_code,
+                "timed_out": timed_out,
+                "duration_ms": round((time.perf_counter_ns() - started) / 1_000_000, 3),
+            },
+        )
         print(f"AI_RUNTIME_TURN_COMPLETE {turn_id}", flush=True)
     return 0
 

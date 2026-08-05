@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import re
@@ -11,9 +12,8 @@ import sys
 import tempfile
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
-from .base import AdapterCapability, AdapterError, AdapterResult, StructuredTask
 from ..runtime.feature_sessions import (
     CapabilityValidation,
     PersistentAdapterDeclaration,
@@ -32,6 +32,7 @@ from ..runtime.sessions import (
     TrustPromptBehavior,
     TurnRequest,
 )
+from .base import AdapterCapability, AdapterError, AdapterResult, StructuredTask
 
 
 def _digest(value: str) -> str:
@@ -75,10 +76,8 @@ def _extract_structured(
     roots: list[Any] = []
     stripped = output.strip()
     if stripped:
-        try:
+        with contextlib.suppress(json.JSONDecodeError):
             roots.append(json.loads(stripped))
-        except json.JSONDecodeError:
-            pass
     for line in output.splitlines():
         try:
             roots.append(json.loads(line))
@@ -99,9 +98,7 @@ def _extract_structured(
 def _validate_result(task: StructuredTask, value: Mapping[str, Any]) -> None:
     required = _SubprocessAdapter.required_keys[task]
     if set(value) != required:
-        raise AdapterError(
-            f"structured {task} result fields differ from schema: {sorted(value)}"
-        )
+        raise AdapterError(f"structured {task} result fields differ from schema: {sorted(value)}")
     if not isinstance(value.get("summary"), str):
         raise AdapterError(f"structured {task} summary must be a string")
     list_fields = {
@@ -161,7 +158,7 @@ def _shape_diagnostic(output: str) -> str:
 
 
 class _SubprocessAdapter:
-    required_keys: dict[StructuredTask, set[str]] = {
+    required_keys: ClassVar[dict[StructuredTask, set[str]]] = {
         StructuredTask.PLAN: {"summary", "steps", "acceptance_criteria", "risks"},
         StructuredTask.IMPLEMENT: {"summary", "tests", "commit"},
         StructuredTask.REVIEW: {"verdict", "summary", "findings"},
@@ -270,17 +267,20 @@ class _SubprocessAdapter:
                 )
                 self.supervisor.start(spec, readiness_timeout=min(timeout, 30))
                 prompt_sha = _digest(prompt)
-                turn_id = "turn-" + _digest(
-                    "\0".join(
-                        (
-                            self.capability.name,
-                            self.capability.version,
-                            str(task),
-                            str(cwd.resolve()),
-                            prompt_sha,
+                turn_id = (
+                    "turn-"
+                    + _digest(
+                        "\0".join(
+                            (
+                                self.capability.name,
+                                self.capability.version,
+                                str(task),
+                                str(cwd.resolve()),
+                                prompt_sha,
+                            )
                         )
-                    )
-                )[:48]
+                    )[:48]
+                )
                 observation = self.supervisor.send_turn(
                     spec,
                     TurnRequest(
@@ -466,7 +466,9 @@ class ClaudeCLIAdapter(_SubprocessAdapter):
     ):
         super().__init__(binary=binary, model=model)
         if merge_authority and not re.fullmatch(r"[0-9a-f]{64}", authority_validation_sha256 or ""):
-            raise AdapterError("Claude merge authority requires explicit live validation provenance")
+            raise AdapterError(
+                "Claude merge authority requires explicit live validation provenance"
+            )
         self._capability = AdapterCapability(
             name="claude",
             version=self.version,
@@ -484,7 +486,8 @@ class ClaudeCLIAdapter(_SubprocessAdapter):
         self._session_contract = AdapterSessionContract(
             launch_command=tuple(interactive),
             readiness=ReadinessDetector(
-                r"(?:^|\n).*?[❯>]\s*$",
+                # U+276F is the literal prompt glyph Claude's TUI draws; not an ASCII '>'.
+                r"(?:^|\n).*?[❯>]\s*$",  # noqa: RUF001
                 trust_pattern=r"Do you trust the contents",
             ),
             trust_prompt=TrustPromptBehavior.REJECT,

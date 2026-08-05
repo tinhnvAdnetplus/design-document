@@ -83,7 +83,9 @@ class VerticalSliceTests(unittest.TestCase):
     def tearDown(self):
         self.temporary.cleanup()
 
-    def adapters(self, *, authoritative=False, implementation_action=None, implementer_version="test-1"):
+    def adapters(
+        self, *, authoritative=False, implementation_action=None, implementer_version="test-1"
+    ):
         def default_implementation(cwd: Path):
             (cwd / "hello.txt").write_text("hello from runtime\n", encoding="utf-8")
             git(cwd, "add", "hello.txt")

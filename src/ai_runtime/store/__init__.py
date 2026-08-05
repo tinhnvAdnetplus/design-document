@@ -8,9 +8,9 @@ from .event_store import (
     EventStoreError,
     EventValidationError,
     IdempotencyConflictError,
+    SequenceConflictError,
     SQLiteEventReader,
     SQLiteEventStore,
-    SequenceConflictError,
 )
 from .writer import (
     AppendReceipt,
@@ -22,13 +22,13 @@ from .writer import (
 )
 
 __all__ = [
-    "AppendResult",
     "AppendReceipt",
+    "AppendResult",
     "CorruptEventStoreError",
+    "EventIdConflictError",
     "EventStoreConfig",
     "EventStoreError",
     "EventValidationError",
-    "EventIdConflictError",
     "EventWriter",
     "GroupCommitConfig",
     "GroupCommitPolicy",

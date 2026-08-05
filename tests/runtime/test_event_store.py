@@ -19,9 +19,9 @@ from ai_runtime.store import (
     GroupCommitPolicy,
     IdempotencyConflictError,
     QueueCapacityError,
+    SequenceConflictError,
     SQLiteEventReader,
     SQLiteEventStore,
-    SequenceConflictError,
 )
 
 
@@ -35,7 +35,12 @@ def make_event(sequence: int, *, stream: str = "feature/test", suffix: str = "")
         "protocol": "ai-runtime.events/v1",
         "type": "implementation.progress",
         "occurred_at": f"2026-08-03T00:00:{sequence:02d}Z",
-        "producer": {"session_id": "test", "role": "test", "adapter": "test", "adapter_version": "1"},
+        "producer": {
+            "session_id": "test",
+            "role": "test",
+            "adapter": "test",
+            "adapter_version": "1",
+        },
         "aggregate": {"feature_id": stream, "stream": stream, "sequence": sequence},
         "correlation_id": f"cor-{stream}",
         "causation_id": None if sequence == 1 else f"evt-{stream.replace('/', '-')}-{sequence - 1}",
@@ -119,7 +124,10 @@ class EventStoreTests(unittest.TestCase):
             with self.assertRaises(SequenceConflictError):
                 invalid.result(timeout=2)
             self.assertTrue(any(receipt.batch_size > 1 for receipt in receipts))
-            self.assertEqual(list(range(1, 9)), [event["aggregate"]["sequence"] for event in writer.iter_events()])
+            self.assertEqual(
+                list(range(1, 9)),
+                [event["aggregate"]["sequence"] for event in writer.iter_events()],
+            )
 
         with SQLiteEventReader(self.config) as reader:
             self.assertEqual(8, reader.count())
@@ -164,7 +172,7 @@ class EventStoreTests(unittest.TestCase):
 
     def test_acknowledged_commit_survives_abrupt_process_exit(self):
         source_root = Path(__file__).resolve().parents[2] / "src"
-        script = r'''
+        script = r"""
 import hashlib, json, os, sys
 from pathlib import Path
 from ai_runtime.store import EventStoreConfig, EventWriter, GroupCommitConfig, GroupCommitPolicy
@@ -176,7 +184,7 @@ writer.start()
 writer.append(event)
 print("ACK", flush=True)
 os._exit(9)
-'''
+"""
         environment = os.environ.copy()
         environment["PYTHONPATH"] = str(source_root)
         result = subprocess.run(
