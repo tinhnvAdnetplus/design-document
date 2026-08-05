@@ -91,9 +91,32 @@ Run the entire suite from this directory with:
 
 Run selected PoCs with `./run-selected.sh 01 02`, or use `./ci.sh` as the CI entrypoint. Every run stores an environment record, assertion-level JSON reports, a Markdown summary, a failure report, captured artifacts, and JUnit XML under a unique `artifacts/<run-id>/` directory.
 
+`ci.sh` also accepts PoC numbers (`./ci.sh 01 02 09`) and runs the whole suite
+when given none. Unlike `run-selected.sh` it never passes `--record`, so it
+does not mutate `RESULT.md` or `experiment-log.md`.
+
 PoC 11 is intentionally excluded from the default suite because it invokes
 authenticated vendor models and consumes quota. Run it explicitly from its own
 directory after reviewing its safety and budget controls.
+
+### What CI enforces
+
+All 82 assertions run on every push, on Python 3.11 and 3.14, but they do not
+all gate a merge:
+
+| Step | PoCs | Blocking |
+| --- | --- | --- |
+| Contract validation suite | 01–08, 10 | yes — 73 assertions |
+| Performance and token budgets | 09 | no — 9 assertions, reported only |
+
+PoC 09 asserts single-sample p99 wall-clock tails. On shared infrastructure
+those measure host storage jitter rather than the runtime: on one unchanged
+commit PERF-01 failed at 62.590 ms p99 and passed on rerun, and locally it
+passes in isolation while failing at 53.594 ms p99 when the other nine PoCs
+run first. The 50 ms criterion and `lib/validation_lab.py` are unchanged; only
+the set of failures allowed to block a merge is narrower. A PoC 09 failure is
+still a real signal — read it as a capacity or host finding, and reproduce it
+on a controlled host before treating it as a regression.
 
 ### Evidence retention
 
