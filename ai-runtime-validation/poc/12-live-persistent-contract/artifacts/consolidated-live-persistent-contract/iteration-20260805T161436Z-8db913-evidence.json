@@ -1,0 +1,137 @@
+{
+  "adapter_versions": {
+    "claude": "2.1.222 (Claude Code)",
+    "codex": "codex-cli 0.146.0"
+  },
+  "branch": "live-persistent-adapter-contract",
+  "budget_exhausted": null,
+  "captured_at": "2026-08-05T16:16:37.270062Z",
+  "decision": "LIVE_CONTRACT_NOT_ESTABLISHED",
+  "fixture": {
+    "clean_after_probe": true,
+    "disposable": true,
+    "git_base_sha256": "a03b1eae07c1f9b019801dcdc0fd8a610c348efbde6f1d2af53df80d83305393",
+    "layout": [
+      "repo/",
+      "runtime-state/",
+      "worktrees/probe/"
+    ]
+  },
+  "format": "ai-runtime-evidence/v2",
+  "format_version": 2,
+  "gate_summary": {
+    "G2": false
+  },
+  "gates": {
+    "G2": {
+      "adapters": {
+        "claude": {
+          "candidate_markers_redacted": [
+            "\u276f 1. Yes, I trust this folder",
+            "2. No, exit"
+          ],
+          "declared_ready_pattern": "(?:^|\\n).*?[\u276f>]\\s*$",
+          "declared_root_launch_redacted": [
+            "$HOME/.local/bin/claude",
+            "--permission-mode",
+            "plan",
+            "--disable-slash-commands",
+            "--model",
+            "haiku"
+          ],
+          "declared_trust_behavior": "reject",
+          "declared_trust_pattern": "Do you trust the contents",
+          "error_redacted": "session readiness timed out",
+          "pane_bytes": 691,
+          "pane_dead": "0",
+          "pane_sha256": "fcf88faceaba883d70eca697d970a1ab961b334421885d4776c4c4c164436ff3",
+          "passed": false,
+          "readiness_reached": false,
+          "ready_pattern_matched_pane": false,
+          "trust_pattern_matched_pane": false
+        },
+        "codex": {
+          "candidate_markers_redacted": [
+            "Press enter to continue"
+          ],
+          "declared_ready_pattern": "model:\\s+(?!loading)\\S+",
+          "declared_root_launch_redacted": [
+            "$HOME/.nvm/versions/node/v26.2.0/bin/codex",
+            "--sandbox",
+            "read-only",
+            "--ask-for-approval",
+            "never",
+            "--no-alt-screen",
+            "--model",
+            "gpt-5.4-mini"
+          ],
+          "declared_trust_behavior": "reject",
+          "declared_trust_pattern": "Do you trust the contents",
+          "error_redacted": "session readiness timed out",
+          "pane_bytes": 249,
+          "pane_dead": "0",
+          "pane_sha256": "8946d01b52df369132c2fbc14c470062f49b788077000b4cf2aea77b9c75ec55",
+          "passed": false,
+          "readiness_reached": false,
+          "ready_pattern_matched_pane": false,
+          "trust_pattern_matched_pane": false
+        }
+      },
+      "passed": false
+    }
+  },
+  "iterations": [
+    {
+      "at": "2026-08-05T16:15:37.196115Z",
+      "correction": "recorded verbatim readiness/trust markers for detector binding",
+      "gate": "G2",
+      "outcome": "claude root did not reach declared readiness"
+    },
+    {
+      "at": "2026-08-05T16:16:37.260294Z",
+      "correction": "recorded verbatim readiness/trust markers for detector binding",
+      "gate": "G2",
+      "outcome": "codex root did not reach declared readiness"
+    }
+  ],
+  "limits": {
+    "max_live_calls": 30,
+    "readiness_timeout_seconds": 60.0,
+    "turn_timeout_seconds": 180.0
+  },
+  "live_call_log": [],
+  "live_calls": {
+    "total": 0
+  },
+  "mode": "live",
+  "models": {
+    "claude": "haiku",
+    "codex": "gpt-5.4-mini",
+    "codex_reasoning_effort": "low"
+  },
+  "privacy_checks": {
+    "fixture_email_absent": true,
+    "home_path_absent": true,
+    "nonce_absent": true,
+    "raw_pane_field_absent": true,
+    "raw_stdout_field_absent": true,
+    "repository_path_absent": true
+  },
+  "privacy_contract": {
+    "raw_model_transcript_retained": false,
+    "raw_pane_capture_retained": false,
+    "raw_prompt_retained": false,
+    "raw_stdout_retained": false,
+    "retained_pane_data": "single redacted detector-matching line per session, <=200 chars"
+  },
+  "run_id": "20260805T161436Z-8db913",
+  "session_residue": {
+    "claude_project_dir_created_by_probe": true,
+    "claude_transcript_files_removed": 0,
+    "codex_known_session_count": 0,
+    "codex_rollout_files_removed": 0,
+    "retained_workspace_trust_entry": "Claude records fixture-path workspace trust outside the fixture; the path is deleted with the fixture and no probe content remains."
+  },
+  "subject": "live-persistent-adapter-contract",
+  "tested_revision": "5a9bbef9b334b2d0b15e297cea9fb80d9dd4ed3d"
+}

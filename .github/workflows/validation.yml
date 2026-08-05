@@ -61,8 +61,13 @@ jobs:
           # that instead, so this step used to verify its own output and never
           # the committed evidence. Packages without the v2 bundle index
           # predate the portable format and are not verifiable.
+          # Opt-in PoC packages live under the PoC that produced them, which the
+          # single-level glob above never reached, so a committed PoC package was
+          # not actually being verified.
           status=0
-          for index in $(git ls-files 'ai-runtime-validation/artifacts/*/portable-git-evidence.json'); do
+          for index in $(git ls-files \
+            'ai-runtime-validation/artifacts/*/portable-git-evidence.json' \
+            'ai-runtime-validation/poc/*/artifacts/*/portable-git-evidence.json'); do
             ai-runtime-validation/scripts/verify-evidence.sh "$(dirname "$index")" || status=1
           done
           exit "$status"

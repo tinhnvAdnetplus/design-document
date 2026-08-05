@@ -1,0 +1,12 @@
+{
+  "base_revision": "5a9bbef9b334b2d0b15e297cea9fb80d9dd4ed3d",
+  "branch": "live-persistent-adapter-contract",
+  "decision": "LIVE_CONTRACT_NOT_ESTABLISHED",
+  "live_calls": {
+    "claude": 3,
+    "codex": 1,
+    "total": 4
+  },
+  "run_id": "20260805T162830Z-b2ca48",
+  "tested_revision": "5a9bbef9b334b2d0b15e297cea9fb80d9dd4ed3d"
+}

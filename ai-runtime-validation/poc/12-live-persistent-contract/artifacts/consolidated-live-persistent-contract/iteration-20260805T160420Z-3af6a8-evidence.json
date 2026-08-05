@@ -1,0 +1,767 @@
+{
+  "adapter_versions": {
+    "claude": "2.1.222 (Claude Code)",
+    "codex": "codex-cli 0.146.0"
+  },
+  "branch": "live-persistent-adapter-contract",
+  "budget_exhausted": null,
+  "captured_at": "2026-08-05T16:11:41.550093Z",
+  "decision": "PARTIAL_CONTRACT_ESTABLISHED",
+  "fixture": {
+    "clean_after_probe": true,
+    "disposable": true,
+    "git_base_sha256": "81a8cd39549362151a8d309f2cc3cd1fb5fb28d14b3e8d38002856e3298acb57",
+    "layout": [
+      "repo/",
+      "runtime-state/",
+      "worktrees/probe/"
+    ]
+  },
+  "format": "ai-runtime-evidence/v2",
+  "format_version": 2,
+  "gate_summary": {
+    "G1": true,
+    "G2": false,
+    "G3": true,
+    "G3_codex": false,
+    "G4": true,
+    "G4_codex": false,
+    "G5": false,
+    "Q1": false
+  },
+  "gates": {
+    "G1": {
+      "passed": true,
+      "roles": {
+        "claude-plan": {
+          "argv_redacted": [
+            "$HOME/.local/bin/claude",
+            "--print",
+            "--permission-mode",
+            "plan",
+            "--disable-slash-commands",
+            "--output-format",
+            "json",
+            "--json-schema",
+            "{\"additionalProperties\":false,\"properties\":{\"acceptance_criteria\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"risks\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"steps\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"summary\":{\"type\":\"string\"}},\"required\":[\"summary\",\"steps\",\"acceptance_criteria\",\"risks\"],\"type\":\"object\"}",
+            "--model",
+            "haiku",
+            "<PROMPT_REDACTED>"
+          ],
+          "argv_sha256": "97d9dce459e78d167e14e6ba2ff6f5e05bfbe7cea2f49bd2b19b19d32eb47ec0",
+          "diagnostic_redacted": "",
+          "duration_ms": 14399.911,
+          "exit_code": 0,
+          "prompt_sha256": "fde5602b9ef77e6dd01189c7f6e1a64925f13c946aaa1a38eee4591e0f9f1f6c",
+          "schema_channel": "inline_json",
+          "session_id_present": true,
+          "session_id_sha256": "86880c6e3d6973a3b9f738c85db4aba107720af1e999581644d870748fc73e3f",
+          "stderr_bytes": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_bytes": 3137,
+          "stdout_sha256": "68509e3b3860fd34d7351ec708df198d1828dfd4ac010b4e28cefc0647a2ef36",
+          "structured_shape": {
+            "depth": 2,
+            "extra_keys": [],
+            "found": true,
+            "needed_code_fence_strip": false,
+            "needed_json_string_decode": true,
+            "path": ".result<json-string>",
+            "root_shapes": [
+              "whole-stdout:['api_error_status', 'duration_api_ms', 'duration_ms', 'fast_mode_disabled_reason', 'fast_mode_state', 'is_error', 'modelUsage', 'num_turns', 'permission_denials', 'result', 'session_id', 'stop_reason', 'structured_output', 'subtype', 'terminal_reason', 'time_to_request_ms', 'total_cost_usd', 'ttft_ms', 'ttft_stream_ms', 'type', 'usage', 'uuid']"
+            ],
+            "source": "whole-stdout"
+          },
+          "timed_out": false,
+          "total_cost_usd": 0.20266300000000004,
+          "usage": {
+            "cache_creation_input_tokens": 31531,
+            "cache_read_input_tokens": 0,
+            "input_tokens": 2,
+            "output_tokens": 855
+          },
+          "validate_result_passed": true,
+          "validation_error_redacted": ""
+        },
+        "claude-review": {
+          "argv_redacted": [
+            "$HOME/.local/bin/claude",
+            "--print",
+            "--permission-mode",
+            "plan",
+            "--disable-slash-commands",
+            "--output-format",
+            "json",
+            "--json-schema",
+            "{\"additionalProperties\":false,\"properties\":{\"findings\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"summary\":{\"type\":\"string\"},\"verdict\":{\"type\":\"string\"}},\"required\":[\"verdict\",\"summary\",\"findings\"],\"type\":\"object\"}",
+            "--model",
+            "haiku",
+            "<PROMPT_REDACTED>"
+          ],
+          "argv_sha256": "d5817e021018d4d39a293db58d615006ed9f538d83c497424933f1d6c9841dfa",
+          "diagnostic_redacted": "",
+          "duration_ms": 31283.125,
+          "exit_code": 0,
+          "prompt_sha256": "ada74716c78dd4dedd26a93109bd664161b16b0688264b4014387b7b83441200",
+          "schema_channel": "inline_json",
+          "session_id_present": true,
+          "session_id_sha256": "b278fc6079bb8d9fddeebff14be6865b06f58517bd8449763c4a4417242bf8ff",
+          "stderr_bytes": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_bytes": 3175,
+          "stdout_sha256": "411e6ec8feb0fe888cab1f89fbb591f366c727d0d7df3a6936b5973f27084513",
+          "structured_shape": {
+            "depth": 2,
+            "extra_keys": [],
+            "found": true,
+            "needed_code_fence_strip": false,
+            "needed_json_string_decode": true,
+            "path": ".result<json-string>",
+            "root_shapes": [
+              "whole-stdout:['api_error_status', 'duration_api_ms', 'duration_ms', 'fast_mode_disabled_reason', 'fast_mode_state', 'is_error', 'modelUsage', 'num_turns', 'permission_denials', 'result', 'session_id', 'stop_reason', 'structured_output', 'subtype', 'terminal_reason', 'time_to_request_ms', 'total_cost_usd', 'ttft_ms', 'ttft_stream_ms', 'type', 'usage', 'uuid']"
+            ],
+            "source": "whole-stdout"
+          },
+          "timed_out": false,
+          "total_cost_usd": 0.22812599999999997,
+          "usage": {
+            "cache_creation_input_tokens": 31497,
+            "cache_read_input_tokens": 0,
+            "input_tokens": 2,
+            "output_tokens": 2567
+          },
+          "validate_result_passed": true,
+          "validation_error_redacted": ""
+        },
+        "codex-implement": {
+          "argv_redacted": [
+            "$HOME/.nvm/versions/node/v26.2.0/bin/codex",
+            "--sandbox",
+            "workspace-write",
+            "--ask-for-approval",
+            "never",
+            "--cd",
+            "$FIXTURE/worktrees/probe",
+            "--add-dir",
+            "$FIXTURE/repo/.git",
+            "--config",
+            "model_reasoning_effort=\"low\"",
+            "--model",
+            "gpt-5.4-mini",
+            "exec",
+            "--ignore-rules",
+            "--json",
+            "--output-schema",
+            "/tmp/probe-schema-_d8lzotu/implement.schema.json",
+            "<PROMPT_REDACTED>"
+          ],
+          "argv_sha256": "073cad0fe7ef9073ef54ce5ad31018cd84d34c64b34ddd27d7bee031f9f001e0",
+          "diagnostic_redacted": "",
+          "duration_ms": 22117.679,
+          "exit_code": 0,
+          "prompt_sha256": "57db61c986123517ac103b544f16e44f54cf9bf5179f5ee47754e52751a23f14",
+          "schema_channel": "schema_file",
+          "session_id_present": true,
+          "session_id_sha256": "c3283c113258537b457251195d2a439bcb20689ec71554d7c7d78635ee7a27b5",
+          "stderr_bytes": 39,
+          "stderr_sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+          "stdout_bytes": 2408,
+          "stdout_sha256": "1e97c44fb25ce21a233a439fc90b8b34ca41536f473d370ce452ea434d66c340",
+          "structured_shape": {
+            "depth": 3,
+            "extra_keys": [],
+            "found": true,
+            "needed_code_fence_strip": false,
+            "needed_json_string_decode": true,
+            "path": ".item.text<json-string>",
+            "root_shapes": [
+              "jsonl-line[0]:['thread_id', 'type']",
+              "jsonl-line[1]:['type']",
+              "jsonl-line[2]:['item', 'type']",
+              "jsonl-line[3]:['item', 'type']"
+            ],
+            "source": "jsonl-line[10]"
+          },
+          "timed_out": false,
+          "total_cost_usd": null,
+          "usage": {
+            "cached_input_tokens": 52096,
+            "input_tokens": 65387,
+            "output_tokens": 427
+          },
+          "validate_result_passed": true,
+          "validation_error_redacted": ""
+        }
+      },
+      "supervised_transport": {
+        "duration_ms": 13423.518,
+        "evidence_keys": [
+          "adapter",
+          "adapter_version",
+          "diagnostic_redacted",
+          "duration_ms",
+          "exit_code",
+          "prompt_sha256",
+          "reconciled_completed_turn",
+          "session_id",
+          "stderr_bytes",
+          "stderr_sha256",
+          "stdout_bytes",
+          "stdout_sha256",
+          "task",
+          "timed_out",
+          "transport_mode",
+          "turn_id"
+        ],
+        "exit_code": 0,
+        "passed": true,
+        "prompt_sha256": "19232a2e51deb827c67162753d25ccd08719ebfe2104a8ea5e2faa703cb21bcf",
+        "result_fields": [
+          "acceptance_criteria",
+          "risks",
+          "steps",
+          "summary"
+        ],
+        "stdout_bytes": 3089,
+        "transport_mode": "tmux_supervised_noninteractive_v1"
+      }
+    },
+    "G2": {
+      "adapters": {
+        "claude": {
+          "declared_ready_pattern": "(?:^|\\n).*?[\u276f>]\\s*$",
+          "declared_root_launch_redacted": [
+            "$HOME/.local/bin/claude",
+            "--permission-mode",
+            "plan",
+            "--disable-slash-commands",
+            "--model",
+            "haiku"
+          ],
+          "declared_trust_behavior": "reject",
+          "declared_trust_pattern": "Do you trust the contents",
+          "error_redacted": "session readiness timed out",
+          "passed": false,
+          "readiness_reached": false
+        },
+        "codex": {
+          "child_termination": {
+            "child_kind": "runtime_event_worker",
+            "child_ready": true,
+            "child_terminated": true,
+            "root_state_after": "READY",
+            "root_survived": true
+          },
+          "declared_ready_pattern": "model:\\s+(?!loading)\\S+",
+          "declared_root_launch_redacted": [
+            "$HOME/.nvm/versions/node/v26.2.0/bin/codex",
+            "--sandbox",
+            "read-only",
+            "--ask-for-approval",
+            "never",
+            "--no-alt-screen",
+            "--model",
+            "gpt-5.4-mini"
+          ],
+          "declared_trust_behavior": "reject",
+          "declared_trust_pattern": "Do you trust the contents",
+          "identity_observation_window": {
+            "all_identity_stable": true,
+            "all_ready": true,
+            "samples": 6,
+            "states": [
+              "READY"
+            ],
+            "window_seconds": 12
+          },
+          "pane_bytes": 1500,
+          "passed": true,
+          "readiness_line_redacted": "\u2502 model:     gpt-5.4-mini medium   /model to change  \u2502",
+          "readiness_reached": true,
+          "state": "READY",
+          "trust_line_redacted": null,
+          "trust_prompt_observed": false
+        }
+      },
+      "passed": false
+    },
+    "G3": {
+      "children_distinct_from_each_other": true,
+      "forks": {
+        "fork_a": {
+          "argv_redacted": [
+            "$HOME/.local/bin/claude",
+            "--print",
+            "--permission-mode",
+            "plan",
+            "--disable-slash-commands",
+            "--output-format",
+            "json",
+            "--model",
+            "haiku",
+            "--resume",
+            "<REDACTED_UUID>",
+            "--fork-session",
+            "<PROMPT_REDACTED>"
+          ],
+          "argv_sha256": "18fd4a58b72dcc03bf03413b4b508b432bf89ace5eb79cf3bff3ee9012362695",
+          "child_session_distinct_from_root": true,
+          "child_transcript": {
+            "bytes": 44208,
+            "present": true,
+            "sha256": "f353616ceea2768428529f780245f632fdbc5fa2f6ec34a9178da510211c5e3a"
+          },
+          "diagnostic_redacted": "",
+          "duration_ms": 4584.255,
+          "exit_code": 0,
+          "fork_session_flag": true,
+          "prompt_sha256": "ec27f05ce1db4c0ef3d58b207fb9de2e8bed14fa471523c204f54e2020025626",
+          "requested_session_id_sha256": null,
+          "resumed_session_id_sha256": "0d90c95fbd41fba8416e8d0639f35cfe04a35618b1ef3353b2af283ef4b89ee3",
+          "returned_session_id_sha256": "b64c5308be616933493defcec2adf824cf4cfec3a252b22ed6725041a179e464",
+          "root_transcript_after": {
+            "bytes": 51195,
+            "present": true,
+            "sha256": "546e0cd515a8e0b15fbaf7ed2d8a82eec94487c6d89b566efbd884422a2a5435"
+          },
+          "root_unmutated": true,
+          "stderr_bytes": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_bytes": 1359,
+          "stdout_sha256": "35447456946505b62846bd8f1e4873dbdad02549a5ef513802224179190b35d2",
+          "timed_out": false,
+          "total_cost_usd": 0.022586099999999998,
+          "usage": {
+            "cache_creation_input_tokens": 1395,
+            "cache_read_input_tokens": 46667,
+            "input_tokens": 2,
+            "output_tokens": 14
+          }
+        },
+        "fork_b": {
+          "argv_redacted": [
+            "$HOME/.local/bin/claude",
+            "--print",
+            "--permission-mode",
+            "plan",
+            "--disable-slash-commands",
+            "--output-format",
+            "json",
+            "--model",
+            "haiku",
+            "--resume",
+            "<REDACTED_UUID>",
+            "--fork-session",
+            "<PROMPT_REDACTED>"
+          ],
+          "argv_sha256": "18fd4a58b72dcc03bf03413b4b508b432bf89ace5eb79cf3bff3ee9012362695",
+          "child_session_distinct_from_root": true,
+          "child_transcript": {
+            "bytes": 44196,
+            "present": true,
+            "sha256": "574ca2a8b9c45c7b81a68dfba5a811497c0423572895a1bf7a11c1d192c238e5"
+          },
+          "diagnostic_redacted": "",
+          "duration_ms": 6010.472,
+          "exit_code": 0,
+          "fork_session_flag": true,
+          "prompt_sha256": "ec27f05ce1db4c0ef3d58b207fb9de2e8bed14fa471523c204f54e2020025626",
+          "requested_session_id_sha256": null,
+          "resumed_session_id_sha256": "0d90c95fbd41fba8416e8d0639f35cfe04a35618b1ef3353b2af283ef4b89ee3",
+          "returned_session_id_sha256": "3f138c5c4e007bf9a09d8155be2b62cdcb8ae37acb1e0a7f4ee2ec28fc28b1b5",
+          "root_transcript_after": {
+            "bytes": 51195,
+            "present": true,
+            "sha256": "546e0cd515a8e0b15fbaf7ed2d8a82eec94487c6d89b566efbd884422a2a5435"
+          },
+          "root_unmutated": true,
+          "stderr_bytes": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_bytes": 1322,
+          "stdout_sha256": "d83f366d1d4d6a7419b96b20122836ba726fe7f5e8180a25403276c9b5e0ec51",
+          "timed_out": false,
+          "total_cost_usd": 0.0146346,
+          "usage": {
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 48062,
+            "input_tokens": 2,
+            "output_tokens": 14
+          }
+        }
+      },
+      "passed": true,
+      "root_seed": {
+        "argv_redacted": [
+          "$HOME/.local/bin/claude",
+          "--print",
+          "--permission-mode",
+          "plan",
+          "--disable-slash-commands",
+          "--output-format",
+          "json",
+          "--model",
+          "haiku",
+          "--session-id",
+          "<REDACTED_UUID>",
+          "<PROMPT_REDACTED>"
+        ],
+        "argv_sha256": "27b01d350397449f7d22163c2e7bde1c6ec0f5ff94580283956e652627d05d26",
+        "diagnostic_redacted": "",
+        "duration_ms": 65879.235,
+        "exit_code": 0,
+        "fork_session_flag": false,
+        "prompt_sha256": "e8ba4d2ed2e9fe35774e49baed8fffc2d44ae39d43d64d98233cc3a95df6f4b2",
+        "requested_session_id_sha256": "0d90c95fbd41fba8416e8d0639f35cfe04a35618b1ef3353b2af283ef4b89ee3",
+        "resumed_session_id_sha256": null,
+        "returned_session_id_sha256": "0d90c95fbd41fba8416e8d0639f35cfe04a35618b1ef3353b2af283ef4b89ee3",
+        "stderr_bytes": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_bytes": 1863,
+        "stdout_sha256": "fcaf39c729926ee3190cf9424ecaa63a6e3405121843c8e0b2c600c490c2a2f0",
+        "timed_out": false,
+        "total_cost_usd": 0.3723328,
+        "usage": {
+          "cache_creation_input_tokens": 46667,
+          "cache_read_input_tokens": 70886,
+          "input_tokens": 6,
+          "output_tokens": 4577
+        }
+      },
+      "root_transcript_before_fork": {
+        "bytes": 51195,
+        "present": true,
+        "sha256": "546e0cd515a8e0b15fbaf7ed2d8a82eec94487c6d89b566efbd884422a2a5435"
+      },
+      "root_uuid_sha256": "0d90c95fbd41fba8416e8d0639f35cfe04a35618b1ef3353b2af283ef4b89ee3",
+      "runtime_assigned_root_uuid": true,
+      "vendor_uuid_derivation": "uuid5(runtime_namespace, adapter|runtime_session_id|run_id)"
+    },
+    "G3_codex": {
+      "blocked_reason": "NO: codex fork produced no discoverable non-interactive session, so codex exec cannot drive a forked session under this transport",
+      "passed": false
+    },
+    "G4": {
+      "claude": {
+        "argv_redacted": [
+          "$HOME/.local/bin/claude",
+          "--print",
+          "--permission-mode",
+          "plan",
+          "--disable-slash-commands",
+          "--output-format",
+          "json",
+          "--model",
+          "haiku",
+          "--json-schema",
+          "{\"additionalProperties\":false,\"properties\":{\"remembered\":{\"type\":\"string\"}},\"required\":[\"remembered\"],\"type\":\"object\"}",
+          "--resume",
+          "<REDACTED_UUID>",
+          "<PROMPT_REDACTED>"
+        ],
+        "argv_sha256": "a9f4c56cd0f6c6bbac7a07ff21de2f5873c75cca6ab9b348ceac1894fbf2f553",
+        "diagnostic_redacted": "",
+        "duration_ms": 6343.076,
+        "exit_code": 0,
+        "fork_session_flag": false,
+        "nonce_sha256": "ec2bb47c3005d650b36442ce0e5250167f93b9db14fcc7bc27313477a744b5dc",
+        "prompt_sha256": "5f34539fff595a2d90e62530b0e195b180ce49e20e79123bbcf480ef75a6dd26",
+        "recall_matched_nonce": true,
+        "recall_present": true,
+        "requested_session_id_sha256": null,
+        "resumed_session_id_sha256": "b64c5308be616933493defcec2adf824cf4cfec3a252b22ed6725041a179e464",
+        "returned_session_id_sha256": "b64c5308be616933493defcec2adf824cf4cfec3a252b22ed6725041a179e464",
+        "stderr_bytes": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_bytes": 1439,
+        "stdout_sha256": "7e0e2419f8499cb884b5ace704195128ec21a4d4e3656b694e607bf92cb1d5dd",
+        "timed_out": false,
+        "total_cost_usd": 0.29109,
+        "usage": {
+          "cache_creation_input_tokens": 48254,
+          "cache_read_input_tokens": 0,
+          "input_tokens": 2,
+          "output_tokens": 104
+        }
+      },
+      "inherited_root_context": true,
+      "passed": true,
+      "resumed_target": "forked child session"
+    },
+    "G4_codex": {
+      "blocked_reason": "NO: codex fork produced no discoverable non-interactive session, so codex exec cannot drive a forked session under this transport",
+      "passed": false
+    },
+    "G5": {
+      "bootstrap_prompt_sha256": "2479a69638a6311b5a5b8a8dfa169a88b14d1f3225100de14c69de79f8467861",
+      "declared_detector_would_match": false,
+      "declared_ready_pattern": "^AI_RUNTIME_EVENT_READY {session_identity}$",
+      "error_redacted": "session readiness timed out",
+      "feature_launch_redacted": [
+        "$HOME/.local/bin/claude",
+        "--permission-mode",
+        "acceptEdits",
+        "--disable-slash-commands",
+        "--model",
+        "haiku",
+        "--add-dir",
+        "$FIXTURE/runtime-state/g5-claude",
+        "--resume",
+        "<REDACTED_UUID>",
+        "--fork-session",
+        "<BOOTSTRAP_REDACTED>"
+      ],
+      "feature_session_ready": false,
+      "passed": false,
+      "relaxed_detector_matched": false,
+      "relaxed_ready_pattern": "AI_RUNTIME_EVENT_READY {session_identity}"
+    },
+    "G6": {
+      "comparison": {
+        "downstream_prompt_identical": true,
+        "forked_cache_creation_input_tokens": 1395,
+        "forked_cache_read_input_tokens": 46667,
+        "forked_minus_fresh_cache_read": 18044,
+        "fresh_cache_creation_input_tokens": 2679,
+        "fresh_cache_read_input_tokens": 28623,
+        "note": "The Claude Code system prompt is part of every prefix, so a fresh turn also reports cache activity. Only the delta above is attributable to the forked conversation prefix.",
+        "second_fork_cache_read_input_tokens": 48062
+      },
+      "fresh_baseline": {
+        "argv_redacted": [
+          "$HOME/.local/bin/claude",
+          "--print",
+          "--permission-mode",
+          "plan",
+          "--disable-slash-commands",
+          "--output-format",
+          "json",
+          "--model",
+          "haiku",
+          "--session-id",
+          "<REDACTED_UUID>",
+          "<PROMPT_REDACTED>"
+        ],
+        "argv_sha256": "8065a4fa5ad2b85396a0d9bc09ed48119f717222d57f19561226f86ad7e4b02f",
+        "diagnostic_redacted": "",
+        "duration_ms": 18518.005,
+        "exit_code": 0,
+        "fork_session_flag": false,
+        "prompt_sha256": "ec27f05ce1db4c0ef3d58b207fb9de2e8bed14fa471523c204f54e2020025626",
+        "requested_session_id_sha256": "cd93b00282148da23fa6d13ce32a601353c06565e70c7abc434ba39f3e9a0a46",
+        "resumed_session_id_sha256": null,
+        "returned_session_id_sha256": "cd93b00282148da23fa6d13ce32a601353c06565e70c7abc434ba39f3e9a0a46",
+        "stderr_bytes": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_bytes": 1624,
+        "stdout_sha256": "eaddd4c05896dfaf5d8f5c5bb87fc4bcd87b43375a05ca73a9a20ffa6b0d510c",
+        "timed_out": false,
+        "total_cost_usd": 0.044618899999999996,
+        "usage": {
+          "cache_creation_input_tokens": 2679,
+          "cache_read_input_tokens": 28623,
+          "input_tokens": 2,
+          "output_tokens": 1290
+        }
+      },
+      "measurable": true,
+      "turns": {
+        "fork_a": {
+          "total_cost_usd": 0.022586099999999998,
+          "usage": {
+            "cache_creation_input_tokens": 1395,
+            "cache_read_input_tokens": 46667,
+            "input_tokens": 2,
+            "output_tokens": 14
+          }
+        },
+        "fork_b": {
+          "total_cost_usd": 0.0146346,
+          "usage": {
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 48062,
+            "input_tokens": 2,
+            "output_tokens": 14
+          }
+        },
+        "fresh_baseline": {
+          "total_cost_usd": 0.044618899999999996,
+          "usage": {
+            "cache_creation_input_tokens": 2679,
+            "cache_read_input_tokens": 28623,
+            "input_tokens": 2,
+            "output_tokens": 1290
+          }
+        },
+        "root_seed": {
+          "total_cost_usd": 0.3723328,
+          "usage": {
+            "cache_creation_input_tokens": 46667,
+            "cache_read_input_tokens": 70886,
+            "input_tokens": 6,
+            "output_tokens": 4577
+          }
+        }
+      }
+    },
+    "Q1": {
+      "answer": "NO: codex fork produced no discoverable non-interactive session, so codex exec cannot drive a forked session under this transport",
+      "error_redacted": "session readiness timed out",
+      "fork_argv_redacted": [
+        "$HOME/.nvm/versions/node/v26.2.0/bin/codex",
+        "--sandbox",
+        "read-only",
+        "--ask-for-approval",
+        "never",
+        "--cd",
+        "$FIXTURE/worktrees/probe",
+        "--no-alt-screen",
+        "--model",
+        "gpt-5.4-mini",
+        "fork",
+        "<REDACTED_UUID>"
+      ],
+      "fork_tui_ready": false,
+      "parent_rollout_before_fork": {
+        "bytes": 54637,
+        "present": true,
+        "sha256": "23fce86d5ddf9069a0738d8aad9f349bb45bef3c13b64dbd98eddf65dadf18c3"
+      },
+      "parent_session_from": "codex exec --json structured output",
+      "parent_session_present": true,
+      "passed": false
+    }
+  },
+  "iterations": [
+    {
+      "at": "2026-08-05T16:06:42.585681Z",
+      "correction": "recorded verbatim readiness/trust markers for detector binding",
+      "gate": "G2",
+      "outcome": "claude root did not reach declared readiness"
+    },
+    {
+      "at": "2026-08-05T16:09:41.460680Z",
+      "correction": "recorded as negative evidence; no synthetic path was relabelled as native",
+      "gate": "Q1",
+      "outcome": "codex fork TUI did not reach the declared readiness marker"
+    },
+    {
+      "at": "2026-08-05T16:11:41.518850Z",
+      "correction": "recorded as negative evidence; structured terminal events stay fail-closed",
+      "gate": "G5",
+      "outcome": "Claude feature session never printed the identity handshake line"
+    }
+  ],
+  "limits": {
+    "max_live_calls": 30,
+    "readiness_timeout_seconds": 60.0,
+    "turn_timeout_seconds": 180.0
+  },
+  "live_call_log": [
+    {
+      "at": "2026-08-05T16:04:21.033782Z",
+      "cli": "claude",
+      "gate": "G1",
+      "index": 1,
+      "tag": "plan-direct"
+    },
+    {
+      "at": "2026-08-05T16:04:35.437268Z",
+      "cli": "claude",
+      "gate": "G1",
+      "index": 2,
+      "tag": "review-direct"
+    },
+    {
+      "at": "2026-08-05T16:05:06.725996Z",
+      "cli": "codex",
+      "gate": "G1",
+      "index": 3,
+      "tag": "implement-direct"
+    },
+    {
+      "at": "2026-08-05T16:05:28.846845Z",
+      "cli": "claude",
+      "gate": "G1",
+      "index": 4,
+      "tag": "plan-supervised"
+    },
+    {
+      "at": "2026-08-05T16:07:00.000753Z",
+      "cli": "claude",
+      "gate": "G3",
+      "index": 5,
+      "tag": "root-seed"
+    },
+    {
+      "at": "2026-08-05T16:08:05.882249Z",
+      "cli": "claude",
+      "gate": "G3",
+      "index": 6,
+      "tag": "fork_a"
+    },
+    {
+      "at": "2026-08-05T16:08:10.468390Z",
+      "cli": "claude",
+      "gate": "G3",
+      "index": 7,
+      "tag": "fork_b"
+    },
+    {
+      "at": "2026-08-05T16:08:16.479987Z",
+      "cli": "claude",
+      "gate": "G6",
+      "index": 8,
+      "tag": "fresh-baseline"
+    },
+    {
+      "at": "2026-08-05T16:08:34.999270Z",
+      "cli": "claude",
+      "gate": "G4",
+      "index": 9,
+      "tag": "resume-fork-child"
+    },
+    {
+      "at": "2026-08-05T16:09:41.469653Z",
+      "cli": "claude",
+      "gate": "G5",
+      "index": 10,
+      "tag": "feature-bootstrap"
+    }
+  ],
+  "live_calls": {
+    "claude": 9,
+    "codex": 1,
+    "total": 10
+  },
+  "mode": "live",
+  "models": {
+    "claude": "haiku",
+    "codex": "gpt-5.4-mini",
+    "codex_reasoning_effort": "low"
+  },
+  "privacy_checks": {
+    "fixture_email_absent": true,
+    "home_path_absent": true,
+    "nonce_absent": true,
+    "raw_pane_field_absent": true,
+    "raw_stdout_field_absent": true,
+    "repository_path_absent": true
+  },
+  "privacy_contract": {
+    "raw_model_transcript_retained": false,
+    "raw_pane_capture_retained": false,
+    "raw_prompt_retained": false,
+    "raw_stdout_retained": false,
+    "retained_pane_data": "single redacted detector-matching line per session, <=200 chars"
+  },
+  "run_id": "20260805T160420Z-3af6a8",
+  "session_residue": {
+    "claude_project_dir_created_by_probe": true,
+    "claude_transcript_files_removed": 7,
+    "codex_known_session_count": 1,
+    "codex_rollout_files_removed": 1,
+    "retained_workspace_trust_entry": "Claude records fixture-path workspace trust outside the fixture; the path is deleted with the fixture and no probe content remains."
+  },
+  "subject": "live-persistent-adapter-contract",
+  "tested_revision": "5a9bbef9b334b2d0b15e297cea9fb80d9dd4ed3d"
+}

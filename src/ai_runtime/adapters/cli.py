@@ -34,6 +34,16 @@ from ..runtime.sessions import (
 )
 from .base import AdapterCapability, AdapterError, AdapterResult, StructuredTask
 
+# SHA-256 of
+# ai-runtime-validation/poc/12-live-persistent-contract/artifacts/
+# consolidated-live-persistent-contract/manifest.sha256.
+# Recompute with `sha256sum manifest.sha256`; see
+# reports/phase-4/live-persistent-adapter-contract.md for what each gate
+# established and which fields it did not earn.
+LIVE_PERSISTENT_CONTRACT_PROVENANCE_SHA256 = (
+    "db6a6b4febf6b671e9773125f1c2dba50c162ed1c3c0a41b42b592fcff585dd5"
+)
+
 
 def _digest(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
@@ -512,6 +522,15 @@ class ClaudeCLIAdapter(_SubprocessAdapter):
             synthetic_launch_command=self._session_contract.launch_command,
             native_fork_command=None,
             resume_command=None,
+            # Every field stays fail-closed on 2.1.222 despite the vendor
+            # primitives being live-validated.  `--print --resume <id>
+            # --fork-session` produced distinct children while leaving the root
+            # transcript byte-identical, resume recalled root context, and the
+            # child read the root's cached prefix.  What blocks promotion is the
+            # runtime's side of the contract: neither declared detector below
+            # matches this version, so a promoted field would route the runtime
+            # into a session it cannot verify, which is strictly worse than the
+            # declared synthetic path it uses today.
             persistent_root=CapabilityValidation.FAIL_CLOSED,
             native_fork=CapabilityValidation.FAIL_CLOSED,
             resume=CapabilityValidation.FAIL_CLOSED,
@@ -590,11 +609,25 @@ class CodexCLIAdapter(_SubprocessAdapter):
             synthetic_launch_command=self._session_contract.launch_command,
             native_fork_command=None,
             resume_command=None,
-            persistent_root=CapabilityValidation.FAIL_CLOSED,
+            # Live-validated on 0.146.0 against a disposable fixture: the
+            # declared readiness detector matched the observed pane line
+            # `model:     <model> medium`, runtime identity held across a
+            # 12-second observation window, and the root stayed READY when a
+            # child session terminated.  Trust remains an operational
+            # precondition: the declaration rejects the prompt rather than
+            # answering it, so an untrusted directory still fails closed.
+            persistent_root=CapabilityValidation.VALIDATED,
+            # Native fork and resume are live-validated at the vendor boundary
+            # (`codex fork <parent>` then `codex exec resume <forked>` inherited
+            # the parent's context and left the parent rollout byte-identical),
+            # but neither field can be promoted: Codex exposes no way to assign a
+            # session identifier, so no command mapping renders from the data the
+            # runtime owns.  A validated field without a renderable mapping would
+            # be unusable, so both stay fail-closed.
             native_fork=CapabilityValidation.FAIL_CLOSED,
             resume=CapabilityValidation.FAIL_CLOSED,
             structured_terminal_events=CapabilityValidation.FAIL_CLOSED,
-            validation_provenance_sha256=None,
+            validation_provenance_sha256=LIVE_PERSISTENT_CONTRACT_PROVENANCE_SHA256,
             writes_workspace=True,
             merge_authority=False,
             temporary=False,

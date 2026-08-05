@@ -1,0 +1,122 @@
+{
+  "adapter_versions": {
+    "claude": "2.1.222 (Claude Code)",
+    "codex": "codex-cli 0.146.1"
+  },
+  "branch": "live-persistent-adapter-contract",
+  "budget_exhausted": null,
+  "captured_at": "2026-08-05T16:35:33.409574Z",
+  "decision": "LIVE_CONTRACT_NOT_ESTABLISHED",
+  "fixture": {
+    "clean_after_probe": true,
+    "disposable": true,
+    "git_base_sha256": "1f849a533623e8c42a0b252d89de4938aa67968e3ccd8950783ab1b671900c42",
+    "layout": [
+      "repo/",
+      "runtime-state/",
+      "worktrees/probe/"
+    ]
+  },
+  "format": "ai-runtime-evidence/v2",
+  "format_version": 2,
+  "gate_summary": {
+    "G3_codex": false,
+    "G4_codex": false,
+    "Q1": false
+  },
+  "gates": {
+    "G3_codex": {
+      "blocked_reason": "no parent session id",
+      "passed": false
+    },
+    "G4_codex": {
+      "blocked_reason": "no parent session id",
+      "passed": false
+    },
+    "Q1": {
+      "answer": "INCONCLUSIVE: codex exec did not expose a session identifier",
+      "parent_seed": {
+        "argv_redacted": [
+          "$HOME/.nvm/versions/node/v26.2.0/bin/codex",
+          "--sandbox",
+          "read-only",
+          "--ask-for-approval",
+          "never",
+          "--cd",
+          "$FIXTURE/worktrees/probe",
+          "--config",
+          "model_reasoning_effort=\"low\"",
+          "--model",
+          "gpt-5.4-mini",
+          "exec",
+          "--ignore-rules",
+          "--json",
+          "<PROMPT_REDACTED>"
+        ],
+        "argv_sha256": "7e1a199f2452ad287438a2602fe984dd7b91de9cc2e29bf8374cc12165e97908",
+        "diagnostic_redacted": "Reading additional input from stdin...\n",
+        "duration_ms": 210057.941,
+        "exit_code": null,
+        "stderr_bytes": 39,
+        "stderr_sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+        "stdout_bytes": 0,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "timed_out": true
+      },
+      "parent_seeded_in_this_gate": true,
+      "parent_session_from": "codex exec --json structured output",
+      "parent_session_present": false,
+      "passed": false
+    }
+  },
+  "iterations": [],
+  "limits": {
+    "max_live_calls": 30,
+    "readiness_timeout_seconds": 60.0,
+    "turn_timeout_seconds": 180.0
+  },
+  "live_call_log": [
+    {
+      "at": "2026-08-05T16:32:03.347565Z",
+      "cli": "codex",
+      "gate": "Q1",
+      "index": 1,
+      "tag": "parent-seed"
+    }
+  ],
+  "live_calls": {
+    "codex": 1,
+    "total": 1
+  },
+  "mode": "live",
+  "models": {
+    "claude": "haiku",
+    "codex": "gpt-5.4-mini",
+    "codex_reasoning_effort": "low"
+  },
+  "privacy_checks": {
+    "fixture_email_absent": true,
+    "home_path_absent": true,
+    "nonce_absent": true,
+    "raw_pane_field_absent": true,
+    "raw_stdout_field_absent": true,
+    "repository_path_absent": true
+  },
+  "privacy_contract": {
+    "raw_model_transcript_retained": false,
+    "raw_pane_capture_retained": false,
+    "raw_prompt_retained": false,
+    "raw_stdout_retained": false,
+    "retained_pane_data": "single redacted detector-matching line per session, <=200 chars"
+  },
+  "run_id": "20260805T163202Z-03f6c1",
+  "session_residue": {
+    "claude_project_dir_created_by_probe": true,
+    "claude_transcript_files_removed": 0,
+    "codex_known_session_count": 0,
+    "codex_rollout_files_removed": 0,
+    "retained_workspace_trust_entry": "Claude records fixture-path workspace trust outside the fixture; the path is deleted with the fixture and no probe content remains."
+  },
+  "subject": "live-persistent-adapter-contract",
+  "tested_revision": "5a9bbef9b334b2d0b15e297cea9fb80d9dd4ed3d"
+}

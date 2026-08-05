@@ -1,0 +1,166 @@
+{
+  "adapter_versions": {
+    "claude": "2.1.222 (Claude Code)",
+    "codex": "codex-cli 0.146.0"
+  },
+  "branch": "live-persistent-adapter-contract",
+  "budget_exhausted": null,
+  "captured_at": "2026-08-05T16:22:25.004252Z",
+  "decision": "LIVE_CONTRACT_NOT_ESTABLISHED",
+  "fixture": {
+    "clean_after_probe": true,
+    "disposable": true,
+    "git_base_sha256": "5fb20919576973ad2c2459a44c84248bfe7bfcf3ea2bff810b3d42bd373dd2ec",
+    "layout": [
+      "repo/",
+      "runtime-state/",
+      "worktrees/probe/"
+    ]
+  },
+  "format": "ai-runtime-evidence/v2",
+  "format_version": 2,
+  "gate_summary": {
+    "G2": false
+  },
+  "gates": {
+    "G2": {
+      "adapters": {
+        "claude": {
+          "candidate_markers_redacted": [
+            "\u276f\u00a0Try \"how do I log an error?\""
+          ],
+          "declared_ready_pattern": "(?:^|\\n).*?[\u276f>]\\s*$",
+          "declared_root_launch_redacted": [
+            "$HOME/.local/bin/claude",
+            "--permission-mode",
+            "plan",
+            "--disable-slash-commands",
+            "--model",
+            "haiku"
+          ],
+          "declared_trust_behavior": "reject",
+          "declared_trust_pattern": "Do you trust the contents",
+          "error_redacted": "session readiness timed out",
+          "interactive_gate_clearing": {
+            "declared_trust_pattern_matched": false,
+            "gate_lines_redacted": [],
+            "gates_dismissed": [
+              {
+                "gate": "claude_workspace_trust",
+                "line_redacted": "\u276f 1. Yes, I trust this folder",
+                "pattern": "(?i)yes, I trust this folder",
+                "seen_by_declared_trust_pattern": false
+              }
+            ],
+            "ready_line_redacted": null,
+            "ready_pattern_matched_after_clearing": false
+          },
+          "pane_bytes": 1900,
+          "pane_dead": "0",
+          "pane_sha256": "4962be181d628a670c42b1ca246e60909bd4eaf94ca441af2addc8eb5e638342",
+          "passed": false,
+          "readiness_reached": false,
+          "ready_pattern_matched_pane": false,
+          "trust_pattern_matched_pane": false
+        },
+        "codex": {
+          "candidate_markers_redacted": [
+            "Do you trust the contents of this directory? Working with untrusted contents",
+            "2. No, quit",
+            "Press enter to continue"
+          ],
+          "declared_ready_pattern": "model:\\s+(?!loading)\\S+",
+          "declared_root_launch_redacted": [
+            "$HOME/.nvm/versions/node/v26.2.0/bin/codex",
+            "--sandbox",
+            "read-only",
+            "--ask-for-approval",
+            "never",
+            "--no-alt-screen",
+            "--model",
+            "gpt-5.4-mini"
+          ],
+          "declared_trust_behavior": "reject",
+          "declared_trust_pattern": "Do you trust the contents",
+          "error_redacted": "trust prompt requires an authorized disposable fixture",
+          "interactive_gate_clearing": {
+            "declared_trust_pattern_matched": false,
+            "gate_lines_redacted": [],
+            "gates_dismissed": [
+              {
+                "gate": "codex_startup_notice",
+                "line_redacted": "Press enter to continue",
+                "pattern": "(?i)press enter to continue",
+                "seen_by_declared_trust_pattern": false
+              }
+            ],
+            "ready_line_redacted": null,
+            "ready_pattern_matched_after_clearing": false
+          },
+          "pane_bytes": 344,
+          "pane_dead": "0",
+          "pane_sha256": "27168064261c325cf5631aaef04bca0ccae229f28859597936e67d64bb76e0ee",
+          "passed": false,
+          "readiness_reached": false,
+          "ready_pattern_matched_pane": false,
+          "trust_pattern_matched_pane": true
+        }
+      },
+      "passed": false
+    }
+  },
+  "iterations": [
+    {
+      "at": "2026-08-05T16:20:53.796771Z",
+      "correction": "recorded verbatim readiness/trust markers for detector binding",
+      "gate": "G2",
+      "outcome": "claude root did not reach declared readiness"
+    },
+    {
+      "at": "2026-08-05T16:22:24.993602Z",
+      "correction": "recorded verbatim readiness/trust markers for detector binding",
+      "gate": "G2",
+      "outcome": "codex root did not reach declared readiness"
+    }
+  ],
+  "limits": {
+    "max_live_calls": 30,
+    "readiness_timeout_seconds": 60.0,
+    "turn_timeout_seconds": 180.0
+  },
+  "live_call_log": [],
+  "live_calls": {
+    "total": 0
+  },
+  "mode": "live",
+  "models": {
+    "claude": "haiku",
+    "codex": "gpt-5.4-mini",
+    "codex_reasoning_effort": "low"
+  },
+  "privacy_checks": {
+    "fixture_email_absent": true,
+    "home_path_absent": true,
+    "nonce_absent": true,
+    "raw_pane_field_absent": true,
+    "raw_stdout_field_absent": true,
+    "repository_path_absent": true
+  },
+  "privacy_contract": {
+    "raw_model_transcript_retained": false,
+    "raw_pane_capture_retained": false,
+    "raw_prompt_retained": false,
+    "raw_stdout_retained": false,
+    "retained_pane_data": "single redacted detector-matching line per session, <=200 chars"
+  },
+  "run_id": "20260805T161822Z-7ee83d",
+  "session_residue": {
+    "claude_project_dir_created_by_probe": true,
+    "claude_transcript_files_removed": 0,
+    "codex_known_session_count": 0,
+    "codex_rollout_files_removed": 0,
+    "retained_workspace_trust_entry": "Claude records fixture-path workspace trust outside the fixture; the path is deleted with the fixture and no probe content remains."
+  },
+  "subject": "live-persistent-adapter-contract",
+  "tested_revision": "5a9bbef9b334b2d0b15e297cea9fb80d9dd4ed3d"
+}

@@ -1,0 +1,68 @@
+{
+  "adapter_versions": {
+    "claude": null,
+    "codex": null
+  },
+  "branch": "live-persistent-adapter-contract",
+  "budget_exhausted": null,
+  "captured_at": "2026-08-05T16:04:10.144619Z",
+  "decision": "DISCOVERY_ONLY",
+  "fixture": {
+    "clean_after_probe": null,
+    "disposable": true,
+    "git_base_sha256": "7aa3af9558dc3fb3e00616189913a396593e093923f61bf1be652efd6e02cace",
+    "layout": [
+      "repo/",
+      "runtime-state/",
+      "worktrees/probe/"
+    ]
+  },
+  "format": "ai-runtime-evidence/v2",
+  "format_version": 2,
+  "gate_summary": {
+    "harness": true
+  },
+  "gates": {
+    "harness": {
+      "fixture_built": true,
+      "fixture_clean": true,
+      "passed": true,
+      "runtime_imports": true
+    }
+  },
+  "iterations": [],
+  "limits": {
+    "max_live_calls": 30,
+    "readiness_timeout_seconds": 60.0,
+    "turn_timeout_seconds": 180.0
+  },
+  "live_call_log": [],
+  "live_calls": {
+    "total": 0
+  },
+  "mode": "discovery-only",
+  "models": {
+    "claude": "haiku",
+    "codex": "gpt-5.4-mini",
+    "codex_reasoning_effort": "low"
+  },
+  "privacy_checks": {
+    "fixture_email_absent": true,
+    "home_path_absent": true,
+    "nonce_absent": true,
+    "raw_pane_field_absent": true,
+    "raw_stdout_field_absent": true,
+    "repository_path_absent": true
+  },
+  "privacy_contract": {
+    "raw_model_transcript_retained": false,
+    "raw_pane_capture_retained": false,
+    "raw_prompt_retained": false,
+    "raw_stdout_retained": false,
+    "retained_pane_data": "single redacted detector-matching line per session, <=200 chars"
+  },
+  "run_id": "20260805T160410Z-1b2f3f",
+  "session_residue": {},
+  "subject": "live-persistent-adapter-contract",
+  "tested_revision": "5a9bbef9b334b2d0b15e297cea9fb80d9dd4ed3d"
+}

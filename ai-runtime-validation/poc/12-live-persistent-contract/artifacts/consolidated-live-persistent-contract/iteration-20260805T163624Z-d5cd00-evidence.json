@@ -1,0 +1,225 @@
+{
+  "adapter_versions": {
+    "claude": "2.1.222 (Claude Code)",
+    "codex": "codex-cli 0.146.1"
+  },
+  "branch": "live-persistent-adapter-contract",
+  "budget_exhausted": null,
+  "captured_at": "2026-08-05T16:36:54.272820Z",
+  "decision": "LIVE_CONTRACT_ESTABLISHED",
+  "fixture": {
+    "clean_after_probe": true,
+    "disposable": true,
+    "git_base_sha256": "f72489c8b9ed02f1bfeaf66c499ee297c8df08deff9eb945b9f4da989a47ef39",
+    "layout": [
+      "repo/",
+      "runtime-state/",
+      "worktrees/probe/"
+    ]
+  },
+  "format": "ai-runtime-evidence/v2",
+  "format_version": 2,
+  "gate_summary": {
+    "G3_codex": true,
+    "G4_codex": true,
+    "Q1": true
+  },
+  "gates": {
+    "G3_codex": {
+      "fork_mode": "native",
+      "parent_unmutated": true,
+      "passed": true
+    },
+    "G4_codex": {
+      "passed": true,
+      "resume_surface": "codex exec resume <session_id>"
+    },
+    "Q1": {
+      "answer": "YES: codex exec resume drove a session created by codex fork",
+      "argv_redacted": [
+        "$HOME/.nvm/versions/node/v26.2.0/bin/codex",
+        "--sandbox",
+        "read-only",
+        "--ask-for-approval",
+        "never",
+        "--cd",
+        "$FIXTURE/worktrees/probe",
+        "--config",
+        "model_reasoning_effort=\"low\"",
+        "--model",
+        "gpt-5.4-mini",
+        "exec",
+        "resume",
+        "--ignore-rules",
+        "--json",
+        "<REDACTED_UUID>",
+        "<PROMPT_REDACTED>"
+      ],
+      "argv_sha256": "1ae01eb240aefbbb1393854b40b5bb57afb350fc25fcdb4a4770d6f82bc90d12",
+      "diagnostic_redacted": "",
+      "duration_ms": 8151.896,
+      "exec_resume_argv_redacted": [
+        "$HOME/.nvm/versions/node/v26.2.0/bin/codex",
+        "--sandbox",
+        "read-only",
+        "--ask-for-approval",
+        "never",
+        "--cd",
+        "$FIXTURE/worktrees/probe",
+        "--config",
+        "model_reasoning_effort=\"low\"",
+        "--model",
+        "gpt-5.4-mini",
+        "exec",
+        "resume",
+        "--ignore-rules",
+        "--json",
+        "<REDACTED_UUID>",
+        "<PROMPT_REDACTED>"
+      ],
+      "exec_resume_succeeded": true,
+      "exit_code": 0,
+      "fork_argv_redacted": [
+        "$HOME/.nvm/versions/node/v26.2.0/bin/codex",
+        "--sandbox",
+        "read-only",
+        "--ask-for-approval",
+        "never",
+        "--cd",
+        "$FIXTURE/worktrees/probe",
+        "--no-alt-screen",
+        "--model",
+        "gpt-5.4-mini",
+        "fork",
+        "<REDACTED_UUID>"
+      ],
+      "fork_tui_ready": true,
+      "forked_candidate_count": 1,
+      "forked_session_discovered": true,
+      "forked_session_sha256": "ce12d56d196303572f849057f833bfb72f4b324e0e508b3a8c536d68fd54867b",
+      "interactive_gate_clearing": {
+        "declared_trust_pattern_matched": true,
+        "gate_lines_redacted": [],
+        "gates_dismissed": [
+          {
+            "gate": "codex_startup_notice",
+            "line_redacted": "Press enter to continue",
+            "pattern": "(?i)press enter to continue",
+            "seen_by_declared_trust_pattern": false
+          }
+        ],
+        "ready_line_redacted": "\u2502 model:     gpt-5.4-mini medium   /model to change \u2502",
+        "ready_pattern_matched_after_clearing": true
+      },
+      "new_rollout_count": 1,
+      "nonce_recalled": true,
+      "nonce_sha256": "08c55a9e77809756377b81ccd41f8edd40c41ceb7a002866d19ea4c05dad16ab",
+      "parent_rollout_after_fork": {
+        "bytes": 37023,
+        "present": true,
+        "sha256": "a9d2e2c674e083f339f1dd5d231e7f026370dc85ea6e530e25902f36bd0ba4ab"
+      },
+      "parent_rollout_before_fork": {
+        "bytes": 37023,
+        "present": true,
+        "sha256": "a9d2e2c674e083f339f1dd5d231e7f026370dc85ea6e530e25902f36bd0ba4ab"
+      },
+      "parent_seed": {
+        "argv_redacted": [
+          "$HOME/.nvm/versions/node/v26.2.0/bin/codex",
+          "--sandbox",
+          "read-only",
+          "--ask-for-approval",
+          "never",
+          "--cd",
+          "$FIXTURE/worktrees/probe",
+          "--config",
+          "model_reasoning_effort=\"low\"",
+          "--model",
+          "gpt-5.4-mini",
+          "exec",
+          "--ignore-rules",
+          "--json",
+          "<PROMPT_REDACTED>"
+        ],
+        "argv_sha256": "c09bbaceea23cd436fb4db12d3e4273dda91c0a9fa33c7c82a266b97f1ac3f2c",
+        "diagnostic_redacted": "",
+        "duration_ms": 8361.412,
+        "exit_code": 0,
+        "stderr_bytes": 39,
+        "stderr_sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+        "stdout_bytes": 350,
+        "stdout_sha256": "abbe778416b582255f18cfa3aad8d8c21fb4398730f005482ddf72116cb3d406",
+        "timed_out": false
+      },
+      "parent_seeded_in_this_gate": true,
+      "parent_session_from": "codex exec --json structured output",
+      "parent_session_present": true,
+      "parent_unmutated": true,
+      "passed": true,
+      "rollout_snapshot_taken_after_gate_clearing": true,
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 377,
+      "stdout_sha256": "0861d95becf1e9d7086d07b9ec52b0a4c2bc09ecddc3b833362559991158887f",
+      "timed_out": false
+    }
+  },
+  "iterations": [],
+  "limits": {
+    "max_live_calls": 30,
+    "readiness_timeout_seconds": 60.0,
+    "turn_timeout_seconds": 180.0
+  },
+  "live_call_log": [
+    {
+      "at": "2026-08-05T16:36:25.139031Z",
+      "cli": "codex",
+      "gate": "Q1",
+      "index": 1,
+      "tag": "parent-seed"
+    },
+    {
+      "at": "2026-08-05T16:36:46.117698Z",
+      "cli": "codex",
+      "gate": "Q1",
+      "index": 2,
+      "tag": "exec-resume-forked"
+    }
+  ],
+  "live_calls": {
+    "codex": 2,
+    "total": 2
+  },
+  "mode": "live",
+  "models": {
+    "claude": "haiku",
+    "codex": "gpt-5.4-mini",
+    "codex_reasoning_effort": "low"
+  },
+  "privacy_checks": {
+    "fixture_email_absent": true,
+    "home_path_absent": true,
+    "nonce_absent": true,
+    "raw_pane_field_absent": true,
+    "raw_stdout_field_absent": true,
+    "repository_path_absent": true
+  },
+  "privacy_contract": {
+    "raw_model_transcript_retained": false,
+    "raw_pane_capture_retained": false,
+    "raw_prompt_retained": false,
+    "raw_stdout_retained": false,
+    "retained_pane_data": "single redacted detector-matching line per session, <=200 chars"
+  },
+  "run_id": "20260805T163624Z-d5cd00",
+  "session_residue": {
+    "claude_project_dir_created_by_probe": true,
+    "claude_transcript_files_removed": 0,
+    "codex_known_session_count": 2,
+    "codex_rollout_files_removed": 2,
+    "retained_workspace_trust_entry": "Claude records fixture-path workspace trust outside the fixture; the path is deleted with the fixture and no probe content remains."
+  },
+  "subject": "live-persistent-adapter-contract",
+  "tested_revision": "5a9bbef9b334b2d0b15e297cea9fb80d9dd4ed3d"
+}
