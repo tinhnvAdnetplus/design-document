@@ -95,6 +95,14 @@ PoC 11 is intentionally excluded from the default suite because it invokes
 authenticated vendor models and consumes quota. Run it explicitly from its own
 directory after reviewing its safety and budget controls.
 
+### Evidence retention
+
+An `artifacts/<run-id>/` package is committed only when a report or
+[`experiment-log.md`](experiment-log.md) cites it. Every run produces a package
+locally, but a run nothing refers to is reproducible from `./ci.sh` and is not
+kept in Git. Six such orphaned packages were removed and remain reachable in
+history at commit `ccd38e5`.
+
 ### 4. Compare Results
 
 After execution, compare observed behavior against `EXPECTED.md` and record findings in `RESULT.md`.
