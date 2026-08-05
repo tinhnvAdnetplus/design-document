@@ -703,6 +703,8 @@ class FeatureSessionFactory:
         )
         if command is None:
             raise CapabilityUnavailableError("recorded feature strategy is no longer declared")
+        if record.fork_mode is None:
+            raise SessionRecoveryRequiredError("feature record has no recorded fork mode")
         root = self.supervisor.read(record.parent_root_id or "")
         if root is None:
             raise SessionRecoveryRequiredError("feature parent root record is missing")

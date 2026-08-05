@@ -6,6 +6,7 @@ from .base import (
     AdapterResult,
     AgentAdapter,
     StructuredTask,
+    SupervisedAdapter,
 )
 from .cli import AntigravityAdapter, ClaudeCLIAdapter, CodexCLIAdapter
 
@@ -18,4 +19,5 @@ __all__ = [
     "ClaudeCLIAdapter",
     "CodexCLIAdapter",
     "StructuredTask",
+    "SupervisedAdapter",
 ]

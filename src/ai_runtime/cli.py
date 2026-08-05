@@ -85,7 +85,7 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def _jsonable(value: Any) -> Any:
-    if dataclasses.is_dataclass(value):
+    if dataclasses.is_dataclass(value) and not isinstance(value, type):
         return {key: _jsonable(item) for key, item in dataclasses.asdict(value).items()}
     if isinstance(value, Path):
         return str(value)

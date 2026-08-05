@@ -337,7 +337,7 @@ class SQLiteEventStore:
             except BaseException as exc:
                 prepared.append(exc)
         if not any(isinstance(item, _PreparedEvent) for item in prepared):
-            return list(prepared)
+            return [item for item in prepared if isinstance(item, BaseException)]
 
         outcomes: list[AppendResult | BaseException | None] = [None] * len(prepared)
         started_ns = time.perf_counter_ns()
@@ -383,12 +383,18 @@ class SQLiteEventStore:
             return [item if item is not None else exc for item in outcomes]
 
         commit_ms = (time.perf_counter_ns() - started_ns) / 1_000_000
-        return [
-            dataclasses.replace(item, commit_duration_ms=commit_ms)
-            if isinstance(item, AppendResult)
-            else item
-            for item in outcomes
-        ]
+        results: list[AppendResult | BaseException] = []
+        for settled in outcomes:
+            if settled is None:
+                # Unreachable: every prepared slot is resolved above. Keep the
+                # slot rather than dropping it, because the caller maps
+                # outcomes back to submission futures by index.
+                results.append(EventStoreError("submission was not resolved"))
+            elif isinstance(settled, AppendResult):
+                results.append(dataclasses.replace(settled, commit_duration_ms=commit_ms))
+            else:
+                results.append(settled)
+        return results
 
     def _resolve_identity_conflict(self, event: _PreparedEvent) -> tuple[str, int] | None:
         duplicate = self._connection.execute(

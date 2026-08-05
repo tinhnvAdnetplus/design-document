@@ -371,9 +371,10 @@ class SessionSupervisor:
         self.spool_dir = self.state_dir / "session-spool"
         self.registry_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
         self.spool_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
-        self.tmux_path = shutil.which(tmux_binary)
-        if self.tmux_path is None:
+        tmux_path = shutil.which(tmux_binary)
+        if tmux_path is None:
             raise SessionUnavailableError(f"tmux executable is unavailable: {tmux_binary}")
+        self.tmux_path = tmux_path
         derived = f"air-{os.getuid()}-{_sha_text(str(self.state_dir))[:12]}"
         self.socket_name = _safe_identifier(socket_name or derived, "socket_name", 64)
 

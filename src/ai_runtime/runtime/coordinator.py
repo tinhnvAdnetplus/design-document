@@ -10,7 +10,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from ..adapters import AgentAdapter, StructuredTask
+from ..adapters import AgentAdapter, StructuredTask, SupervisedAdapter
 from ..events import new_event
 from ..git import (
     GitWorkspaceManager,
@@ -93,11 +93,13 @@ class RuntimeCoordinator:
         bindable = [
             adapter
             for adapter in (self.planner, self.implementer, self.reviewer)
-            if callable(getattr(adapter, "bind_supervisor", None))
+            if isinstance(adapter, SupervisedAdapter)
         ]
-        self.supervisor = SessionSupervisor(config.state_dir) if bindable else None
-        for adapter in bindable:
-            adapter.bind_supervisor(self.supervisor)
+        supervisor = SessionSupervisor(config.state_dir) if bindable else None
+        self.supervisor = supervisor
+        if supervisor is not None:
+            for adapter in bindable:
+                adapter.bind_supervisor(supervisor)
         self._started = False
 
     def __enter__(self) -> RuntimeCoordinator:

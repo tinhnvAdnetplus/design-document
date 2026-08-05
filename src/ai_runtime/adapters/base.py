@@ -6,11 +6,11 @@ import dataclasses
 import enum
 from collections.abc import Mapping
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from ..runtime.feature_sessions import PersistentAdapterDeclaration
-    from ..runtime.sessions import AdapterSessionContract
+    from ..runtime.sessions import AdapterSessionContract, SessionSupervisor
 
 
 class StructuredTask(enum.StrEnum):
@@ -64,3 +64,13 @@ class AgentAdapter(Protocol):
     ) -> AdapterResult: ...
 
     def acknowledge(self, result: AdapterResult) -> None: ...
+
+
+@runtime_checkable
+class SupervisedAdapter(Protocol):
+    """An adapter that drives a real CLI and needs the supervisor bound first.
+
+    Optional: an in-process adapter has no terminal transport to supervise.
+    """
+
+    def bind_supervisor(self, supervisor: SessionSupervisor) -> None: ...

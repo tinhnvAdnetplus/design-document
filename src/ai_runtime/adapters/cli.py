@@ -164,6 +164,12 @@ class _SubprocessAdapter:
         StructuredTask.REVIEW: {"verdict", "summary", "findings"},
     }
 
+    # Every concrete adapter binds its own version-observed declarations in
+    # __init__, before the first invocation can reach them.
+    _capability: AdapterCapability
+    _session_contract: AdapterSessionContract
+    _persistent_declaration: PersistentAdapterDeclaration
+
     def __init__(self, *, binary: str, model: str | None = None):
         self.binary = binary
         self.model = model
@@ -184,6 +190,10 @@ class _SubprocessAdapter:
         if self.supervisor is not None and self.supervisor is not supervisor:
             raise AdapterError("adapter is already bound to a different session supervisor")
         self.supervisor = supervisor
+
+    @property
+    def capability(self) -> AdapterCapability:
+        return self._capability
 
     @property
     def session_contract(self) -> AdapterSessionContract:
@@ -427,10 +437,6 @@ class AntigravityAdapter(_SubprocessAdapter):
             termination=self._session_contract.termination,
         )
 
-    @property
-    def capability(self) -> AdapterCapability:
-        return self._capability
-
     def _command(self, task, *, prompt, cwd, schema_path, schema_json, timeout_seconds):
         return [
             self.path,
@@ -518,10 +524,6 @@ class ClaudeCLIAdapter(_SubprocessAdapter):
             termination=self._session_contract.termination,
         )
 
-    @property
-    def capability(self) -> AdapterCapability:
-        return self._capability
-
     def _command(self, task, *, prompt, cwd, schema_path, schema_json, timeout_seconds):
         command = [
             self.path,
@@ -599,10 +601,6 @@ class CodexCLIAdapter(_SubprocessAdapter):
             trust_prompt=self._session_contract.trust_prompt,
             termination=self._session_contract.termination,
         )
-
-    @property
-    def capability(self) -> AdapterCapability:
-        return self._capability
 
     def _command(self, task, *, prompt, cwd, schema_path, schema_json, timeout_seconds):
         common_git_dir = subprocess.run(
