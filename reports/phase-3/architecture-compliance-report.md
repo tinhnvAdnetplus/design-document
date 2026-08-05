@@ -40,6 +40,22 @@ No file under `docs/` was changed. The frozen validation engine and PERF configu
 - `ai-runtime-validation/lib/validation_lab.py`: `fefb26e4c0400e074b293f17011a6d17d540da692f89fba8a08dcc74760d1ebc`
 - `ai-runtime-validation/poc/09-performance/fixtures/benchmark_config.json`: `749af917e38dc2579af3311d2ae07ced2516d3be94ec3c29d9a3105e9f398a67`
 
+### Correction — validation engine digest since this phase
+
+The `validation_lab.py` digest above records the file as it stood during the
+Event Store phase. It is no longer current. Two later commits changed the
+engine for evidence portability, not for assertion content:
+
+| Commit | Change | Resulting digest |
+| --- | --- | --- |
+| `86ff3d4` | engine as pinned above | `fefb26e4c0400e074b293f17011a6d17d540da692f89fba8a08dcc74760d1ebc` |
+| `1ee96f7` | export nested repositories as verified Git bundles | `8679f65e1bfdd8f14c402aa24a3c7a196e6e498b11874f453cc3beb3669270a5` |
+| `b99378a` | redact absolute paths across evidence payloads | `6987d64c9a20800a36a724b3557572ecfe8573190a039a2eb4e3c940c38a0fa6` |
+
+The assertion count and thresholds are unchanged across all three: the suite
+still reports 82/82. The PERF configuration digest is unchanged. Any future
+freeze claim should cite the digest observed at the time it is written.
+
 ## Scope boundaries
 
 This phase does not implement projections as durable materialized tables, the scheduler, policy authorization, Git intents, adapters, or external side effects. The replay API is deliberately pure: it applies a caller-provided projector and cannot execute runtime effects.
